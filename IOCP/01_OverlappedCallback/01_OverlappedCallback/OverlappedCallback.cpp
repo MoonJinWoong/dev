@@ -155,7 +155,176 @@ bool OverlappedCallback::StartServer()
 	return true;
 }
 
+bool OverlappedCallback::BindRecv(SOCKET socket)
+{
+	DWORD dwFlag = 0;
+	DWORD dwRecvNumBytes = 0;
 
+	// Overlapped I/O를 위한 구조체 생성
+	stOverlappedEx* pOverlappedEx = new stOverlappedEx;
+	// 구조체 초기화 
+	ZeroMemory(pOverlappedEx, sizeof(WSAOVERLAPPED));
+
+
+	// Overlapped I/O를 위한 각 정보 세팅
+	pOverlappedEx->m_wsaBuf.len = MAX_SOCKBUF;
+	pOverlappedEx->m_wsaBuf.buf = &pOverlappedEx->m_szBuf[0];
+	pOverlappedEx->m_socketClient = socket;
+	pOverlappedEx->m_eOperation = OP_RECV;
+	pOverlappedEx->m_pOverlappedCallback = this;
+
+	int nRet = WSARecv(socket,
+		&(pOverlappedEx->m_wsaBuf),
+		1,
+		&dwRecvNumBytes,
+		&dwFlag,
+		(LPWSAOVERLAPPED)(pOverlappedEx),
+		CompletionRoutine);
+
+	// socket err 이면 client socket이 끊어진걸로 처리한다. 
+	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+	{
+		printf("error WSARect() 함수 Failed !!!! $d \n", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
+bool OverlappedCallback::SendMsg(SOCKET socket, char* pMsg, int nLen)
+{
+	DWORD dwRevNumBytes = 0;
+
+	//Overlapped I/O를 위한 구조체 생성
+	stOverlappedEx* pOverlappedEx = new stOverlappedEx;
+	// 구조체 초기화
+	ZeroMemory(pOverlappedEx, sizeof(WSAOVERLAPPED));
+	// 전송될 메세지를 복사
+	CopyMemory(pOverlappedEx->m_szBuf, pMsg, nLen);
+
+	// Overlapped I/O를 위해 각 정보를 세팅 해준다
+	pOverlappedEx->m_wsaBuf.buf = pOverlappedEx->m_szBuf;
+	pOverlappedEx->m_wsaBuf.len = nLen;
+	pOverlappedEx->m_socketClient = socket;
+	pOverlappedEx->m_eOperation = OP_SEND;
+	pOverlappedEx->m_pOverlappedCallback = this;
+
+	int nRet = WSASend(socket,
+		&(pOverlappedEx->m_wsaBuf),
+		1,
+		&dwRevNumBytes,
+		0,
+		(LPWSAOVERLAPPED)(pOverlappedEx),
+		CompletionRoutine);
+
+	// socket err이면 client socket이 끊어진걸로 처리 
+	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+	{
+		printf(" error WSASend() failed !!! %d\n ", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
+// 사용자의 접속을 받는 thread 
+void OverlappedCallback::AccepterThread()
+{
+	SOCKADDR_IN stClientAddr;
+	int nAddrLen = sizeof(SOCKADDR_IN);
+	while (m_bAccepterRun)
+	{
+		// 클라 접속 요청이 들어올 때까지 기다린다
+		SOCKET sockAccept = accept(m_sockListen,
+			(SOCKADDR*)&stClientAddr, &nAddrLen);
+
+		if (INVALID_SOCKET == sockAccept)
+		{
+			continue;
+		}
+
+		bool bRet = BindRecv(sockAccept);
+		if (false == bRet)
+		{
+			return;
+		}
+
+		char clientIP[32] = { 0, };
+		inet_ntop(AF_INET, &(stClientAddr.sin_addr), clientIP, 32 - 1);
+		printf("client connect !!! : [ip - %s]  [socket - $d]\n", clientIP, (int)sockAccept);
+
+		SleepEx(0, true);
+	}
+
+}
+
+
+void CALLBACK CompletionRoutine(DWORD dwError,
+								DWORD dwTransfered,
+								LPWSAOVERLAPPED lpOverlapped,
+								DWORD dwFlags)
+{
+	stOverlappedEx* pOverlappedEx = (stOverlappedEx*)lpOverlapped;
+
+	// class의 포인터를 받는다
+	auto pOverlappedCallback =
+		(OverlappedCallback*)pOverlappedEx->m_pOverlappedCallback;
+
+	//COverlappedCallbackDlg* pMainDlg = pOverlappedCallback->GetMainDlg();
+
+	// 접속이 끊김
+	if (0 == dwTransfered)
+	{
+		printf("connect fail! socket: $d\n ", (int)pOverlappedEx->m_socketClient);
+		pOverlappedCallback->CloseSocket(pOverlappedEx->m_socketClient);
+		goto end;
+	}
+	
+	if (0 != dwError)
+	{
+		printf("error!! completionroutine failed !!!! $d\n", WSAGetLastError());
+		goto end;
+	}
+	switch (pOverlappedEx->m_eOperation)
+	{
+		//WSARecv로 Overlapepd I/O가 완료 되었다. 
+	case OP_RECV:
+		{
+			pOverlappedEx->m_szBuf[dwTransfered] = NULL;
+			printf("(수신) bytes : %d , msg : %s \n", dwTransfered, pOverlappedEx->m_szBuf);
+
+			// 클라에게 메세지를 에코 한다. 
+			pOverlappedCallback->SendMsg(pOverlappedEx->m_socketClient,
+				pOverlappedEx->m_szBuf, dwTransfered);
+		}
+		break;
+		//WSASend로 Overlapped I/O가 완료됨
+	case OP_SEND:
+		{
+		pOverlappedEx->m_szBuf[dwTransfered] = NULL;
+		printf("(송신) bytes : $d , msg : %s \n", dwTransfered, pOverlappedEx->m_szBuf);
+		// 다시 Recv Overlapped I/O 를 걸어준다.
+		pOverlappedCallback->BindRecv(pOverlappedEx->m_socketClient);
+		}
+		break;
+	default:
+		{
+		printf("정의 되지 않은 Operation !!!!! \n");
+		}
+		break;
+	}
+
+
+
+end:
+	delete pOverlappedEx;
+}
+
+void OverlappedCallback::DestroyThread()
+{
+	closesocket(m_sockListen);
+	m_bAccepterRun = false;
+	// 스레드 종료를 기다림
+	WaitForSingleObject(m_hAccepterThread, INFINITE);
+}
 
 
 

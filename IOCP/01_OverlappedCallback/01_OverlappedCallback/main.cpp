@@ -6,4 +6,19 @@
 
 #include "OverlappedCallback.h"
 
+const int PORT = 32452;
 
+
+int main()
+{
+	OverlappedCallback overlapped;
+	overlapped.InitSocket();
+
+	// socket과 server 주소를 연결하고 등록시킨다.
+	overlapped.BindandListen(PORT);
+	overlapped.StartServer();
+
+	getchar();
+	overlapped.DestroyThread();
+	return 0;
+}
