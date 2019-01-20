@@ -1,0 +1,18 @@
+﻿  OverlappedCallback.cpp
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(111): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(111): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(120): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(120): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(188): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(188): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(253): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(253): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 1개 필요하지만 2개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(277): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(277): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(284): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(284): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(304): warning C4477: 'printf' : 서식 문자열 '%s'에 'char *' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'DWORD'입니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(304): warning C4313: 'printf': 서식 문자열의 '%s'이(가) 인수 1('DWORD' 형식)과(와) 충돌합니다.
+c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(304): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\01_overlappedcallback\01_overlappedcallback\overlappedcallback.cpp(304): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 1개 필요하지만 2개가 제공되었습니다.
+  01_OverlappedCallback.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\01_OverlappedCallback\x64\Debug\01_OverlappedCallback.exe

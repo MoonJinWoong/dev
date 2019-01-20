@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include <iostream>
-#include "OverlappedCallback.h"
+#include "overlappedCallback.h"
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS 
 
 
 // 접속을 받기 위한 대기 스레드
@@ -56,7 +57,7 @@ bool OverlappedCallback::InitSocket()
 	}
 
 	// 연결지향형 TCP , Overlapped IO 소켓을 생성
-	m_sockListen = WSASocket(AF_INET, SOCK_STREAM
+	m_sockListen = WSASocketW(AF_INET, SOCK_STREAM
 		, IPPROTO_TCP, NULL, NULL , WSA_FLAG_OVERLAPPED);
 
 	if (INVALID_SOCKET == m_sockListen)
@@ -132,7 +133,7 @@ bool OverlappedCallback::CreateAccepterThread()
 	m_hAccepterThread = (HANDLE)_beginthreadex(NULL, 0, &CallAccepterThread, this,
 		CREATE_SUSPENDED, &uiThreadId);
 
-	if (m_hAccepterThread = NULL)
+	if (m_hAccepterThread == NULL)
 	{
 		printf("AccepterThread Create id Failed : %u\n", GetLastError());
 		return false;
