@@ -184,6 +184,62 @@ bool IOCompletionPort::CreateAccepterThread()
 
 }
 
+bool IOCompletionPort::BindIOCompletionPort(stClientInfo* pClientInfo)
+{
+	HANDLE hIOCP;
+	
+	//socket과 pClientInfo를 CompletionPort 객체와 연결시킨다. 
+	hIOCP = CreateIoCompletionPort((HANDLE)pClientInfo->m_socketClient, m_hIOCP,
+		(ULONG_PTR)(pClientInfo), 0);
+
+	if (NULL == hIOCP || m_hIOCP != hIOCP)
+	{
+		printf("error!! CreateIoCompletionPort() Call failed !!!! %d\n", GetLastError());
+		return false;
+	}
+	return true;
+}
+
+bool IOCompletionPort::StartServer()
+{
+	// CompletionPort 객체 생성 요청을 한다. 
+	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, NULL, 0);
+	
+	if (m_hIOCP == NULL)
+	{
+		printf("error !!! CreateIoCompletionPort() Call failed !!! %d\n", GetLastError());
+		return false;
+	}
+	
+	// 접속된 client address 정보를 저장할 구조체 
+	bool bRet = CreateWorkerThread();
+	if (bRet == false)
+		return false;
+	
+	bRet = CreateAccepterThread();
+	if (bRet == false)
+		return false;
+
+
+	printf("Server Start!!!!! \n");
+	return true;
+}
+
+
+bool IOCompletionPort::BindRecv(stClientInfo* pClientInfo)
+{
+	DWORD dwFlag = 0;
+	DWORD dwRecvNumBytes = 0;
+
+
+	//Overlapped I/O를 위해 각 정보를 세팅해준다. 
+	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
+	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.buf =
+		pClientInfo->m_stRecvOverlappedEx.m_eOperation = OP_RECV;
+
+
+}
+
 
 
 
