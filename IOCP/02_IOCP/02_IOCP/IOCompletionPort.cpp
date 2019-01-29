@@ -235,9 +235,206 @@ bool IOCompletionPort::BindRecv(stClientInfo* pClientInfo)
 	//Overlapped I/O를 위해 각 정보를 세팅해준다. 
 	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.len = MAX_SOCKBUF;
 	pClientInfo->m_stRecvOverlappedEx.m_wsaBuf.buf =
-		pClientInfo->m_stRecvOverlappedEx.m_eOperation = OP_RECV;
+		pClientInfo->m_stRecvOverlappedEx.m_szBuf;
+	pClientInfo->m_stRecvOverlappedEx.m_eOperation = OP_RECV;
+
+	int nRet = WSARecv(pClientInfo->m_socketClient,
+		&(pClientInfo->m_stRecvOverlappedEx.m_wsaBuf),
+		1,
+		&dwRecvNumBytes,
+		&dwFlag,
+		(LPOVERLAPPED)&(pClientInfo->m_stRecvOverlappedEx), NULL);
+
+	//socket_error이면 client socket이 끊어진걸로 처리한다.
+	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+	{
+		printf("[에러] WSARecv()함수 실패 : %d\n", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
+bool IOCompletionPort::SendMsg(stClientInfo* pClientInfo, char* pMsg, int nLen)
+{
+	DWORD dwRecvNumBytes = 0;
+
+	// 전송될 메세지를 복사
+	CopyMemory(pClientInfo->m_stSendOverlappedEx.m_szBuf, pMsg, nLen);
+
+	// Overlapped I/O를위한 각각의 정보 세팅 
+	pClientInfo->m_stSendOverlappedEx.m_wsaBuf.len = nLen;
+	pClientInfo->m_stSendOverlappedEx.m_wsaBuf.buf =
+		pClientInfo->m_stSendOverlappedEx.m_szBuf;
+	pClientInfo->m_stSendOverlappedEx.m_eOperation = OP_SEND;
+
+	int nRet = WSASend(pClientInfo->m_socketClient,
+		&(pClientInfo->m_stSendOverlappedEx.m_wsaBuf),
+		1,
+		&dwRecvNumBytes,
+		0,
+		(LPWSAOVERLAPPED)&(pClientInfo->m_stSendOverlappedEx),
+		NULL);
 
 
+	// socket error 이면 client socket이 끊어진걸로 처리.
+	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+	{
+		printf("error WSASend() call failed !!!! %d\n", WSAGetLastError());
+		return false;
+	}
+	return true;
+}
+
+
+stClientInfo* IOCompletionPort::GetEmptyClientInfo()
+{
+	for (int i = 0; i < MAX_CLIENT; i++)
+	{
+		if (INVALID_SOCKET == m_pClientInfo[i].m_socketClient)
+			return &m_pClientInfo[i];
+	}
+
+	return NULL;
+}
+
+
+// 사용자의 접속을 받는 thread
+void IOCompletionPort::AccepterThread()
+{
+	SOCKADDR_IN		stClientAddr;
+	int nAddrLen = sizeof(SOCKADDR_IN);
+	while (m_bAccepterRun)
+	{
+		// 접속을 받을 구조체의 인덱스를 얻어온다. 
+		stClientInfo* pClientInfo = GetEmptyClientInfo();
+		if (NULL == pClientInfo)
+		{
+			printf("Client Full !!!! \m");
+			return;
+		}
+
+		// 클라이언트 접속 요청이 들어올 때까지 기다린다. 
+		pClientInfo->m_socketClient = accept(m_socketListen,
+			(SOCKADDR*)&stClientAddr, &nAddrLen);
+
+		if (INVALID_SOCKET == pClientInfo->m_socketClient)
+			continue;
+
+		// IO CompletionPort 객체와 소켓을 연결시킨다. 
+		bool bRet = BindIOCompletionPort(pClientInfo);
+		if (bRet == false)
+			return;
+
+		// Recv Overlapped IO 작업을 요청해놓음 
+		bRet = BindRecv(pClientInfo);
+		if (bRet == false)
+			return;
+
+		char clientIP[32] = { 0, };
+		inet_ntop(AF_INET, &(stClientAddr), clientIP, 32 - 1);
+		printf("client connected : IP-%s  SOCKET-%d    \n", clientIP,
+			(int)pClientInfo->m_socketClient);
+
+
+		m_nClientCnt++;
+	}
+}
+
+void IOCompletionPort::WorkerThread()
+{
+
+	// CompletionKey를 받을 포인터 변수 
+	stClientInfo* pClientInfo = NULL;
+	// 함수 호출 성공 여부 
+	BOOL bSuccess = TRUE;
+	// Overlapped IO 작업에서 전송된 데이터 크기
+	DWORD dwIoSize = 0;
+	// IO 작업을 위해 요청한 Overlapped 구조체를 받을 포인터
+	LPOVERLAPPED lpOverlapped = NULL;
+
+	while (m_bWorkerRun)
+	{
+		// 이 함수로 인해 thread들은 WaitingThread Queue에 들어가게 된다. 
+		// 대기 완료 상태로 들어가게 된다. 
+		// 완료된 Overlapped IO 작업이 발생하면 IOCP Queue에서 
+		// 완료된 작업을 가져와 뒤 처리를 한다. 
+		// 그리고 PostQeueuCompletionStatus()에 의해 사용자 메세지가 도착하면 
+		// thread를 종료한다. 
+
+		bSuccess = GetQueuedCompletionStatus(m_hIOCP,
+			&dwIoSize,						// 실제로 전송된 바이트
+			(PULONG_PTR)&pClientInfo,		// Completion Key
+			&lpOverlapped,					// Overlapped IO 객체
+			INFINITE);						// 대기할 시간
+
+		// 사용자 thread 종료 메세지 처리...
+		if (TRUE == bSuccess && dwIoSize == 0 &&
+			NULL == lpOverlapped)
+		{
+			m_bWorkerRun = false;
+			continue;
+		}
+		if (NULL == lpOverlapped)
+			continue;
+
+		//client가 접속을 끊었을 때
+		if (FALSE == bSuccess || (0 == dwIoSize && TRUE == bSuccess))
+		{
+			printf("socket(%d) 접속 끊김....\n", (int)pClientInfo->m_socketClient);
+
+			CloseSocket(pClientInfo);
+			continue;
+		}
+
+		stOverlappedEx* pOverlappedEx = (stOverlappedEx*)lpOverlapped;
+
+		// Overlapped IO Recv 작업 결과 뒤처리
+		if (OP_RECV == pOverlappedEx->m_eOperation)
+		{
+			pOverlappedEx->m_szBuf[dwIoSize] = NULL;
+			printf("수신 Byte : %d,  msg:  $s\n", dwIoSize, pOverlappedEx->m_szBuf);
+
+			// client에 msg를 에코 한다. 
+			SendMsg(pClientInfo, pOverlappedEx->m_szBuf, dwIoSize);
+			BindRecv(pClientInfo);
+		}
+		//Overlapped IO Send 작업 결과 뒤처리 
+		else if (OP_SEND == pOverlappedEx->m_eOperation)
+		{
+			pOverlappedEx->m_szBuf[dwIoSize] = NULL;
+			printf("수신 Byte : %d , msg : %s", dwIoSize, pOverlappedEx->m_szBuf);
+		}
+
+		else
+		{
+			printf("socket(%d)에서 예외상황\n", (int)pClientInfo->m_socketClient);
+		}
+
+
+	}
+}
+
+void IOCompletionPort::DestroyThread()
+{
+	for (int i = 0; i < MAX_WORKERTHREAD; i++)
+	{
+		// WaitingThread Qeueu에서 대기중인 thread에 
+		// 사용자 종료 msg 보낸다. 
+		PostQueuedCompletionStatus(m_hIOCP, 0, 0, NULL);
+	}
+
+	for (int i; i < MAX_WORKERTHREAD; i++)
+	{
+		// thread 핸들을 닫고 thread가 종료될때까지 기다린다. 
+		CloseHandle(m_hWorkerThread[i]);
+		WaitForSingleObject(m_hWorkerThread[i], INFINITE);
+	}
+
+	m_bAccepterRun = false;
+	// Accepter thread를 종료 
+	closesocket(m_socketListen);
+	// thread 종료를 기다린다.
+	WaitForSingleObject(m_hAccepterThread, INFINITE);
 }
 
 
