@@ -3,6 +3,9 @@
 #include "IOCompletionPort.h"
 
 
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
+
 // WSARecv와 WSASend의 Overlapped I/O 작업 처리를 위한 thread
 unsigned int WINAPI CallWorkerThread(LPVOID p)
 {
@@ -65,7 +68,7 @@ bool IOCompletionPort::InitSocket()
 	}
 
 	// 연결 지향형 TCP, Overlapped I/O 소켓을 생성
-	m_socketListen = WSASocket(AF_INET, SOCK_STREAM,
+	m_socketListen = WSASocketW(AF_INET, SOCK_STREAM,
 		IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
 
 	if (INVALID_SOCKET == m_socketListen)
@@ -225,7 +228,6 @@ bool IOCompletionPort::StartServer()
 	return true;
 }
 
-
 bool IOCompletionPort::BindRecv(stClientInfo* pClientInfo)
 {
 	DWORD dwFlag = 0;
@@ -284,7 +286,6 @@ bool IOCompletionPort::SendMsg(stClientInfo* pClientInfo, char* pMsg, int nLen)
 	}
 	return true;
 }
-
 
 stClientInfo* IOCompletionPort::GetEmptyClientInfo()
 {
@@ -423,7 +424,7 @@ void IOCompletionPort::DestroyThread()
 		PostQueuedCompletionStatus(m_hIOCP, 0, 0, NULL);
 	}
 
-	for (int i; i < MAX_WORKERTHREAD; i++)
+	for (int i= 0; i < MAX_WORKERTHREAD; i++)
 	{
 		// thread 핸들을 닫고 thread가 종료될때까지 기다린다. 
 		CloseHandle(m_hWorkerThread[i]);
