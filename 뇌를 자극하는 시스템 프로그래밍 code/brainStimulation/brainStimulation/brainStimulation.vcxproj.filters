@@ -3,5 +3,6 @@
   <ItemGroup>
     <ClCompile Include="ThreadAdderOne.cpp" />
     <ClCompile Include="strtok.cpp" />
+    <ClCompile Include="ThreadPooling.cpp" />
   </ItemGroup>
 </Project>
