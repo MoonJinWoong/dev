@@ -116,12 +116,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CommonDef.h" />
+    <ClInclude Include="Log.h" />
     <ClInclude Include="Monitor.h" />
     <ClInclude Include="PreComplie.h" />
+    <ClInclude Include="Queue.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Thread.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="Monitor.cpp" />
+    <ClCompile Include="Singleton.cpp" />
+    <ClCompile Include="Thread.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

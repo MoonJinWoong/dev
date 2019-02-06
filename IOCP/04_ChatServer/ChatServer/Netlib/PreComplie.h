@@ -38,6 +38,11 @@ using namespace std;
 #include "CommonDef.h"
 #include "Monitor.h"
 #include "Singleton.h"
+#include "Thread.h"
+#include "Queue.h"
+#include "Log.h"
+
+
 
 
 

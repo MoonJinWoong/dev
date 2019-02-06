@@ -5,8 +5,14 @@
     <ClInclude Include="CommonDef.h" />
     <ClInclude Include="Monitor.h" />
     <ClInclude Include="Singleton.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="Queue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Monitor.cpp" />
+    <ClCompile Include="Singleton.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="Log.cpp" />
   </ItemGroup>
 </Project>
