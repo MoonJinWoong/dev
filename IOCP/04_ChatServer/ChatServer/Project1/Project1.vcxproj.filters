@@ -6,5 +6,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConnectionManager.h" />
+    <ClInclude Include="Protocol.h" />
   </ItemGroup>
 </Project>
