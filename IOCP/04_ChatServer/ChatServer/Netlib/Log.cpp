@@ -56,7 +56,7 @@ bool cLog::Init(sLogConfig &LogConfig)
 	loctime = localtime(&curtime);
 	strftime(strtime, 100, "%m월%d일%H시%M분", loctime);
 	//LOG디렉토리생성
-	CreateDirectory("./LOG", NULL);
+	CreateDirectory(L"./LOG", NULL);
 	sprintf(m_szLogFileName,
 		"./Log/%s_%s.log", LogConfig.s_szLogFileName, strtime);
 	strncpy(m_szIP, LogConfig.s_szIP, MAX_IP_LENGTH);
@@ -371,7 +371,7 @@ bool INIT_LOG(sLogConfig &LogConfig)
 	return Log()->Init(LogConfig);
 }
 //로그를 남기는 함수
-void LOG(enumLogInfoType eLogInfoType, char *szOutputString, ...)
+void LOG(enumLogInfoType eLogInfoType, const char *szOutputString, ...)
 {
 	Monitor::Owner lock(g_csLog);
 

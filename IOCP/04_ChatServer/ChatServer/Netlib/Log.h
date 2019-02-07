@@ -236,7 +236,7 @@ bool INIT_LOG(sLogConfig &LogConfig);
 //로그를 남기는 함수 
 //로고 메세지 쓰는 방법 : ( 에러나 정보가 발생한 함수 | 에러나 정보에관한내용 )
 //EX) IOCPServer::BindIocp() | bind() , Failed ..
-void LOG(enumLogInfoType eLogInfoType, char *szOutputString, ...);
+void LOG(enumLogInfoType eLogInfoType, const char *szOutputString, ...);
 //라스트에러를 메세지 박스로 찍는 함수
 void LOG_LASTERROR(char *szOutputString, ...);
 //로그를 끝낸다.
