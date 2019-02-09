@@ -9,6 +9,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="Queue.h" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="Vbuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Monitor.cpp" />
@@ -16,5 +17,6 @@
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="Vbuffer.cpp" />
   </ItemGroup>
 </Project>

@@ -43,7 +43,7 @@ using namespace std;
 #include "Log.h"
 //#include "Connection.h"
 //#include "IocpServer.h"
-//#include "VBuffer.h"
+#include "Vbuffer.h"
 
 
 

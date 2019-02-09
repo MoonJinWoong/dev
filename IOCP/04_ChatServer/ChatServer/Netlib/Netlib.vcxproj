@@ -123,6 +123,7 @@
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="Thread.h" />
+    <ClInclude Include="Vbuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Log.cpp" />
@@ -130,6 +131,7 @@
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="Singleton.cpp" />
     <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="Vbuffer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
