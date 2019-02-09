@@ -5,6 +5,7 @@
 class Monitor
 {
 public:
+	// 자동으로 락을 해제하기 위해 만듦
 	class Owner
 	{
 	public:

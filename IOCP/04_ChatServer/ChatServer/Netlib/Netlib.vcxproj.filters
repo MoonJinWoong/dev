@@ -8,11 +8,13 @@
     <ClInclude Include="Thread.h" />
     <ClInclude Include="Log.h" />
     <ClInclude Include="Queue.h" />
+    <ClInclude Include="RingBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Monitor.cpp" />
     <ClCompile Include="Singleton.cpp" />
     <ClCompile Include="Thread.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="RingBuffer.cpp" />
   </ItemGroup>
 </Project>

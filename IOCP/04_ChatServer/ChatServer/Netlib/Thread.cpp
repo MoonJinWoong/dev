@@ -40,3 +40,34 @@ bool Thread::CreateThread(DWORD dwWaitTick)
 		return false;
 	}
 }
+
+void Thread::Run()
+{
+	if (m_blsRun == false)
+	{
+		m_blsRun = true; 
+		ResumeThread(m_hThread);
+	}
+}
+
+void Thread::Stop()
+{
+	while (true)
+	{
+		DWORD dwRet = WaitForSingleObject(m_hQuitEvent, m_dwWaitTick);
+		if (WAIT_OBJECT_0 == dwRet)
+			break;
+		else if (WAIT_TIMEOUT == dwRet)
+		{
+			m_dwTickCount++;
+			OnProcess();
+		}
+	}
+}
+
+void Thread::DestroyThread()
+{
+	Run();
+	SetEvent(m_hQuitEvent);
+	WaitForSingleObject(m_hThread, INFINITE);
+}

@@ -22,7 +22,7 @@ public:
 protected:
 	HANDLE m_hThread;
 	HANDLE m_hQuitEvent;
-	HANDLE m_blsRun;
+	bool m_blsRun;
 	DWORD  m_dwWaitTick;
 	DWORD  m_dwTickCount;
 };

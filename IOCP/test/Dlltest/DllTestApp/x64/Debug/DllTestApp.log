@@ -1,0 +1,6 @@
+﻿  test.cpp
+c:\users\dndsu\desktop\dev\iocp\test\dlltest\dlltestapp\test.cpp(2): warning C4068: 알 수 없는 pragma입니다.
+c:\users\dndsu\desktop\dev\iocp\test\dlltest\dlltestapp\test.cpp(6): warning C4326: 'main'의 반환 형식이 'int'이어야 하는데 'void'입니다.
+test.obj : error LNK2019: "__declspec(dllimport) public: void __cdecl cMyClass::Sum(int,int)" (__imp_?Sum@cMyClass@@QEAAXHH@Z) 외부 기호(참조 위치: main 함수)에서 확인하지 못했습니다.
+test.obj : error LNK2019: "__declspec(dllimport) public: void __cdecl cMyClass::OutputSum(void)" (__imp_?OutputSum@cMyClass@@QEAAXXZ) 외부 기호(참조 위치: main 함수)에서 확인하지 못했습니다.
+C:\Users\dndsu\Desktop\dev\IOCP\test\Dlltest\x64\Debug\DllTestApp.exe : fatal error LNK1120: 2개의 확인할 수 없는 외부 참조입니다.
