@@ -1,0 +1,43 @@
+﻿  Connection.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(57): warning C4189: 'nZero': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(228): warning C4189: 'nRet': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  IocpServer.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(145): warning C4189: 'DispatcherCount': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(157): warning C4189: 'nZero': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(299): warning C4456: 'lpOverlappedEx' 선언은 이전 로컬 선언을 숨깁니다.
+  c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(286): note: 'lpOverlappedEx' 선언을 참조하십시오.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(317): warning C4456: 'lpOverlappedEx' 선언은 이전 로컬 선언을 숨깁니다.
+  c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(299): note: 'lpOverlappedEx' 선언을 참조하십시오.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(286): warning C4189: 'lpOverlappedEx': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(556): warning C4189: 'nUseBufSize': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(623): warning C4189: 'lpOverlapped': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(621): warning C4189: 'nRet': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\iocpserver.cpp(625): warning C4189: 'lpOverlappedEx': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  Log.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(287): warning C4189: 'bRet': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(291): warning C4100: 'szOutputString': 참조되지 않은 정식 매개 변수입니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(312): warning C4100: 'eLogInfo': 참조되지 않은 정식 매개 변수입니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(328): warning C4189: 'iResult': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(333): warning C4100: 'eLogInfo': 참조되지 않은 정식 매개 변수입니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\log.cpp(336): warning C4189: 'iResult': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  Monitor.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  RingBuffer.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  Singleton.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  Thread.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  VBuffer.cpp
+c:\users\dndsu\desktop\dev\iocp\netlib\log.h(226): warning C4505: 'Log': 참조되지 않은 지역 함수를 제거했습니다.
+c:\users\dndsu\desktop\dev\iocp\netlib\vbuffer.h(44): warning C4505: 'g_GetVBuffer': 참조되지 않은 지역 함수를 제거했습니다.
+  NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\04_ChatServer\x64\Release\NetLib.lib
