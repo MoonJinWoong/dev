@@ -25,8 +25,21 @@ void Init()
 		//cout << "eee" << endl;
 
 	//IOCPServer *a = new IOCPServer();
+	
+	//IocpServer* iocp = new IocpServer();
+	//IOCPServer io = new IOCPServer();
 
-	IocpServer()->ServerStart(InitConfig);
+
+	// m_pIocpServer->ServferStart
+
+	//IocpServer()->ServerStart(InitConfig);
+	 
+	//IOCPServer io = new IOCPServer();
+	 
+	//IOCPServer tmp;
+
+
+    iocpserver()->ServerStart(InitConfig);
 	//cout << "ret : " << ret << endl;
 	//IOCPServer * server;
 	//server->ServerStart(InitConfig);

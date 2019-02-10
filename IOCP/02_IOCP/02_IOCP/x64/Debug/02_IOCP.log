@@ -1,7 +1,7 @@
 ﻿  IOCompletionPort.cpp
 c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(66): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
   c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(66): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
-c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(315): warning C4129: 'm': 문자 이스케이프 시퀀스를 인식할 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(398): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
-  c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(398): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 1개 필요하지만 2개가 제공되었습니다.
+c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(313): warning C4129: 'm': 문자 이스케이프 시퀀스를 인식할 수 없습니다.
+c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(396): warning C4474: 'printf' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  c:\users\dndsu\desktop\dev\iocp\02_iocp\02_iocp\iocompletionport.cpp(396): note: 자리 표시자 및 해당 매개 변수에는 variadic 인수가 1개 필요하지만 2개가 제공되었습니다.
   02_IOCP.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\02_IOCP\x64\Debug\02_IOCP.exe

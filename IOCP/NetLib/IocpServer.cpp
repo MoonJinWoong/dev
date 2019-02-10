@@ -3,7 +3,7 @@
 unsigned int WINAPI CallWorkerThread(LPVOID p);
 unsigned int WINAPI CallManagerThread(LPVOID p);
 
-IOCPServer* IOCPServer::m_pIocpServer = nullptr;
+IOCPServer *IOCPServer::m_pIocpServer = NULL;
 
 IOCPServer::IOCPServer(void)
 {

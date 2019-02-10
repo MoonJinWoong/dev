@@ -46,7 +46,10 @@ public:
 	virtual bool	OnSystemMsg( Connection* lpConnection , DWORD dwMsgType , LPARAM lParam ) = 0;
 	/////////////////////////////////////////////////////////////////////////////////////
 	
-	static IOCPServer* GetIocpServer() { return IOCPServer::m_pIocpServer; }
+	static IOCPServer* GetIocpServer()
+	{ 
+		return IOCPServer::m_pIocpServer; 
+	}
 	static IOCPServer* m_pIocpServer;
 
 private:
@@ -85,7 +88,7 @@ protected:
 	DWORD				m_dwProcessPacketCnt;
 };
 
- inline IOCPServer* IocpServer()
+inline IOCPServer* iocpserver()
 {
 	return IOCPServer::GetIocpServer();
 }
