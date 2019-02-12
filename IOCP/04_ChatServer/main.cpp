@@ -1,6 +1,31 @@
 #include "ConnectionManager.h"
 
 
+class CChatServer : public IOCPServer
+{
+	// IOCPServer을(를) 통해 상속됨
+	virtual bool OnAccept(Connection * lpConnection) override
+	{
+		return false;
+	}
+	virtual bool OnRecv(Connection * lpConnection, DWORD dwSize, char * pRecvedMsg) override
+	{
+		return false;
+	}
+	virtual bool OnRecvImmediately(Connection * lpConnection, DWORD dwSize, char * pRecvedMsg) override
+	{
+		return false;
+	}
+	virtual void OnClose(Connection * lpConnection) override
+	{
+	}
+	virtual bool OnSystemMsg(Connection * lpConnection, DWORD dwMsgType, LPARAM lParam) override
+	{
+		return false;
+	}
+};
+
+
 void Init()
 {
 	sLogConfig LogConfig;
@@ -20,30 +45,16 @@ void Init()
 	InitConfig.nWorkerThreadCnt = 2;
 	InitConfig.nProcessThreadCnt = 1;
 
-	
-	//if (!IocpServer()->ServerStart(InitConfig))
-		//cout << "eee" << endl;
 
-	//IOCPServer *a = new IOCPServer();
-	
-	//IocpServer* iocp = new IocpServer();
-	//IOCPServer io = new IOCPServer();
+	CChatServer* a = new CChatServer;
+	if (a->ServerStart(InitConfig))
+	{
+		cout << "정상" << endl;
+	}
 
-
-	// m_pIocpServer->ServferStart
+	//a->ServerStart(InitConfig);
 
 	//IocpServer()->ServerStart(InitConfig);
-	 
-	//IOCPServer io = new IOCPServer();
-	 
-	//IOCPServer tmp;
-
-
-    iocpserver()->ServerStart(InitConfig);
-	//cout << "ret : " << ret << endl;
-	//IOCPServer * server;
-	//server->ServerStart(InitConfig);
-	//IOCPServer::ServerStart();
 
 	g_ConnectionManager()->CreateConnection(InitConfig, 10);
 	LOG(LOG_INFO_LOW, "서버 시작..");
@@ -63,6 +74,6 @@ int main()
 	getchar();
 
 	End();
-	
+
 	return 0;
 }

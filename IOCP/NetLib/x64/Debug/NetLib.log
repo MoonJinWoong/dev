@@ -1,11 +1,4 @@
 ﻿  Connection.cpp
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(82): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(153): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(154): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(186): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(242): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(266): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
-c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(314): error C3861: 'IocpServer': 식별자를 찾을 수 없습니다.
   IocpServer.cpp
   Log.cpp
   Monitor.cpp
@@ -14,3 +7,4 @@ c:\users\dndsu\desktop\dev\iocp\netlib\connection.cpp(314): error C3861: 'IocpSe
   Thread.cpp
   VBuffer.cpp
   코드를 생성하고 있습니다...
+  NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\04_ChatServer\x64\Debug\NetLib.lib

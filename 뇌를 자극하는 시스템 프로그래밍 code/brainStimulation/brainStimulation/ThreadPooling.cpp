@@ -31,13 +31,13 @@ struct __ThreadPool
 	// Work를 등록하기 위한 배열
 	WORK workdList[WORK_MAX];
 
-	// thread 정보와 각 thread별 Event오브젝트 
+	// thread 정보와 각 thread별 Event오브젝트 아래 둘 배열 idx는 쌍을 이룬다.
 	WorkerThread workerThreadList[THREAD_MAX];
 	HANDLE workerEventList[THREAD_MAX];
 
 	//work에 대한 정보 
-	DWORD idxOfCurrentWork;
-	DWORD idxOfLastAddedWork; 
+	DWORD idxOfCurrentWork;			// 대기 1순위 work idx 
+	DWORD idxOfLastAddedWork;		// 마지막으로 추가한 work idx+1 새로 들어온 work가 등록되면 이 위치에 넣으면 됨
 
 	// number of thread;
 	DWORD threadIdx;		// pool 에 존재하는 thread 개수 
@@ -163,7 +163,44 @@ DWORD MakeThreadToPool(DWORD numOfThread)
 
 
 // 전달되어야 할 대상
+void WorkerThreadFunction(LPVOID pParam)
+{
+	WORK workFunction;
+	HANDLE event = gThreadPool.workerEventList[(DWORD)pParam];
+
+	while (1)
+	{
+		workFunction = GetWorkFromPool();
+		if (workFunction == nullptr)
+		{
+			// work 가 할당될 때까지 blocked 상태 
+			WaitForSingleObject(event, INFINITE);
+			continue;
+		}
+		workFunction();
+	}
+}
+
+void TestFunction()
+{
+	// i 는 static이므로 둘 이상의 스레드에 의해 동시 접근
+	static int i = 0;
+	i++;
+	_tprintf(_T("Good test !!!!!!! --%d : Processing thread : %d  \n\n"), i, GetCurrentThreadId());
+}
 
 
+int _tmain(int argc, TCHAR* argv[])
+{
+	MakeThreadToPool(3);
+
+	for (int i = 0; i < 100; i++)
+	{
+		AddWorkToPool(TestFunction);
+	}
+
+	Sleep(50000); 
+	return 0;
+}
 
 

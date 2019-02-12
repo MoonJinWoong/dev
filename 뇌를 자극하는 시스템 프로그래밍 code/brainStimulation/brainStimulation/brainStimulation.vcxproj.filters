@@ -4,5 +4,6 @@
     <ClCompile Include="ThreadAdderOne.cpp" />
     <ClCompile Include="strtok.cpp" />
     <ClCompile Include="ThreadPooling.cpp" />
+    <ClCompile Include="..\..\..\..\뇌자극 소스\19장 source\namedpipe_asynch_server.c" />
   </ItemGroup>
 </Project>
