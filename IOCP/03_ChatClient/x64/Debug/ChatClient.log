@@ -1,5 +1,2 @@
 ﻿  main.cpp
-c:\users\dndsu\desktop\dev\iocp\03_chatclient\main.cpp(50): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\dndsu\desktop\dev\iocp\03_chatclient\main.cpp(64): warning C4267: '인수': 'size_t'에서 'DWORD'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\dndsu\desktop\dev\iocp\03_chatclient\main.cpp(81): warning C4267: '인수': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   ChatClient.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\03_ChatClient\x64\Debug\ChatClient.exe

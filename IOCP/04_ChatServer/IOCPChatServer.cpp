@@ -1,41 +1,79 @@
 #include "IOCPChatServer.h"
 
 
+//IOCPChatServer::IOCPChatServer(void) 
+//{
+//	m_pIocpServer= NULL;
+//}
+//IOCPChatServer::~IOCPChatServer(void) 
+//{
+//	if (m_pInstance != NULL)
+//		delete m_pInstance;
+//}
 
-ChatServer::ChatServer(void) {}
-ChatServer::~ChatServer(void) {}
+IOCPChatServer::IOCPChatServer() {}
+IOCPChatServer::~IOCPChatServer() {}
 
-bool ChatServer::OnAccept(Connection* lpConnection)
+bool IOCPChatServer::OnAccept(Connection* lpConnection)
 {
 	
 	cout << "OnAccept 호출 " << endl;
 	cout << "접속 클라 ip 주소 -"<<lpConnection->GetConnectionIp() << endl;		 
-	cout << "전송 버퍼 size -"<<lpConnection->GetSendBufSize() << endl;
+	//cout << "전송 버퍼 size -"<<lpConnection->GetSendBufSize() << endl;
+	//cout << "recv buf size-" << lpConnection->GetRecvBufSize() << endl;
+	//cout<<"operation -> "<<lpConnection->s_e
 
+	g_ConnectionManager()->AddConnection(lpConnection);
 	return true;
 }
-bool ChatServer::OnRecv(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
+
+//void IOCPChatServer::releaseInstance(void)
+//{
+//	IOCPChatServer* chatserver = new IOCPChatServer;
+//}
+//
+//IOCPChatServer* IOCPChatServer::Instance(void)
+//{
+//
+//	return chatserver();
+//}
+bool IOCPChatServer::OnRecv(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
 {
 	cout << "OnRecv 호출되었니....? " << endl;
+
+	unsigned short usType;
+	CopyMemory(&usType, pRecvMsg + 4, PACKET_TYPE_LENGTH);
+	switch (usType)
+	{
+	case  PACKET_CHAT:
+	{
+		Packet_Chat* pChat = (Packet_Chat*)pRecvMsg;
+		g_ConnectionManager()->BroadCast_Chat(pChat->s_szIP, pChat->s_szChatMsg);
+		break;
+	}
+	default:
+		break;
+	}
 	return true;
 }
-bool ChatServer::OnRecvImmediately(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
+bool IOCPChatServer::OnRecvImmediately(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
 {
 	cout << "OnRecvImmediately 호출되었니....? " << endl;
 	return true;
 }
-void ChatServer::OnClose(Connection* lpConnection)
+void IOCPChatServer::OnClose(Connection* lpConnection)
 {
 	cout << "OnClose 호출되었니....? " << endl;
 }
-bool ChatServer::OnSystemMsg(Connection* lpConnection, DWORD dwMsgType, LPARAM lParam)
+bool IOCPChatServer::OnSystemMsg(Connection* lpConnection, DWORD dwMsgType, LPARAM lParam)
 {
 	cout << "OnSystemMsg 호출되었니....? " << endl;
 	return true;
 }
 
-bool ChatServer::BindAndListen(int port)
+bool IOCPChatServer::BindAndListen(int port)
 {
+	//쓸모 없는 함수. 추후 삭제 할 것
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
 

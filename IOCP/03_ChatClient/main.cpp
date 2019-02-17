@@ -1,85 +1,123 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <winsock2.h>
+#include <Windows.h>
+#include <conio.h>
+#include <thread>
+#include <process.h>
+
+
+#include "overlapped.h"
+
+#define BUF_SIZE 256
+#define NICK_LEN 32
+#define LINE_NUM 32
+
+#define COL  100
+#define LINE (LINE_NUM + 1)
+
+
+#pragma warning(disable : 4996)
+
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-
-#pragma comment(lib,"ws2_32")
-#include <WinSock2.h>
-#include <WS2tcpip.h>
-
-#include <iostream>
-
-using namespace std;
-
-DWORD WINAPI SendThread(LPVOID lpData);
-
-char ID[10];
+#define _CRT_SECURE_NO_WARNINGSasd
 
 
+#pragma comment(lib, "ws2_32.lib")
+#define MAX_BUFFER        1024
+#define SERVER_IP        "127.0.0.1"
+#define SERVER_PORT        32452
+
+enum {PACKET_CHAT = 1};
 
 int main()
 {
-	std::cout << "Hello" << std::endl;
+	// Winsock Start - winsock.dll 로드
+	WSADATA WSAData;
+	if (WSAStartup(MAKEWORD(2, 0), &WSAData) != 0)
+	{
+		printf("Error - Can not load 'winsock.dll' file\n");
+		return 1;
+	}
 
-	WSADATA		WsaData;
-	int nRet = WSAStartup(MAKEWORD(2, 2), &WsaData);
+	// 1. 소켓생성
+	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (listenSocket == INVALID_SOCKET)
+	{
+		printf("Error - Invalid socket\n");
+		return 1;
+	}
 
-	auto local_ip = "127.0.0.1";
-	auto port = "32452";
-	
-	// 소켓 생성
-	SOCKET socket_client = socket(AF_INET, SOCK_STREAM, 0);
+	// 서버정보 객체설정
+	SOCKADDR_IN serverAddr;
+	memset(&serverAddr, 0, sizeof(SOCKADDR_IN));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(SERVER_PORT);
+	serverAddr.sin_addr.S_un.S_addr = inet_addr(SERVER_IP);
 
+	// 2. 연결요청
+	if (connect(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	{
+		printf("Error - Fail to connect\n");
+		// 4. 소켓종료
+		closesocket(listenSocket);
+		// Winsock End
+		WSACleanup();
+		return 1;
+	}
+	else
+	{
+		printf("Server Connected\n* Enter Message\n->");
+	}
 
-
-	// 소켓 주소 정보
-	SOCKADDR_IN servAddr = { 0 };
-		servAddr.sin_family = AF_INET;
-		servAddr.sin_addr.s_addr = inet_addr(local_ip);
-		servAddr.sin_port = htons(atoi(port)); // 포트
-
-		// 소켓 접속
-		if (connect(socket_client, (struct sockaddr *) &servAddr, sizeof(servAddr)) == SOCKET_ERROR)
+	while (1)
+	{
+		// 메시지 입력
+		char messageBuffer[MAX_BUFFER];
+		int i, bufferLen;
+		for (i = 0; 1; i++)
 		{
-			closesocket(socket_client);
-			printf("서버에 접속 할수 없습니다.");
-			return SOCKET_ERROR;
-		}
-
-		CreateThread(NULL, 0, SendThread, (LPVOID)socket_client, 0, NULL);
-		// 상태 출력
-		DWORD dwTmp;
-		char text[1024] = "서버에 접속되었습니다.\n";
-		WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), text, strlen(text), &dwTmp, NULL);
-
-		// 전송 & 수신 루푸
-		while (1)
-		{
-			char buffer[1024] = { 0 };
-			int len = recv(socket_client, buffer, sizeof(buffer), 0);
-			if (len <= 0)
+			messageBuffer[i] = getchar();
+			if (messageBuffer[i] == '\n')
 			{
-				printf("접속 종료.");
+				messageBuffer[i++] = '\0';
 				break;
 			}
-
-			// 메시지 출력
-			WriteFile(GetStdHandle(STD_OUTPUT_HANDLE), buffer, strlen(buffer), &dwTmp, NULL);
 		}
-		//소켓 해제
-		closesocket(socket_client);
-		return 0;
+		bufferLen = i;
+
+		Packet_Chat Chat;
+		Chat.s_nLength = sizeof(Packet_Chat);
+		Chat.s_sType = PACKET_CHAT;
+		strcpy(Chat.s_szIP, "127.0.0.1");
+		strncpy(Chat.s_szChatMsg, messageBuffer, bufferLen);
+		Chat.s_szChatMsg[bufferLen] = NULL;
+		//m_AsyncSocket.SendMsg((char*)&Chat, sizeof(Packet_Chat));
+		send(listenSocket, (char*)&Chat, sizeof(Packet_Chat),0);
+		//// 3-1. 데이터 쓰기
+		//int sendBytes = send(listenSocket, messageBuffer, bufferLen, 0);
+		//if (sendBytes > 0)
+		//{
+		//	printf("TRACE - Send message : %s (%d bytes)\n", messageBuffer, sendBytes);
+		//	// 3-2. 데이터 읽기
+		//	int receiveBytes = recv(listenSocket, messageBuffer, MAX_BUFFER, 0);
+		//	if (receiveBytes > 0)
+		//	{
+		//		printf("TRACE - Receive message : %s (%d bytes)\n* Enter Message\n->", messageBuffer, receiveBytes);
+		//	}
+		//}
+
 	}
 
+	// 4. 소켓종료
+	closesocket(listenSocket);
 
-	DWORD WINAPI SendThread(LPVOID lpData)
-	{
-		SOCKET socket_client = (SOCKET)lpData;
-		while (1)
-		{
-			printf("전송할 내용 : ");
-			DWORD dwTmp;
-			char text[1024] = { 0 };
-			ReadFile(GetStdHandle(STD_INPUT_HANDLE), text, 1024, &dwTmp, NULL);
-			send(socket_client, text, strlen(text), 0);
-		}
-		return 0;
-	}
+	// Winsock End
+	WSACleanup();
+
+	return 0;
+}
+
+
+
 

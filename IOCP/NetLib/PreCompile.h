@@ -26,6 +26,8 @@
 #include <list>
 #include <fstream>
 #include <math.h>
+#include <typeinfo>
+
 
 using namespace std;
 

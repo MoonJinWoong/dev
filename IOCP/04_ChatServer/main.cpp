@@ -4,7 +4,7 @@
 #include "IOCPChatServer.h"
 
 
-ChatServer* chatserver = new ChatServer;
+IOCPChatServer* chatserver = new IOCPChatServer();
 
 
 void Init()
@@ -21,7 +21,7 @@ void Init()
 	InitConfig.nProcessThreadCnt = 1;
 
 
-	
+	//chatserver()->
 
 	// ServerStart()에서 실질적인 초기화 진행
 	if (true == chatserver->ServerStart(InitConfig))

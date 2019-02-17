@@ -124,6 +124,8 @@ bool Connection::BindAcceptExSock()
 
 	IncrementAcceptIoRefCount();
 
+
+	
 	BOOL bRet = AcceptEx( m_sockListener , m_socket , 
 		m_lpRecvOverlappedEx->s_WsaBuf.buf,
 		0 ,
@@ -132,6 +134,8 @@ bool Connection::BindAcceptExSock()
 		&dwBytes,
 		(LPOVERLAPPED)m_lpRecvOverlappedEx
 		);
+
+	//cout << "dw Bytes..." << dwBytes << endl;
 	if( !bRet && WSAGetLastError() != WSA_IO_PENDING )
 	{  
 		DecrementAcceptIoRefCount();

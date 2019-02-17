@@ -335,16 +335,20 @@ void IOCPServer::WorkerThread()
 		{
 		case OP_ACCEPT:
 		{
+			//cout << "do accept 부르기 전...  " << endl;
 			DoAccept(lpOverlappedEx);
 		}
 		break;
 		case OP_RECV:
 		{
+			cout << "overlapped buf info -" << lpOverlappedEx->s_WsaBuf.buf[0] << endl;
+			cout << "dorecv call ...." << endl;
 			DoRecv(lpOverlappedEx, dwIoSize);
 		}
 		break;
 		case OP_SEND:
 		{
+			cout << "do send...? " << endl;
 			DoSend(lpOverlappedEx, dwIoSize);
 		}
 		break;
@@ -403,25 +407,36 @@ void IOCPServer::DoRecv(LPOVERLAPPED_EX lpOverlappedEx, DWORD dwIoSize)
 	if (lpConnection == NULL)
 		return;
 	lpConnection->DecrementRecvIoRefCount();
-
+	
 	int nMsgSize = 0, nRemain = 0;
 	char *pCurrent = NULL, *pNext = NULL;
 
 	nRemain = lpOverlappedEx->s_dwRemain;
+
+	//cout << "overlapped ex socket msg   " << lpOverlappedEx->s_lpSocketMsg << endl;
 	lpOverlappedEx->s_WsaBuf.buf = lpOverlappedEx->s_lpSocketMsg;
 	lpOverlappedEx->s_dwRemain += dwIoSize;
 
+	cout << "dw remain size " << typeid(lpOverlappedEx->s_dwRemain).name() 
+		<< "-" << lpOverlappedEx->s_dwRemain << endl;
+
+
+	//cout << "클라에서 온 msg buf 사이즈 .... - " << sizeof(lpOverlappedEx->s_WsaBuf.buf) << endl;
 	if (lpOverlappedEx->s_dwRemain >= PACKET_SIZE_LENGTH)
-		CopyMemory(&nMsgSize, &(lpOverlappedEx->s_WsaBuf.buf[0]), PACKET_SIZE_LENGTH);
+		//wcscpy(&nMsgSize, &(lpOverlappedEx->s_WsaBuf.buf[0]);
+		memcpy(&nMsgSize, &(lpOverlappedEx->s_WsaBuf.buf[0]), PACKET_SIZE_LENGTH);
+		//CopyMemory(&nMsgSize, &(lpOverlappedEx->s_WsaBuf.buf[0]), PACKET_SIZE_LENGTH);
 	else
 		nMsgSize = 0;
 
 	//arrive wrong packet..
+
+	cout << "client msg size "<<typeid(nMsgSize).name() << "-"<< nMsgSize << endl;
+	cout << "ringbuffer size " << typeid(lpConnection->m_ringRecvBuffer.GetBufferSize()).name()
+		<< "-" << lpConnection->m_ringRecvBuffer.GetBufferSize() << endl;
 	if (nMsgSize <= 0 || nMsgSize > lpConnection->m_ringRecvBuffer.GetBufferSize())
 	{
-		LOG(LOG_ERROR_NORMAL,
-			"SYSTEM | IOCPServer::WorkerThread() | arrived wrong packet : (%u)",
-			GetLastError());
+		cout << "Do recv 에서 wrong packet 도착...." << endl;
 		CloseConnection(lpConnection);
 		return;
 	}
@@ -481,6 +496,7 @@ void IOCPServer::DoRecv(LPOVERLAPPED_EX lpOverlappedEx, DWORD dwIoSize)
 		}
 
 	}
+	
 	lpConnection->RecvPost(pNext, nRemain);
 }
 

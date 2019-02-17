@@ -13,6 +13,8 @@
 #define MAX_IP_LENGTH				20
 #define MAX_PROCESS_THREAD			1
 #define MAX_WORKER_THREAD			10
+#define MAX_CHATMSG 300
+#define MAX_IP		20
 
 
 
@@ -84,4 +86,14 @@ typedef struct _PROCESSPACKET
 	}
 
 } PROCESSPACKET, *LPPROCESSPACKET;
+
+enum { PACKET_CHAT = 1 };
+
+struct Packet_Chat
+{
+	unsigned int s_nLength;
+	unsigned short s_sType;
+	char s_szIP[MAX_IP];
+	char s_szChatMsg[MAX_CHATMSG];
+};
 
