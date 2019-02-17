@@ -27,16 +27,6 @@ bool IOCPChatServer::OnAccept(Connection* lpConnection)
 	return true;
 }
 
-//void IOCPChatServer::releaseInstance(void)
-//{
-//	IOCPChatServer* chatserver = new IOCPChatServer;
-//}
-//
-//IOCPChatServer* IOCPChatServer::Instance(void)
-//{
-//
-//	return chatserver();
-//}
 bool IOCPChatServer::OnRecv(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
 {
 	cout << "OnRecv 호출되었니....? " << endl;
@@ -59,6 +49,20 @@ bool IOCPChatServer::OnRecv(Connection* lpConnection, DWORD dwSize, char * pRecv
 bool IOCPChatServer::OnRecvImmediately(Connection* lpConnection, DWORD dwSize, char * pRecvMsg)
 {
 	cout << "OnRecvImmediately 호출되었니....? " << endl;
+	
+	unsigned short usType;
+	CopyMemory(&usType, pRecvMsg + 4, PACKET_TYPE_LENGTH);
+	switch (usType)
+	{
+	case  PACKET_CHAT:
+	{
+		Packet_Chat* pChat = (Packet_Chat*)pRecvMsg;
+		g_ConnectionManager()->BroadCast_Chat(pChat->s_szIP, pChat->s_szChatMsg);
+		break;
+	}
+	default:
+		break;
+	}
 	return true;
 }
 void IOCPChatServer::OnClose(Connection* lpConnection)

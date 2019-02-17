@@ -413,12 +413,10 @@ void IOCPServer::DoRecv(LPOVERLAPPED_EX lpOverlappedEx, DWORD dwIoSize)
 
 	nRemain = lpOverlappedEx->s_dwRemain;
 
-	//cout << "overlapped ex socket msg   " << lpOverlappedEx->s_lpSocketMsg << endl;
+	
 	lpOverlappedEx->s_WsaBuf.buf = lpOverlappedEx->s_lpSocketMsg;
 	lpOverlappedEx->s_dwRemain += dwIoSize;
 
-	cout << "dw remain size " << typeid(lpOverlappedEx->s_dwRemain).name() 
-		<< "-" << lpOverlappedEx->s_dwRemain << endl;
 
 
 	//cout << "클라에서 온 msg buf 사이즈 .... - " << sizeof(lpOverlappedEx->s_WsaBuf.buf) << endl;
@@ -463,6 +461,7 @@ void IOCPServer::DoRecv(LPOVERLAPPED_EX lpOverlappedEx, DWORD dwIoSize)
 
 		while (true)
 		{
+			//cout << "asdfasdfasdfsafdsadfasfsadfasdff" << endl;
 			if (nRemain >= PACKET_SIZE_LENGTH)
 			{
 
@@ -576,6 +575,7 @@ bool IOCPServer::ProcessPacket(Connection* lpConnection,
 	if (!OnRecvImmediately(lpConnection, dwCurrentSize, pCurrent))
 	{
 
+		
 		LPPROCESSPACKET lpProcessPacket =
 			GetProcessPacket(OP_RECVPACKET, (LPARAM)pCurrent, NULL);
 		if (NULL == lpProcessPacket)

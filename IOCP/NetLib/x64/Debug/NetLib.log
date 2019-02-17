@@ -1,10 +1,2 @@
-﻿  Connection.cpp
-  IocpServer.cpp
-  Log.cpp
-  Monitor.cpp
-  RingBuffer.cpp
-  Singleton.cpp
-  Thread.cpp
-  VBuffer.cpp
-  코드를 생성하고 있습니다...
+﻿  IocpServer.cpp
   NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\04_ChatServer\x64\Debug\NetLib.lib

@@ -5,7 +5,7 @@
 #include <conio.h>
 #include <thread>
 #include <process.h>
-
+#include <iostream>
 
 #include "overlapped.h"
 
@@ -28,8 +28,13 @@
 #define SERVER_IP        "127.0.0.1"
 #define SERVER_PORT        32452
 
+
+
+using namespace std;
+
 enum {PACKET_CHAT = 1};
 
+SOCKET listenSocket;
 int main()
 {
 	// Winsock Start - winsock.dll 로드
@@ -41,7 +46,7 @@ int main()
 	}
 
 	// 1. 소켓생성
-	SOCKET listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (listenSocket == INVALID_SOCKET)
 	{
 		printf("Error - Invalid socket\n");
@@ -92,22 +97,25 @@ int main()
 		strcpy(Chat.s_szIP, "127.0.0.1");
 		strncpy(Chat.s_szChatMsg, messageBuffer, bufferLen);
 		Chat.s_szChatMsg[bufferLen] = NULL;
-		//m_AsyncSocket.SendMsg((char*)&Chat, sizeof(Packet_Chat));
-		send(listenSocket, (char*)&Chat, sizeof(Packet_Chat),0);
-		//// 3-1. 데이터 쓰기
-		//int sendBytes = send(listenSocket, messageBuffer, bufferLen, 0);
-		//if (sendBytes > 0)
-		//{
-		//	printf("TRACE - Send message : %s (%d bytes)\n", messageBuffer, sendBytes);
-		//	// 3-2. 데이터 읽기
-		//	int receiveBytes = recv(listenSocket, messageBuffer, MAX_BUFFER, 0);
-		//	if (receiveBytes > 0)
-		//	{
-		//		printf("TRACE - Receive message : %s (%d bytes)\n* Enter Message\n->", messageBuffer, receiveBytes);
-		//	}
-		//}
+		send(listenSocket, (char*)&Chat, sizeof(Packet_Chat), 0);
 
+
+		char recvmessageBuffer[MAX_BUFFER];
+		Packet_Chat recvChat;
+		recvChat.s_nLength = sizeof(Packet_Chat);
+		recvChat.s_sType = PACKET_CHAT;
+		strcpy(recvChat.s_szIP, "127.0.0.1");
+		strncpy(recvChat.s_szChatMsg, recvmessageBuffer, bufferLen);
+		int nRcv = recv(listenSocket, (char*)&recvChat, sizeof(Packet_Chat) - 1, 0);
+
+		cout << recvChat.s_szChatMsg << endl;
+		//recvChat.s_szChatMsg[bufferLen] = NULL;
 	}
+
+		
+
+
+	
 
 	// 4. 소켓종료
 	closesocket(listenSocket);
