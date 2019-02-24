@@ -1,0 +1,10 @@
+﻿  calculator.cpp
+c:\users\dndsu\desktop\dev\iocp\dlltest\dlltest\calculator.cpp(6): warning C4273: 'Calculator::Sum': dll 링크가 일치하지 않습니다.
+  c:\users\dndsu\desktop\dev\iocp\dlltest\dlltest\calculatoe.h(20): note: 'Sum'의 이전 정의를 참조하십시오.
+c:\users\dndsu\desktop\dev\iocp\dlltest\dlltest\calculator.cpp(11): warning C4273: 'Calculator::printSum': dll 링크가 일치하지 않습니다.
+  c:\users\dndsu\desktop\dev\iocp\dlltest\dlltest\calculatoe.h(21): note: 'printSum'의 이전 정의를 참조하십시오.
+     C:\Users\dndsu\Desktop\dev\IOCP\DllTest\x64\Release\DllTest.lib 라이브러리 및 C:\Users\dndsu\Desktop\dev\IOCP\DllTest\x64\Release\DllTest.exp 개체를 생성하고 있습니다.
+  코드를 생성하고 있습니다.
+  All 12 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  코드를 생성했습니다.
+  DllTest.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\DllTest\x64\Release\DllTest.dll
