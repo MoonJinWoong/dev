@@ -4,7 +4,7 @@
 
 
 
-class DLLTEST_API test
+class NETLIB test
 {
 public:
 	test();

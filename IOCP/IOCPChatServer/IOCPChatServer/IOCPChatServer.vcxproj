@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CommonDefine.h" />
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="preCompile.h" />
     <ClInclude Include="test.h" />

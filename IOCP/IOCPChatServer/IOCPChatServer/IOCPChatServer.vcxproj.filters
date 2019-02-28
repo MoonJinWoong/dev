@@ -10,6 +10,7 @@
     <ClInclude Include="preCompile.h" />
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="test.h" />
+    <ClInclude Include="CommonDefine.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
