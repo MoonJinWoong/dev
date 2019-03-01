@@ -17,10 +17,14 @@ public:
 	virtual bool ServerStart(const INITCONFIG &initconfig);     // 상속받은 놈은 반드시 이걸 정의해주어야함
 	virtual bool ServerStop();      // 상속받은 놈은 반드시 이걸 정의해주어야함
 	
+	void WorkerThread();
+	void ProcessThread();
+
+
 private:
-	// create 관련 함수.. 클래스 내에서만 호출한다. 굳이 밖으로 꺼낼 필요성 없음 
-	bool CreateIOCP();    
-	bool CreateThreads();
+	bool CreateIOCP();				  // workeriocp processiocp 생성해줌
+	bool CreateWorkerThread();		  // worker thread 생성
+	bool CreateProcessThread();
 
 
 protected:

@@ -140,12 +140,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CircleBuffer.h" />
     <ClInclude Include="CommonDefine.h" />
+    <ClInclude Include="ConnectionManager.h" />
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="preCompile.h" />
     <ClInclude Include="test.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CircleBuffer.cpp" />
+    <ClCompile Include="ConnectionManager.cpp" />
     <ClCompile Include="IocpServer.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>

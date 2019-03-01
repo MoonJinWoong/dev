@@ -6,6 +6,8 @@
 const int MAX_WORKER_THREAD = 8;
 const int MAX_PROCESS_TRHEAD = 1;
 
+// CircleBuffersize 
+const int MAX_CIRCLE_BUFFER_SIZE = 1024 * 100;
 
 
 typedef struct INITCONFIG

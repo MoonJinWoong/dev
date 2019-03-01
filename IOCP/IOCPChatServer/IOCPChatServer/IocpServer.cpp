@@ -1,5 +1,7 @@
 #include "preCompile.h"
 
+unsigned int WINAPI CallWorkerThread(LPVOID p);
+unsigned int WINAPI CallProcessThread(LPVOID p);
 
 IocpServer*  IocpServer::m_pIocpServer = NULL;
 
@@ -12,7 +14,21 @@ IocpServer::~IocpServer()
 {
 
 }
+unsigned int WINAPI CallWorkerThread(LPVOID p)
+{
+	IocpServer* pWorkerServerSock = (IocpServer*)p;
+	pWorkerServerSock->WorkerThread();
 
+	return 1;
+}
+
+unsigned int WINAPI CallProcessThread(LPVOID p)
+{
+	IocpServer* pProcessServerSock = (IocpServer*)p;
+	pProcessServerSock->ProcessThread();
+
+	return 1;
+}
 bool IocpServer::InitIOCP()
 {
 	// worker thread handle 초기화					(범위기반으로...?이거 테스트해보자 )
@@ -38,14 +54,23 @@ bool IocpServer::InitIOCP()
 
 bool IocpServer::ServerStart(const INITCONFIG &initConfig)
 {
+	// app에서 초기화 한 후 이곳을 호출한다. 
+
+
 	cPort = initConfig.sServerPort;
 	cWorkerThreadCnt = initConfig.sWorkerThreadCnt;
-	cWorkerThreadCnt = initConfig.sProcessThreadCnt;
+	cProcessThreadCnt = initConfig.sProcessThreadCnt;
 
 	if (InitIOCP() == false)
 		return false;
-	if (CreateIOCP() == false)
+	if (!CreateIOCP())   // workeriocp process iocp 두개 생성해주는 곳 
 		return false;
+	if (!CreateWorkerThread())
+		return false;
+	if (!CreateProcessThread())
+		return false;
+
+	return true;
 }
 
 bool IocpServer::ServerStop()
@@ -114,42 +139,84 @@ bool IocpServer::CreateIOCP()
 	return true;
 }
 
-bool IocpServer::CreateThreads()
+bool IocpServer::CreateWorkerThread()
 {
-	// worker thread and process thread 생성
+	// worker thread 생성
 
 	HANDLE	hWorkerThread;
 	UINT	uiThreadId;
 
-	for (DWORD dwCount = 0; dwCount < cWorkerThreadCnt; dwCount++)
+	
+	for (int dwCount = 0; dwCount < cWorkerThreadCnt; dwCount++)
 	{
 		hWorkerThread = (HANDLE)_beginthreadex(NULL, 0, &CallWorkerThread,
 			this, CREATE_SUSPENDED, &uiThreadId);
+		
 		if (hWorkerThread == NULL)
 		{
-		
+			cout << "CreateWorkerThread failed....!!!" << endl;
 			return false;
 		}
+
+		// 실제 스레드 주소 
 		cWorkerThread[dwCount] = hWorkerThread;
-		ResumeThread(hWorkerThread);
+
+		 ResumeThread(hWorkerThread);
+
 	}
 
-	// worker랑 thread랑 분리하자.. 오류 생길거 같다.. 
-	// 여기서부터 다시짜보자
-	
 
+	cout << "** WorkerThread " << cWorkerThreadCnt << "개 생성...." << endl;
+	return true;
 }
 
-//unsigned int WINAPI CallWorkerThread(LPVOID p)
-//{
-//	IOCPServer* pServerSock = (IOCPServer*)p;
-//	pServerSock->WorkerThread();
-//	return 1;
-//}
-//
-//unsigned int WINAPI CallProcessThread(LPVOID p)
-//{
-//	IOCPServer* pServerSock = (IOCPServer*)p;
-//	pServerSock->ProcessThread();
-//	return 1;
-//}
+bool IocpServer::CreateProcessThread()
+{
+	HANDLE	hProcessThread;
+	UINT	uiThreadId;
+
+	// create worker thread.
+	for (DWORD dwCount = 0; dwCount < cProcessThreadCnt; dwCount++)
+	{
+		//cout << "asdfasfasdasdasdf" << endl;
+		hProcessThread = (HANDLE)_beginthreadex(NULL, 0, &CallProcessThread,
+			this, CREATE_SUSPENDED, &uiThreadId);
+		if (hProcessThread == NULL)
+		{
+			cout << "CreateProcessThread failed....!!!" << endl;
+			return false;
+		}
+		cProcessThread[dwCount] = hProcessThread;
+		ResumeThread(hProcessThread);
+		SetThreadPriority(hProcessThread, THREAD_PRIORITY_TIME_CRITICAL);
+	}
+
+	cout << "** Process Thread " << cProcessThreadCnt << "개 생성...." << endl;
+	return true;
+}
+
+void IocpServer::WorkerThread()
+{
+	BOOL					bSuccess = false;
+	LPOVERLAPPED			lpOverlapped = NULL;
+	ConnectionManager*			lpConnection = NULL;
+	//LPOVERLAPPED_EX			lpOverlappedEx = NULL;
+	DWORD					dwIoSize = 0;
+
+	
+	
+
+
+	while (cWorkerThreadFlag)
+	{
+		cout << "worker thread call success... ! " << endl;
+	}
+	
+}
+
+void IocpServer::ProcessThread()
+{
+	cout << "process thread call success... ! " << endl;
+}
+
+

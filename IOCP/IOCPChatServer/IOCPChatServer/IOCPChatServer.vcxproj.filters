@@ -11,9 +11,13 @@
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="test.h" />
     <ClInclude Include="CommonDefine.h" />
+    <ClInclude Include="ConnectionManager.h" />
+    <ClInclude Include="CircleBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="ConnectionManager.cpp" />
+    <ClCompile Include="CircleBuffer.cpp" />
   </ItemGroup>
 </Project>

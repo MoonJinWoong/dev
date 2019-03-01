@@ -6,3 +6,8 @@ void test::run()
 {
 	cout << "run 함수 호출...!" << endl;
 }
+
+
+
+
+// 일기 
