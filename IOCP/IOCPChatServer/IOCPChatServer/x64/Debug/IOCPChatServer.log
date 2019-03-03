@@ -1,3 +1,0 @@
-﻿  IocpServer.cpp
-c:\users\dndsu\desktop\dev\iocp\iocpchatserver\iocpchatserver\iocpserver.cpp(151): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-  IOCPChatServer.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\IOCPChatServer\x64\Debug\NetLibrary.dll
