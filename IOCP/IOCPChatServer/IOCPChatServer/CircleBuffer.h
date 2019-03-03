@@ -20,7 +20,7 @@ public:
 	//inline char*	GetCurrentMark() { return m_pCurrentMark; }
 	//inline char*	GetEndMark() { return m_pEndMark; }
 
-	//char*			ForwardMark(int nForwardLength);
+	char*			ForwardMark(int Length);
 	//char*			ForwardMark(int nForwardLength, int nNextLength, DWORD dwRemainLength);
 	//void			BackwardMark(int nBackwardLength);
 
@@ -33,14 +33,14 @@ public:
 	////채워 넣기전에 바로 다른 쓰레드에서 SendPost()가 불린다면 엉뚱한 쓰레기 데이터가 갈 수 있다.
 	////그걸 방지하기 위해 데이터를 다 채운 상태에서만 사용된 버퍼 사이즈를 설정할 수 있어야한다.
 	////이함수는 sendpost함수에서 불리게 된다.
-	//void			SetUsedBufferSize(int nUsedBufferSize);
+	void			SetUsedBufferSize(int UsedBufferSize);
 
 	////누적 버퍼 사용양 반환
 	//int				GetAllUsedBufferSize() { return cAllUserBufSize; }
 
 
 	////버퍼 데이터 읽어서 반환
-	//char*			GetBuffer(int nReadSize, int* pReadSize);
+	char*			GetBuffer(int nReadSize, int* pReadSize);
 
 	// mutex cLockObject;
 private:

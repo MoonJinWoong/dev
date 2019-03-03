@@ -15,10 +15,18 @@
 
 #include <iostream>
 #include <mutex>
+
 #include <WinSock2.h>
+#include <winsock.h>
 #include <mutex>
 #include <thread>
 #include <process.h>  // beginethreadEx
+#include <Mswsock.h>  // acceptEx 
+#include <map>				// connection에서 사용
+#include <unordered_map>	// 혹시 몰라서 만들어둠
+#include <ws2def.h>
+#include <functional>
+
 
 using namespace std;
 

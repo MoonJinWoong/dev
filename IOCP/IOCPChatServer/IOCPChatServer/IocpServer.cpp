@@ -56,7 +56,6 @@ bool IocpServer::ServerStart(const INITCONFIG &initConfig)
 {
 	// app에서 초기화 한 후 이곳을 호출한다. 
 
-
 	cPort = initConfig.sServerPort;
 	cWorkerThreadCnt = initConfig.sWorkerThreadCnt;
 	cProcessThreadCnt = initConfig.sProcessThreadCnt;
@@ -68,6 +67,8 @@ bool IocpServer::ServerStart(const INITCONFIG &initConfig)
 	if (!CreateWorkerThread())
 		return false;
 	if (!CreateProcessThread())
+		return false;
+	if (!CreateListenSocket())
 		return false;
 
 	return true;
@@ -200,11 +201,8 @@ void IocpServer::WorkerThread()
 	BOOL					bSuccess = false;
 	LPOVERLAPPED			lpOverlapped = NULL;
 	ConnectionManager*			lpConnection = NULL;
-	//LPOVERLAPPED_EX			lpOverlappedEx = NULL;
+	LPOVERLAPPED_EX			lpOverlappedEx = NULL;
 	DWORD					dwIoSize = 0;
-
-	
-	
 
 
 	while (cWorkerThreadFlag)
@@ -216,7 +214,57 @@ void IocpServer::WorkerThread()
 
 void IocpServer::ProcessThread()
 {
-	cout << "process thread call success... ! " << endl;
+	//cout << "process thread call success... ! " << endl;
 }
 
+bool IocpServer::CreateListenSocket()
+{
+	SOCKADDR_IN	si_addr;
+	int			nRet;
+	int			nZero = 0;
 
+
+	cListenSocket = WSASocket(AF_INET, SOCK_STREAM,
+		IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (INVALID_SOCKET == cListenSocket)
+	{
+		cout << "listen socket call error ...!!" << endl;
+		return false;
+	}
+	else {
+		cout << "listen socket Create Success...!!!!" << endl;
+	}
+
+	// bind listen socket with si_addr struct.
+	si_addr.sin_family = AF_INET;
+	si_addr.sin_port = htons(cPort);
+	si_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+
+
+	// std 랑 충돌해서 :: 붙여줘야함.
+	int ret = ::bind(cListenSocket, (struct sockaddr *) &si_addr, sizeof(si_addr));
+	if (ret == SOCKET_ERROR)
+		cout << "bind error...!!1" << endl;
+
+
+	// start listening..
+	nRet = listen(cListenSocket, 50);
+
+	if (SOCKET_ERROR == nRet)
+	{
+		cout << "listen() call error...!" << endl;
+		return false;
+	}
+
+	HANDLE hIOCPHandle;
+	hIOCPHandle = CreateIoCompletionPort((HANDLE)cListenSocket,
+		cWorkerIOCP, (DWORD)0, 0);
+
+	if (NULL == hIOCPHandle || cWorkerIOCP != hIOCPHandle)
+	{
+		cout << "createIoCompletionPort call failed....!" << endl;
+		return false;
+	}
+	return true;
+}

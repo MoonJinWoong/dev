@@ -12,19 +12,50 @@ public:
 
 	CircleBuffer cRecvCircleBuffer;
 	CircleBuffer cSendCircleBuffer;
-//
+
+	int			cIndex;
+	SOCKET		cListenSocket;
+
+	//	//Overlapped I/O 요청을 위한 변수
+	LPOVERLAPPED_EX		cRecvOverlappedEx;
+	LPOVERLAPPED_EX		cSendOverlappedEx;
+
+    //한번에 수신할 수 있는 데이터의 최대 크기
+	int			cRecvBufSize;
+	//한번에 송신할 수 있는 데이터의 최대 크기
+	int			cSendBufSize;
+	//클라이언트 주소를 받기위한 버퍼
+	char			cAddressBuf[1024];
+
+	SOCKET		cSocket;     
+
+	BYTE		cIpAddress[MAX_IP_LENGTH];
+
+	//클라이언트와 연결 종료가 되었는지 여부
+	bool			cIsClosed;
+	//클라이언트와 연결이 되어있는지 여부
+	bool			cIsConnect;
+	//현재 Overlapped I/O 전송 작업을 하고 있는지 여부
+	bool			cIsSend;
+
+	//	//클라이언트와 연결이 되어있는지 여부
+	bool			m_bIsConnect;
+
 //public:
-//	void 	InitializeConnection();
-//	bool 	CreateConnection(INITCONFIG &initConfig);
-//	bool 	CloseConnection(bool bForce = FALSE);
+	//void 	InitializeConnection();
+
+	bool 	CreateConnection(INITCONFIG &initConfig);
+	bool 	CloseConnection(bool bForce = FALSE);
 //	bool	ConnectTo(char* szIp, unsigned short usPort);
 //	bool 	BindIOCP(HANDLE& hIOCP);
 //	bool 	RecvPost(char* pNext, DWORD dwRemain);
-//	bool 	SendPost(int nSendSize);
+	bool 	SendPost(int nSendSize);
 //	void 	SetSocket(SOCKET socket) { m_socket = socket; }
 //	SOCKET 	GetSocket() { return m_socket; }
-//	bool 	BindAcceptExSock();
-//	char* 	PrepareSendPacket(int slen);
+	bool 	BindAcceptExSock();
+	char* 	PrepareSendPacket(int len);
+
+
 //	bool 	ReleaseRecvPacket();
 //	bool 	ReleaseSendPacket(LPOVERLAPPED_EX lpSendOverlappedEx = NULL);
 //
@@ -91,7 +122,7 @@ public:
 //	int			m_nSendBufSize;
 //
 //	BYTE		m_szIp[MAX_IP_LENGTH];
-//	int			m_nIndex;
+//
 //
 //	Monitor	m_csConnection;
 //

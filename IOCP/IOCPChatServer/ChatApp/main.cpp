@@ -1,8 +1,9 @@
 
-#include "../IOCPChatServer/preCompile.h"
-#pragma comment(lib,"NetLibrary.lib")
+//#include "../IOCPChatServer/preCompile.h"
+//#pragma comment(lib,"NetLibrary.lib")
 
-
+#include "Connection.h"
+#include "IOCPChatServer.h"
 
 
 
@@ -25,6 +26,8 @@ int main()
 		cout << "server start success ...." << endl;
 
 
+	Connection* conn = new Connection();
+	conn->CreateConnection(config, 1);
 
 
 

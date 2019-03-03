@@ -25,6 +25,7 @@ private:
 	bool CreateIOCP();				  // workeriocp processiocp 积己秦淋
 	bool CreateWorkerThread();		  // worker thread 积己
 	bool CreateProcessThread();
+	bool CreateListenSocket();
 
 
 protected:

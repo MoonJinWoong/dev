@@ -6,9 +6,27 @@
 const int MAX_WORKER_THREAD = 8;
 const int MAX_PROCESS_TRHEAD = 1;
 
+
+const int PACKET_SIZE_LENGTH = 4;	//
+
 // CircleBuffersize 
 const int MAX_CIRCLE_BUFFER_SIZE = 1024 * 100;
 
+const BYTE MAX_IP_LENGTH = 20;
+
+enum OperationType
+{
+	//Work IOCP operation
+	OP_SEND,
+	OP_RECV,
+	OP_ACCEPT,
+
+
+	//Process IOCP operation
+	OP_CLOSE,		//접속 종료처리
+	OP_RECVPACKET,	//순서 성 패킷 처리
+	OP_SYSTEM		//시스템 메시지 처리
+};
 
 typedef struct INITCONFIG
 {
@@ -33,3 +51,20 @@ typedef struct INITCONFIG
 	DWORD				sProcessThreadCnt;	//패킷처리를 위한 thread 개수
 
 }INITCONFIG;
+
+
+typedef struct OVERLAPPED_EX
+{
+	WSAOVERLAPPED			sOverlapped;
+	WSABUF					sWsaBuf;
+	int						sTotalBytes;
+	DWORD					sDwRemain;
+	char*					slpSocketMsg;	// Send/Recv Buffer.
+	OperationType			sOperation;
+	void*					slpConnection;
+	OVERLAPPED_EX(void* lpConnection)
+	{
+		ZeroMemory(this, sizeof(OVERLAPPED_EX));
+		slpConnection = lpConnection;
+	}
+} OVERLAPPED_EX, *LPOVERLAPPED_EX;
