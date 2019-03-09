@@ -19,17 +19,13 @@ int main()
 	initconfig.sProcessThreadCnt = 1;
 
 
-
+	
 
 
 	// 객체 생성 및 초기화
 	IocpServer* chatserver = new IocpServer();
 	if (chatserver->start(initconfig))
 		cout << "********** server init success **********" << endl;
-
-
-
-
 
 
 	// accept thread 만들고 돌린다.

@@ -1,154 +1,100 @@
-
 #include "preCompile.h"
 
-const int BUFSIZE = 512;
+//#pragma comment(lib, "Ws2_32.lib")
 
 
-SOCKET g_mysocket;
-WSABUF	send_wsabuf;
-char 	send_buffer[BUFSIZE];
-WSABUF	recv_wsabuf;
-char	recv_buffer[BUFSIZE];
-char	packet_buffer[BUFSIZE];
-DWORD		in_packet_size = 0;
-int		saved_packet_size = 0;
-int		g_myid;
 
-HANDLE mainhandle;
 
-const char *escape = "/quit";	// 종료 명령
-char userID[10];		// 유저ID
-char line[30], chatdata[31];
-struct sockaddr_in server_addr;
 
-// 함수 몸체 정의
-void ProcessPacket(char *ptr);
-DWORD WINAPI ProcessInputSend(LPVOID arg);
-
-void Init()
+int main(void)
 {
-	WSADATA	wsadata;
-	WSAStartup(MAKEWORD(2, 2), &wsadata);
-
-	g_mysocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
-
-	SOCKADDR_IN ServerAddr;
-	ZeroMemory(&ServerAddr, sizeof(SOCKADDR_IN));
-	ServerAddr.sin_family = AF_INET;
-	ServerAddr.sin_port = htons(SERVER_PORT);
-	ServerAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-	int Result = WSAConnect(g_mysocket, (sockaddr *)&ServerAddr, sizeof(ServerAddr), NULL, NULL, NULL, NULL);
-
-}
-
-void ReadPacket(SOCKET sock)
-{
-	DWORD iobyte, ioflag = 0;
-
-	int ret = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
-	if (ret) {
-		int err_code = WSAGetLastError();
-		printf("Recv Error [%d]\n", err_code);
-	}
-
-	BYTE *ptr = reinterpret_cast<BYTE *>(recv_buffer);
-
-	while (0 != iobyte) {
-		if (0 == in_packet_size) in_packet_size = ptr[0];
-		if (iobyte + saved_packet_size >= in_packet_size) {
-			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
-			ProcessPacket(packet_buffer);
-			ptr += in_packet_size - saved_packet_size;
-			iobyte -= in_packet_size - saved_packet_size;
-			in_packet_size = 0;
-			saved_packet_size = 0;
-		}
-		else {
-			memcpy(packet_buffer + saved_packet_size, ptr, iobyte);
-			saved_packet_size += iobyte;
-			iobyte = 0;
-		}
-	}
-}
-void ProcessPacket(char *ptr)
-{
-	static bool first_time = true;
-	switch (ptr[1])
+	// Winsock Start - winsock.dll 로드
+	WSADATA WSAData;
+	if (WSAStartup(MAKEWORD(2, 0), &WSAData) != 0)
 	{
-	case SC_MSG:
+		printf("Error - Can not load 'winsock.dll' file\n");
+		return 1;
+	}
+
+	// 1. 소켓생성
+	SOCKET listenSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (listenSocket == INVALID_SOCKET)
 	{
-		//	printf("SC_PUT_PLAYER 호출되니......\n");
-		sc_packet_msg *my_packet = reinterpret_cast<sc_packet_msg *>(ptr);
-		cout << "recv msg : " << my_packet << endl;
-		break;
+		printf("Error - Invalid socket\n");
+		return 1;
+	}
+
+	// 서버정보 객체설정
+	SOCKADDR_IN serverAddr;
+	memset(&serverAddr, 0, sizeof(SOCKADDR_IN));
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons(SERVER_PORT);
+	serverAddr.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+
+	// 2. 연결요청
+	if (connect(listenSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	{
+		printf("Error - Fail to connect\n");
+		// 4. 소켓종료
+		closesocket(listenSocket);
+		// Winsock End
+		WSACleanup();
+		return 1;
+	}
+	else
+	{
+		printf("Server Connected\n* Enter Message\n->");
 	}
 
 
-	
-	default:
-		printf("Unknown PACKET type [%d]\n", ptr[1]);
-	}
-}
 
-
-int main()
-{
-	
-	Init();
-
-	
-	//  send를 위한스레드 생성
-	HANDLE hThread;
-	DWORD ThreadId;
-
-
-/*	hThread = CreateThread(NULL, 0, ProcessInputSend, 0, 0, &ThreadId);
-	if (hThread == NULL) {
-		printf("fail make thread\n");
-	*/
-
-	//while (1) {
-
-	//	ReadPacket(g_mysocket);
-	//}
+	WSAOVERLAPPED_EX *socketInfo;
+	DWORD sendBytes;
+	DWORD receiveBytes;
+	DWORD flags;
 
 	while (1)
 	{
-
-		cout << "보낼 데이터 - ";
-		if (fgets(chatdata, BUFSIZE+1, stdin) == NULL)
-			break;
-			
-		int len = strlen(chatdata);
-		if (chatdata[len - 1] == '\n') chatdata[len - 1] = '\0';
-		if (strlen(chatdata) == 0)
-			break;
-
-		// 여기서부터 다시 
-		//ret = send(g_mysocket,chatdata
-			
-
-	}
-
-
-}
-DWORD WINAPI ProcessInputSend(LPVOID arg)
-{
-	while (TRUE) {
-		if (fgets(chatdata, 30, stdin)) {		// 스트림 read
-			chatdata[strlen(chatdata) - 1] = '\0';
-			sprintf(line, "\n[%s] : %s", userID, chatdata);		// 버퍼의 첫 내용을 출력
-			if (send(g_mysocket, line, strlen(line), 0) < 0) {
-				printf("Write fail\n");
-			}
-
-			if (strstr(line, escape) != 0) {		// 종료명령어
-				printf("Bye\n");
-				closesocket(g_mysocket);
-				exit(0);
+		// 메시지 입력
+		char messageBuffer[MAX_BUFF_SIZE];
+		int i, bufferLen;
+		for (i = 0; 1; i++)
+		{
+			messageBuffer[i] = getchar();
+			if (messageBuffer[i] == '\n')
+			{
+				messageBuffer[i++] = '\0';
+				break;
 			}
 		}
+		bufferLen = i;
+
+		socketInfo = (WSAOVERLAPPED_EX *)malloc(sizeof(WSAOVERLAPPED_EX));
+		memset((void *)socketInfo, 0x00, sizeof(WSAOVERLAPPED_EX));
+		socketInfo->wsabuf.len = bufferLen;
+		socketInfo->wsabuf.buf = messageBuffer;
+		//socketInfo->event_type = E_SEND;
+
+		// 3-1. 데이터 쓰기
+		int sendBytes = send(listenSocket, messageBuffer, bufferLen, 0);
+		if (sendBytes > 0)
+		{
+			printf("TRACE - Send message : %s (%d bytes)\n", messageBuffer, sendBytes);
+			// 3-2. 데이터 읽기
+			int receiveBytes = recv(listenSocket, messageBuffer, MAX_BUFF_SIZE, 0);
+			if (receiveBytes > 0)
+			{
+				printf("TRACE - Receive message : %s (%d bytes)\n* Enter Message\n->", messageBuffer, receiveBytes);
+			}
+		}
+
 	}
+
+	// 4. 소켓종료
+	closesocket(listenSocket);
+
+	// Winsock End
+	WSACleanup();
+
 	return 0;
 }

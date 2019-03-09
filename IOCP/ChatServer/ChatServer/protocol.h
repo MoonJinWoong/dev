@@ -2,9 +2,9 @@
 
 const int SERVER_PORT =  9000;
 const int MAX_WORKER_THREAD = 2;
-const int MAX_BUFF_SIZE = 1024;
+const int MAX_BUFF_SIZE = 1024; // 패킷 크기
 const int MAX_PACKET_SIZE = 255;
-
+const int MAX_USER = 100;
 
 
 // Protocol ID
@@ -47,10 +47,26 @@ struct WSAOVERLAPPED_EX
 {
 	WSAOVERLAPPED over;
 	WSABUF wsabuf;
-	unsigned char IOCP_buf[MAX_BUFF_SIZE];
+	char IOCP_buf[MAX_BUFF_SIZE];
 	EVENTTYPE event_type;
 };
 
+
+
+
+//클라이언트 정보를 담기위한 구조체
+struct sClientInfo {
+	SOCKET				sSocketClient;			//Cliet와 연결되는 소켓
+	WSAOVERLAPPED_EX	sRecvOverlappedEx;	//RECV Overlapped I/O작업을 위한 변수
+	WSAOVERLAPPED_EX	sSendOverlappedEx;	//SEND Overlapped I/O작업을 위한 변수
+	//생성자에서 멤버 변수들을 초기화
+	sClientInfo()
+	{
+		ZeroMemory(&sRecvOverlappedEx, sizeof(WSAOVERLAPPED_EX));
+		ZeroMemory(&sSendOverlappedEx, sizeof(WSAOVERLAPPED_EX));
+		sSocketClient = INVALID_SOCKET;
+	}
+};
 
 
 #pragma pack (push, 1)    // 구조체 사이즈 맞춤
