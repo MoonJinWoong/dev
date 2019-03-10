@@ -11,6 +11,8 @@ IocpServer::IocpServer()
 {
 	cClientInfo = new sClientInfo[MAX_USER];
 	cClientCnt = 0;
+	cIOCP = INVALID_HANDLE_VALUE;
+	//cWorkerIOCP = INVALID_HANDLE_VALUE;
 }
 IocpServer::~IocpServer()
 {
@@ -54,7 +56,7 @@ bool IocpServer::InitializeSocket(INITCONFIG initconfig)
 	for (DWORD i = 0; i < cWorkerThreadCount; i++)
 		cWorkerThread[i] = INVALID_HANDLE_VALUE;
 
-	cWorkerIOCP = INVALID_HANDLE_VALUE;
+	
 
 	// 네트워크 초기화 
 	WSADATA		WsaData;
@@ -65,8 +67,8 @@ bool IocpServer::InitializeSocket(INITCONFIG initconfig)
 		return false;
 	}
 
-	//iocp 커널객체 생성
-	cWorkerIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, NULL, 0);
+	//iocp 워커 생성
+	//cWorkerIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, NULL, 0);
 
 	// 오버랩드 IO 생성
 	cSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -155,66 +157,29 @@ void IocpServer::WorkerThread()
 
 	while (true)
 	{
-		cout << "워커 대기중..." << endl;
 		//스레드 풀 생성. 큐에서 작업 완료된 IO가 있으면 읽어 들인다. 그전까지는 대기
-		isSuccess = GetQueuedCompletionStatus(cWorkerIOCP, &dwIoSize,(PULONG_PTR)&cClientInfo,
+		isSuccess = GetQueuedCompletionStatus(cIOCP, &dwIoSize,(PULONG_PTR)&cClientInfo,
 			reinterpret_cast<LPWSAOVERLAPPED *>(&lpOverlapped), INFINITE);
-		cout << "여기 오니...." << endl;
 		
+		//cout << (PULONG_PTR)&cClientInfo << endl;
 		if (isSuccess == false) cout << "GQCS failed...!" << endl;
 
+		
 		WSAOVERLAPPED_EX* recvOverlappedEx = (WSAOVERLAPPED_EX*)lpOverlapped;
+		
 		if (recvOverlappedEx->event_type == E_RECV)
 		{
 			recvOverlappedEx->IOCP_buf[dwIoSize] = NULL;
-			cout<<"send bytes :"<<dwIoSize<<
+			cout<<"recv bytes :"<<dwIoSize<<
 				  "   msg :"<< recvOverlappedEx->IOCP_buf<<endl;
-
+			
 
 			//클라이언트에 메세지를 에코한다.
-			SendMsg(getWorkerClient, recvOverlappedEx->IOCP_buf, dwIoSize);
-			BindRecv(getWorkerClient);
-			
-			
-			//int to_process = io_size;
-			//
-			//char *buf_ptr = client[cl].recv_over.IOCP_buf;
-			//unsigned char packet_buf[MAX_PACKET_SIZE];
-			//int psize = client[cl].curr_packet_size;
-			//int pr_size = client[cl].prev_recv_size;
-			//while (to_process != 0)
-			//{
-			//	if (psize == 0) psize = buf_ptr[0];
-			//	if (psize <= to_process + pr_size)
-			//	{
-			//		memcpy(packet_buf, client[cl].pakcet_buf, pr_size);
-			//		memcpy(packet_buf + pr_size, buf_ptr, psize - pr_size);
-			//		//cout << "프로세스 처리 전" << mClients[cl].x << "   " << mClients[cl].z << endl;
-			//		//mClients[cl].ProcessPakcet(cl,packet_buf,mClients[cl].exp,mClients[cl].npcLevel,mClients[cl].hp);
-			//		//cout << "프로세스 처리 후" << mClients[cl].x << "   " << mClients[cl].z << endl;
-			//		ProcessPacket(static_cast<int>(cl), packet_buf);
-			//		
-			//		to_process -= psize - pr_size; buf_ptr += psize - pr_size;
-			//		psize = 0; pr_size = 0;
-			//	}
-			//	else
-			//	{
-			//		memcpy(client[cl].pakcet_buf + pr_size, buf_ptr, to_process);
-			//		pr_size += to_process;
-			//		buf_ptr += to_process;
-			//		to_process = 0;
-			//	}
-			//}
+			int ret = SendMsg(cClientInfo, recvOverlappedEx->IOCP_buf, dwIoSize);
+			//cout << "eeeee    " << ret << endl;
 
-			//client[cl].curr_packet_size = psize;
-			//client[cl].prev_recv_size = pr_size;
-			//DWORD recvFlag = 0;
+			if (ret == false) cout << "Send Msg failed...!" << endl;
 
-			//int ret = WSARecv(client[cl].s, &client[cl].recv_over.wsabuf,
-			//	1, NULL, &recvFlag, &client[cl].recv_over.over, NULL);
-
-			//if (ret != 0)
-			//	cout << "WSARecv error....!!!!!" << endl;
 		}
 
 		//else if (pOver->event_type == E_SEND)
@@ -304,7 +269,7 @@ bool IocpServer::BindRecv(sClientInfo* recvClientInfo)
 		&dwFlag,
 		(LPWSAOVERLAPPED)&(recvClientInfo->sRecvOverlappedEx),
 		NULL);
-
+	cout << "WSARecv -" << nRet << endl;
 	//socket_error이면 client socket이 끊어진걸로 처리한다.
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
@@ -313,34 +278,23 @@ bool IocpServer::BindRecv(sClientInfo* recvClientInfo)
 	}
 	return true;
 }
-bool IocpServer::SendMsg(sClientInfo* sendClient, char* msg, int len)
+bool IocpServer::SendMsg(sClientInfo* client, char* msg, int len)
 {
-	DWORD dwRecvNumBytes = 0;
 
-	//전송될 메세지를 복사
-	memcpy(sendClient->sSendOverlappedEx.IOCP_buf, msg, len);
+	
+	WSAOVERLAPPED_EX *send_over = new WSAOVERLAPPED_EX;
+	ZeroMemory(send_over, sizeof(*send_over));
+	send_over->event_type = E_SEND;
+	memcpy(send_over->IOCP_buf, msg, len);
+	send_over->wsabuf.buf = reinterpret_cast<CHAR *>(send_over->IOCP_buf);
+	send_over->wsabuf.len = len;
+	DWORD send_flag = 0;
+	int ret = WSASend(client->sSocketClient, &send_over->wsabuf, 1, NULL, send_flag, &send_over->over, NULL);
+	
+	if (ret != 0)
+		cout << "WSASend Failed...   err-" << GetLastError() << endl;
 
 
 
-	//Overlapped I/O을 위해 각 정보를 셋팅해 준다.
-	sendClient->sSendOverlappedEx.wsabuf.len = len;
-	sendClient->sSendOverlappedEx.wsabuf.buf =
-		sendClient->sSendOverlappedEx.IOCP_buf;
-	sendClient->sSendOverlappedEx.event_type = E_SEND;
-
-	int nRet = WSASend(sendClient->sSocketClient,
-		&(sendClient->sSendOverlappedEx.wsabuf),
-		1,
-		&dwRecvNumBytes,
-		0,
-		(LPWSAOVERLAPPED)&(sendClient->sSendOverlappedEx),
-		NULL);
-
-	//socket_error이면 client socket이 끊어진걸로 처리한다.
-	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
-	{
-		cout<<"SendMsg call is failed...! error:"<< WSAGetLastError()<<endl;
-		return false;
-	}
 	return true;
 }

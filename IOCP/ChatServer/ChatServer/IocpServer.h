@@ -19,7 +19,7 @@ public:
 	bool InitializeSocket(INITCONFIG initconfig);
 	bool BindAndIOPort(sClientInfo * getClientInfo);
 	bool BindRecv(sClientInfo* recvClientInfo);
-	bool SendMsg(sClientInfo*, char*msg, int len);
+	bool SendMsg(sClientInfo* client, char*msg, int len);
 		
 	void AcceptThread();
 	void WorkerThread();

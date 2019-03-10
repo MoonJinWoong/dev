@@ -4,7 +4,7 @@
 
 
 
-
+WSABUF recvbuf;
 
 int main(void)
 {
@@ -47,6 +47,9 @@ int main(void)
 	}
 
 
+	thread read_thread{ readThread };
+
+
 
 	WSAOVERLAPPED_EX *socketInfo;
 	DWORD sendBytes;
@@ -74,18 +77,16 @@ int main(void)
 		socketInfo->wsabuf.len = bufferLen;
 		socketInfo->wsabuf.buf = messageBuffer;
 		//socketInfo->event_type = E_SEND;
-
+		DWORD iobyte;
 		// 3-1. 데이터 쓰기
-		int sendBytes = send(listenSocket, messageBuffer, bufferLen, 0);
-		if (sendBytes > 0)
+		//int sendBytes = send(listenSocket, messageBuffer, bufferLen, 0);
+
+		int ret2 = WSASend(listenSocket, &socketInfo->wsabuf, 1, &iobyte, 0, NULL, NULL);
+		printf("send byte -%d\n", iobyte);
+		if (iobyte > 0)
 		{
-			printf("TRACE - Send message : %s (%d bytes)\n", messageBuffer, sendBytes);
-			// 3-2. 데이터 읽기
-			int receiveBytes = recv(listenSocket, messageBuffer, MAX_BUFF_SIZE, 0);
-			if (receiveBytes > 0)
-			{
-				printf("TRACE - Receive message : %s (%d bytes)\n* Enter Message\n->", messageBuffer, receiveBytes);
-			}
+			printf("TRACE - Send message : %s (%d bytes)\n", messageBuffer, iobyte);
+			
 		}
 
 	}
@@ -97,4 +98,12 @@ int main(void)
 	WSACleanup();
 
 	return 0;
+}
+
+void readThread()
+{
+	while (1)
+	{
+		
+	}
 }

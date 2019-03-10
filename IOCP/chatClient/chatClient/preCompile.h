@@ -30,7 +30,7 @@ const int  SC_MSG = 1;
 #include <winsock.h>
 #include <thread>
 #include <Windows.h>
-
+#include <thread>
 
 using namespace std;
 
@@ -84,3 +84,5 @@ struct sc_packet_msg
 
 #pragma pack(pop)
 
+
+void readThread();
