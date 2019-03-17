@@ -1,5 +1,0 @@
-﻿  main.cpp
-c:\users\dndsu\desktop\dev\iocp\chatclient\chatclient\main.cpp(55): warning C4101: 'sendBytes' :참조되지 않은 지역 변수입니다.
-c:\users\dndsu\desktop\dev\iocp\chatclient\chatclient\main.cpp(56): warning C4101: 'receiveBytes' :참조되지 않은 지역 변수입니다.
-c:\users\dndsu\desktop\dev\iocp\chatclient\chatclient\main.cpp(57): warning C4101: 'flags' :참조되지 않은 지역 변수입니다.
-  chatClient.vcxproj -> C:\Users\dndsu\Desktop\dev\IOCP\chatClient\x64\Debug\chatClient.exe
