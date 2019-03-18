@@ -15,7 +15,9 @@ private:
 	HANDLE		cAcceptThreadHandle;
 
 	SOCKET		cListenSock;       // BindAndListen에서 해줌
-	SOCKET		cClientSock;       // 통신에 사용될 소켓
+	SOCKET		cServerSock;       // 통신에 사용될 소켓
+	SOCKET		cClientSock[MAX_USER];
+
 	SOCKADDR_IN	cClientaddr;
 
 	vector<thread *> workerThreads;

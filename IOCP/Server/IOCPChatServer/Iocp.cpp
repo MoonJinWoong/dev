@@ -1,5 +1,6 @@
 #include "preCompile.h"
 
+Connection Clients[MAX_USER];
 
 Iocp::Iocp() {}
 Iocp::~Iocp() {}
@@ -12,7 +13,10 @@ BOOL Iocp::StartServer()
 }
 BOOL Iocp::InitIOCP(const INITCONFIG & initconfig)
 {
-	
+	for (int i = 0; i < MAX_USER; i++)
+		Clients[i].setIsConnected(false);
+
+
 	cPort = initconfig.nServerPort;
 	cSendBufSize = initconfig.nSendBufSize;
 	cRecvBufSize = initconfig.nRecvBufSize;
@@ -85,18 +89,19 @@ void Iocp::CreateThreads()
 void Iocp::WorkerThread()
 {
 	int retval;
-	
+		unsigned long long  client_id = -1;	
 
 	while (1) {
 		// 비동기 입출력 완료 기다리기
 		DWORD cbTransferred;
 		//SOCKET client_sock;
 		EX_OVERLAPPED *ptr;
-		
+
 		
 		retval = GetQueuedCompletionStatus(cIocpHandle, &cbTransferred,
-			(PULONG_PTR)&cClientSock, (LPOVERLAPPED *)&ptr, INFINITE);
+			&client_id, (LPOVERLAPPED *)&ptr, INFINITE);
 
+		cout << "client ID - " << client_id << endl;
 		// 클라이언트 정보 얻기
 		//SOCKADDR_IN clientaddr;
 		int addrlen = sizeof(cClientaddr);
@@ -111,8 +116,9 @@ void Iocp::WorkerThread()
 				cout << "Overlapped error -" << endl;
 			}
 			closesocket(ptr->sock);
-			printf("[TCP 서버] 클라이언트 종료: IP 주소=%s, 포트 번호=%d\n",
-				inet_ntoa(cClientaddr.sin_addr), ntohs(cClientaddr.sin_port));
+			cout << "[TCP 서버] 클라이언트 종료:  IP 주소=" << inet_ntoa(cClientaddr.sin_addr)
+				<< "포트 번호=" << ntohs(cClientaddr.sin_port) << endl;
+			
 			delete ptr;
 			continue;
 		}
@@ -123,8 +129,9 @@ void Iocp::WorkerThread()
 			ptr->sendbytes = 0;
 			// 받은 데이터 출력
 			ptr->buf[ptr->recvbytes] = '\0';
-			printf("[TCP/%s:%d] %s\n", inet_ntoa(cClientaddr.sin_addr),
-				ntohs(cClientaddr.sin_port), ptr->buf);
+			cout << "[TCP/" << inet_ntoa(cClientaddr.sin_addr) 
+				<< ":" << ntohs(cClientaddr.sin_port)<<","<<ptr->buf << "]" << endl;
+				
 		}
 		else {
 			ptr->sendbytes += cbTransferred;
@@ -176,29 +183,41 @@ void Iocp::AcceptThread()
 		
 		while (1) {
 			// 접속 class 완성하고 WSAAccept와 test 해야함
-			cClientSock = accept(cListenSock, (SOCKADDR *)&cClientaddr, &addrlen);
-			if (cClientSock == INVALID_SOCKET)
+			cServerSock = accept(cListenSock, (SOCKADDR *)&cClientaddr, &addrlen);
+			if (cServerSock == INVALID_SOCKET)
 				cout << "Accept error -" << WSAGetLastError() << endl;
 
 
 			cout << "TCP 서버] 클라이언트 접속: IP 주소=" << inet_ntoa(cClientaddr.sin_addr)
 				<< "  포트 번호=" << ntohs(cClientaddr.sin_port) << endl;
 
+			// 클라 고유 번호 부여
+			int new_client = -1;
+			for (int i = 0; i < MAX_USER; i++)
+			{
+				if (Clients[i].getIsConnected() == false)
+				{
+					Clients[i].setIsConnected(true);
+					new_client = i;
+					break;
+				}
+			}
+
 			
 			// 소켓과 입출력 완료 포트 연결
-			CreateIoCompletionPort((HANDLE)cClientSock, cIocpHandle, (ULONG_PTR)this, 0);
+			CreateIoCompletionPort((HANDLE)cServerSock, cIocpHandle, new_client, 0);
 
 			// 소켓 정보 구조체 할당
 			EX_OVERLAPPED *ptr = new EX_OVERLAPPED;
 			ZeroMemory(&ptr->overlapped, sizeof(ptr->overlapped));
-			ptr->sock = cClientSock;
+			ptr->sock = cServerSock;
 			ptr->recvbytes = ptr->sendbytes = 0;
 			ptr->wsabuf.buf = ptr->buf;
 			ptr->wsabuf.len = BUFSIZE;
 
 			// 비동기 입출력 시작
 			flags = 0;
-			int retval = WSARecv(cClientSock, &ptr->wsabuf, 1, &recvbytes,
+			int retval = WSARecv(cServerSock, &ptr->wsabuf, 1, &recvbytes,
 				&flags, &ptr->overlapped, NULL);
 			if (retval == SOCKET_ERROR) {
 				if (WSAGetLastError() != ERROR_IO_PENDING) {
@@ -210,8 +229,11 @@ void Iocp::AcceptThread()
 
 void Iocp::CloseServer()
 {
+	for (int i = 0; i < MAX_USER; i++)
+		closesocket(cClientSock[i]);
 
-	closesocket(cClientSock);
+	closesocket(cServerSock);
 	closesocket(cListenSock);
+
 	WSACleanup();
 }

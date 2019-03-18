@@ -3,7 +3,7 @@
 
 const int SERVERPORT	= 9000;
 const int BUFSIZE		= 512;
-
+const int MAX_USER		= 100;
 
 typedef struct _INITCONFIG
 {
@@ -39,5 +39,5 @@ struct EX_OVERLAPPED
 	WSABUF wsabuf;
 };
 
-//SOCKET client_sock;
-//EX_OVERLAPPED *client_over[100];
+
+
