@@ -149,24 +149,16 @@ void Iocp::WorkerThread()
 			DWORD sendbytes;
 
 		
-			//for (int i = 0; i < MAX_USER; i++)
-			//{
-			//	if (Clients[i].getIsConnected() == true)
-			//	{
 					retval = WSASend(sClient[client_id].sock, &ptr->wsabuf, 1,
 						&sendbytes, 0, &sClient[client_id].overlapped, NULL);
 
-								if (retval == SOCKET_ERROR) {
-				if (WSAGetLastError() != WSA_IO_PENDING) {
+			if (retval == SOCKET_ERROR) 
+			{
+				if (WSAGetLastError() != WSA_IO_PENDING) 
+				{
 					cout << "WSASend error -" << WSAGetLastError() << endl;
 				}
 			}
-			//	}
-			//}
-		/*	retval = WSASend(sClient[client_id].sock, &sClient[client_id].wsabuf, 1,
-				&sendbytes, 0, &sClient[client_id].overlapped, NULL);*/
-
-
 		}
 		else {
 			ptr->recvbytes = 0;
