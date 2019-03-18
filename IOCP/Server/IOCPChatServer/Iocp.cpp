@@ -1,6 +1,8 @@
 #include "preCompile.h"
 
 Connection Clients[MAX_USER];
+EX_OVERLAPPED sClient[MAX_USER];
+
 
 Iocp::Iocp() {}
 Iocp::~Iocp() {}
@@ -130,8 +132,7 @@ void Iocp::WorkerThread()
 			// 받은 데이터 출력
 			ptr->buf[ptr->recvbytes] = '\0';
 			cout << "[TCP/" << inet_ntoa(cClientaddr.sin_addr) 
-				<< ":" << ntohs(cClientaddr.sin_port)<<","<<ptr->buf << "]" << endl;
-				
+				<< ":" << ntohs(cClientaddr.sin_port)<<","<<ptr->buf << "]" << endl;				
 		}
 		else {
 			ptr->sendbytes += cbTransferred;
@@ -142,15 +143,30 @@ void Iocp::WorkerThread()
 			ZeroMemory(&ptr->overlapped, sizeof(ptr->overlapped));
 			ptr->wsabuf.buf = ptr->buf + ptr->sendbytes;
 			ptr->wsabuf.len = ptr->recvbytes - ptr->sendbytes;
-
+			
+			sClient[client_id].wsabuf.buf = ptr->wsabuf.buf;
+			sClient[client_id].wsabuf.len = ptr->wsabuf.len;
 			DWORD sendbytes;
-			retval = WSASend(ptr->sock, &ptr->wsabuf, 1,
-				&sendbytes, 0, &ptr->overlapped, NULL);
-			if (retval == SOCKET_ERROR) {
+
+		
+			//for (int i = 0; i < MAX_USER; i++)
+			//{
+			//	if (Clients[i].getIsConnected() == true)
+			//	{
+					retval = WSASend(sClient[client_id].sock, &ptr->wsabuf, 1,
+						&sendbytes, 0, &sClient[client_id].overlapped, NULL);
+
+								if (retval == SOCKET_ERROR) {
 				if (WSAGetLastError() != WSA_IO_PENDING) {
 					cout << "WSASend error -" << WSAGetLastError() << endl;
 				}
 			}
+			//	}
+			//}
+		/*	retval = WSASend(sClient[client_id].sock, &sClient[client_id].wsabuf, 1,
+				&sendbytes, 0, &sClient[client_id].overlapped, NULL);*/
+
+
 		}
 		else {
 			ptr->recvbytes = 0;
@@ -162,8 +178,12 @@ void Iocp::WorkerThread()
 
 			DWORD recvbytes;
 			DWORD flags = 0;
-			retval = WSARecv(ptr->sock, &ptr->wsabuf, 1,
-				&recvbytes, &flags, &ptr->overlapped, NULL);
+
+			sClient[client_id].wsabuf.buf = ptr->wsabuf.buf;
+			sClient[client_id].wsabuf.len = ptr->wsabuf.len;
+
+			retval = WSARecv(sClient[client_id].sock, &sClient[client_id].wsabuf, 1,
+				&recvbytes, &flags, &sClient[client_id].overlapped, NULL);
 			if (retval == SOCKET_ERROR) {
 				if (WSAGetLastError() != WSA_IO_PENDING) {
 					cout << "WSARecv error -" << WSAGetLastError() << endl;
@@ -206,19 +226,21 @@ void Iocp::AcceptThread()
 			
 			// 소켓과 입출력 완료 포트 연결
 			CreateIoCompletionPort((HANDLE)cServerSock, cIocpHandle, new_client, 0);
-
+			
 			// 소켓 정보 구조체 할당
-			EX_OVERLAPPED *ptr = new EX_OVERLAPPED;
-			ZeroMemory(&ptr->overlapped, sizeof(ptr->overlapped));
-			ptr->sock = cServerSock;
-			ptr->recvbytes = ptr->sendbytes = 0;
-			ptr->wsabuf.buf = ptr->buf;
-			ptr->wsabuf.len = BUFSIZE;
+			//EX_OVERLAPPED *ptr = new EX_OVERLAPPED;
+			ZeroMemory(reinterpret_cast<char *>(&(sClient[new_client].overlapped))
+				, sizeof(sClient[new_client].overlapped));
+
+			sClient[new_client].sock = cServerSock;
+			sClient[new_client].recvbytes = sClient[new_client].sendbytes = 0;
+			sClient[new_client].wsabuf.buf = sClient[new_client].buf;
+			sClient[new_client].wsabuf.len = BUFSIZE;
 
 			// 비동기 입출력 시작
 			flags = 0;
-			int retval = WSARecv(cServerSock, &ptr->wsabuf, 1, &recvbytes,
-				&flags, &ptr->overlapped, NULL);
+			int retval = WSARecv(cServerSock, &sClient[new_client].wsabuf, 1, &recvbytes,
+				&flags, &sClient[new_client].overlapped, NULL);
 			if (retval == SOCKET_ERROR) {
 				if (WSAGetLastError() != ERROR_IO_PENDING) {
 					cout << "recv error -" << WSAGetLastError() << endl;

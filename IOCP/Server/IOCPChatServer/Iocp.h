@@ -22,6 +22,8 @@ private:
 
 	vector<thread *> workerThreads;
 
+	mutex criticalSection;
+
 public:
 	Iocp();
 	~Iocp();

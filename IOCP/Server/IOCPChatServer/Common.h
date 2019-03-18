@@ -20,6 +20,7 @@ typedef struct _INITCONFIG
 	int				nWorkerThreadCnt;	//i/o 처리를 위한 thread 개수
 	//int				nProcessThreadCnt;	//패킷처리를 위한 thread 개수
 
+
 	_INITCONFIG()
 	{
 		ZeroMemory(this, sizeof(INITCONFIG));
