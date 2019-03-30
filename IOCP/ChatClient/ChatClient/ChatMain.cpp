@@ -9,7 +9,7 @@
 #include <string.h>
 #include <Windows.h>
 #include <process.h>
-
+#include <mutex>
 
 
 #define BUF_SIZE 512
@@ -18,9 +18,13 @@
 unsigned WINAPI SendMsg(void* arg);//쓰레드 전송함수
 unsigned WINAPI RecvMsg(void* arg);//쓰레드 수신함수
 void ErrorHandling(char* msg);
+int recvn(SOCKET s, char* buf, int len, int flags);
 
-char name[NAME_SIZE] = "[DEFAULT]";
+char name[NAME_SIZE] = "RECV ->";
 char msg[BUF_SIZE];
+
+std::mutex lockObj;
+
 
 int main() {
 	WSADATA wsaData;
@@ -59,29 +63,43 @@ int main() {
 
 unsigned WINAPI SendMsg(void* arg) {//전송용 쓰레드함수
 	SOCKET sock = *((SOCKET*)arg);//서버용 소켓을 전달한다.
-	char nameMsg[NAME_SIZE + BUF_SIZE];
+	char nameMsg[BUF_SIZE];
 	while (1) {//반복
+		//ZeroMemory(nameMsg, sizeof(nameMsg));
 		fgets(msg, BUF_SIZE, stdin);//입력을 받는다.
 		if (!strcmp(msg, "q\n") || !strcmp(msg, "Q\n")) {//q를 입력하면 종료한다.
 			closesocket(sock);
 			exit(0);
 		}
-		sprintf(nameMsg, "%s %s", name, msg);//nameMsg에 메시지를 전달한다.
+		sprintf(nameMsg, "%s", msg);//nameMsg에 메시지를 전달한다.
+		
+		
+		lockObj.lock();
 		send(sock, nameMsg, strlen(nameMsg), 0);//nameMsg를 서버에게 전송한다.
+		printf("cli -> server ... send call\n");
+		lockObj.unlock();
 	}
 	return 0;
 }
 
 unsigned WINAPI RecvMsg(void* arg) {
 	SOCKET sock = *((SOCKET*)arg);//서버용 소켓을 전달한다.
-	char nameMsg[NAME_SIZE + BUF_SIZE];
-	int strLen;
+	char nameMsg[BUF_SIZE];
+	int strLen= 0;
 	while (1) {//반복
-		strLen = recv(sock, nameMsg, NAME_SIZE + BUF_SIZE - 1, 0);//서버로부터 메시지를 수신한다.
+		
+		//ZeroMemory(nameMsg, sizeof(nameMsg));
+		//lockObj.lock();
+		//strLen = recv(sock, nameMsg, BUF_SIZE - 1, 0);//서버로부터 메시지를 수신한다.
+		strLen = recvn(sock, nameMsg, BUF_SIZE - 1, 0);
+		//lockObj.unlock();
 		if (strLen == -1)
 			return -1;
+		printf("받은 메세지 - %s",nameMsg);
 		nameMsg[strLen] = 0;//문자열의 끝을 알리기 위해 설정
-		fputs(nameMsg, stdout);//자신의 콘솔에 받은 메시지를 출력한다.
+		
+		//fputs(nameMsg, stdout);//자신의 콘솔에 받은 메시지를 출력한다.
+		
 	}
 	return 0;
 }
@@ -90,6 +108,31 @@ void ErrorHandling(char* msg) {
 	fputs(msg, stderr);
 	fputc('\n', stderr);
 	exit(1);
+}
+
+int recvn(SOCKET s, char* buf, int len, int flags)
+{
+	int rcv;
+	char* ptr = buf;
+	int left = len;
+	while (left > 0)
+	{
+		rcv = recv(s, ptr, left, flags);
+		if (rcv == SOCKET_ERROR)
+
+		{
+			return SOCKET_ERROR;
+		}
+		else if (rcv == 0)
+		{
+			break;
+		}
+		left -= rcv;
+		ptr += rcv;
+	}
+
+	return (len - left);
+
 }
 
 

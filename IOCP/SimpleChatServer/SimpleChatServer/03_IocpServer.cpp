@@ -148,17 +148,9 @@ void IocpServer::WorkerThread()
 		over->IOCP_buf[MAX_BUFFER] = {};
 
 
+		//lockObj.lock();
 
-		DWORD send_flag = 0;
-		for (int i = 0; i < MAX_CLIENTS; i++)
-		{
-			if (user[i].isConnected == true)
-			{
-				WSASend(user[i].socket, &over->wsabuf, 1,
-					NULL, 0, NULL, NULL);
-			}
-		}
-
+		//lockObj.unlock();
 
 
 
@@ -169,7 +161,18 @@ void IocpServer::WorkerThread()
 		WSARecv(user[clientNum].socket,
 			&user[clientNum].recvOver.wsabuf, 1,
 			NULL, &recv_flag, &user[clientNum].recvOver.over, NULL);
-
+		
+		
+		DWORD send_flag = 0;
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (user[i].isConnected == true)
+			{
+				WSASend(user[i].socket, &over->wsabuf, 1,
+					NULL, 0, NULL, NULL);
+				cout << "Server -> Client Send ...!" << endl;
+			}
+		}
 
 		/*OverlappedEx * sendOver = nullptr;
 		ZeroMemory(&sendOver->over, sizeof(sendOver->over));

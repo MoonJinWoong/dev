@@ -17,7 +17,7 @@ public:
 	void CloseServer();
 	void DisConnect(int id);
 
-
+	mutex lockObj;
 	CLIENT		  * SocketInfo;		// 소켓 정보
 	SOCKET			cListenSocket;	// 서버 리슨 소켓
 	HANDLE			cIocpHandle;			// IOCP 객체 핸들
