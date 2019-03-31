@@ -1,5 +1,5 @@
 #pragma comment(lib,"x64/Debug/LogicLibrary")
-//#pragma comment(lib,"x64/Debug/NetworkLibrary")
+#pragma comment(lib,"x64/Debug/NetworkLibrary")
 #include "../LogicLibrary/LogicMain.h"
 
 
