@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{2E545000-90DB-43F4-832D-946462EEA0E9}</ProjectGuid>
-    <RootNamespace>SelectChatHost</RootNamespace>
+    <ProjectGuid>{8A9AB81D-C847-4175-8E34-B318EEBA31B2}</ProjectGuid>
+    <RootNamespace>SelectChatApp</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
