@@ -5,26 +5,32 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-//#include <vector>
-//#include <deque>
-//#include <unordered_map>
+#include <vector>
+#include <deque>
+#include <unordered_map>
 
 #include "NetworkFrame.h"
 
-namespace NetworkLayer
+namespace NetworkLib
 {
-	class SelectNetwork : public NetworkFrame
+	class SelectNetwork :public NetworkFrame
 	{
 	public:
 		SelectNetwork();
 		virtual ~SelectNetwork();
-		virtual bool Init(const ServerConfig& config);
+		virtual bool Init();
 
-		bool InitServerSocket();
-		//bool BindAndListen();
+	protected:
+		SOCKET m_ServerSockfd;
+		ServerConfig m_config;
+		fd_set m_Readfds;
 
-	private:
-		ServerConfig m_pConfig;
-		SOCKET mServerSock;
+		std::vector<ClientSession> m_ClientSessionPool;
+		std::deque<int> m_ClientSessionPoolIndex;
+	protected:
+		bool InitSocket();
+		bool BindAndListen(unsigned short port , int backlog);
+		int CreateSessionPool(const int maxClientCount);
+
 	};
 }

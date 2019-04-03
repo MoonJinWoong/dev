@@ -20,11 +20,10 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{A852EE52-C666-467B-9049-79BC87076668}</ProjectGuid>
+    <ProjectGuid>{7C81CE8B-FF8E-4345-A864-F3D5680FF2BA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Logic</RootNamespace>
+    <RootNamespace>LogicLayer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
-    <ProjectName>LogicLayer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

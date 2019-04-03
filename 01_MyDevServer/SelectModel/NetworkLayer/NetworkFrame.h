@@ -3,13 +3,13 @@
 #include "Defines.h"
 
 
-namespace NetworkLayer
+namespace NetworkLib
 {
 	class NetworkFrame
 	{
 	public:
 		NetworkFrame() {}
 		virtual ~NetworkFrame() {}
-		bool Init(const ServerConfig& config) { return 0; }
+		virtual bool Init() { return 0; }
 	};
 }
