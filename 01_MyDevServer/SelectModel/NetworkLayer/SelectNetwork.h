@@ -19,6 +19,8 @@ namespace NetworkLib
 		SelectNetwork();
 		virtual ~SelectNetwork();
 		virtual bool Init();
+		NET_ERROR_CODE SendData(const int sessionIndex, const short packetId
+			, const short size, const char* pMsg) override;
 
 	protected:
 		SOCKET m_ServerSockfd;

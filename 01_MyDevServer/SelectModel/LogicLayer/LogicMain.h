@@ -12,6 +12,9 @@ namespace NetworkLib
 
 namespace LogicLib
 {
+	class PlayerManager;
+
+
 	class LogicMain
 	{
 	public:
@@ -21,6 +24,7 @@ namespace LogicLib
 
 	private:
 		std::unique_ptr<NetworkLib::NetworkFrame> m_pNetwork;
-
+		std::unique_ptr<PlayerManager> m_pPlayerManager;
+		std::unique_ptr<LobbyManager> m_pLobbyManager;
 	};
 }

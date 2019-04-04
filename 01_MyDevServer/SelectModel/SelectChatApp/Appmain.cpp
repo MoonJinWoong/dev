@@ -1,7 +1,8 @@
-#pragma comment(lib,"Debug/LogicLayer.lib")
+//#pragma comment(lib,"Debug/LogicLayer.lib")
 
 #include <iostream>
 #include <thread>
+
 
 #include "../LogicLayer/LogicMain.h"
 

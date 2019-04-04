@@ -4,7 +4,7 @@ namespace NetworkLib
 {
 	struct ServerConfig
 	{
-		unsigned short Port;
+		unsigned short Port = 9000;
 		int BackLogCount;
 		int MaxClientCount;
 		int ExtraClientCount;  // 클라 짤라줄 변수 

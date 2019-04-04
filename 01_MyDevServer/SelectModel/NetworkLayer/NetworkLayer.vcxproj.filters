@@ -4,6 +4,7 @@
     <ClInclude Include="NetworkFrame.h" />
     <ClInclude Include="SelectNetwork.h" />
     <ClInclude Include="Defines.h" />
+    <ClInclude Include="NetworkError.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SelectNetwork.cpp" />
