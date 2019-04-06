@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Defines.h"
-
+#include "NetworkError.h"
 
 namespace NetworkLib
 {
@@ -10,6 +10,6 @@ namespace NetworkLib
 	public:
 		NetworkFrame() {}
 		virtual ~NetworkFrame() {}
-		virtual bool Init() { return 0; }
+		virtual NET_ERROR_CODE Init() { return NET_ERROR_CODE::NONE; }
 	};
 }

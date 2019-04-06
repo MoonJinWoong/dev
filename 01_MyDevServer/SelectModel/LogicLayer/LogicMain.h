@@ -13,7 +13,7 @@ namespace NetworkLib
 namespace LogicLib
 {
 	class PlayerManager;
-
+	class LobbyManager;
 
 	class LogicMain
 	{

@@ -7,18 +7,16 @@ namespace NetworkLib
 	class SelectNetwork;
 }
 
-
-
 namespace LogicLib
 {
 	struct LobbyManagerConfig
 	{
-		int MaxLobbyCount;
-		int MaxLobbyUserCount;
-		int MaxRoomCountByLobby;
-		int MaxRoomUserCount;
-	};
+		int MaxLobbyCount = 2;
+		int MaxLobbyUserCount = 50;
+		int MaxRoomCountByLobby = 20;
+		int MaxRoomUserCount = 4;
 
+	};
 	struct LobbySmallInfo
 	{
 		short Num;
@@ -27,6 +25,7 @@ namespace LogicLib
 
 	class Lobby;
 
+
 	class LobbyManager
 	{
 		using TcpNet = NetworkLib::NetworkFrame;
@@ -34,23 +33,17 @@ namespace LogicLib
 
 	public:
 		LobbyManager();
-		virtual ~LobbyManager();
+		~LobbyManager();
+		void Init(TcpNet* pNetwork);
 
-		void Init(const LobbyManagerConfig config, TcpNet* pNetwork);
-
-		Lobby* GetLobby(short lobbyId);
-
-
-	public:
-		void SendLobbyListInfo(const int sessionIndex);
-
-
-
-
-
+		LobbyManagerConfig m_lobbyMgr;
 	private:
+		
 		TcpNet* m_pRefNetwork;
+
 		std::vector<Lobby> m_LobbyList;
+
+	protected:
 
 	};
 }

@@ -18,9 +18,9 @@ namespace NetworkLib
 	public:
 		SelectNetwork();
 		virtual ~SelectNetwork();
-		virtual bool Init();
-		NET_ERROR_CODE SendData(const int sessionIndex, const short packetId
-			, const short size, const char* pMsg) override;
+		virtual NET_ERROR_CODE Init();
+		//NET_ERROR_CODE SendData(const int sessionIndex, const short packetId
+		//	, const short size, const char* pMsg) override;
 
 	protected:
 		SOCKET m_ServerSockfd;
@@ -30,8 +30,8 @@ namespace NetworkLib
 		std::vector<ClientSession> m_ClientSessionPool;
 		std::deque<int> m_ClientSessionPoolIndex;
 	protected:
-		bool InitSocket();
-		bool BindAndListen(unsigned short port , int backlog);
+		NET_ERROR_CODE InitSocket();
+		NET_ERROR_CODE BindAndListen(unsigned short port , int backlog);
 		int CreateSessionPool(const int maxClientCount);
 
 	};

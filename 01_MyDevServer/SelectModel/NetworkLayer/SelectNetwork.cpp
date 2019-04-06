@@ -18,7 +18,7 @@ namespace NetworkLib
 	}
 
 	 SelectNetwork::~SelectNetwork(){}
-	 bool SelectNetwork::Init()
+	 NET_ERROR_CODE SelectNetwork::Init()
 	 {
 		 // 1. socket 초기화
 		 // 2. bind and listen select를위한 FDSET 세팅  
@@ -26,11 +26,12 @@ namespace NetworkLib
 
 
 		 auto ret = InitSocket();
-		 if (ret < 0) return false;
+		 if (ret != NET_ERROR_CODE::NONE) 
+			 return ret;
 
-		 bool bindListenRet = BindAndListen(m_config.Port, m_config.BackLogCount);
-		 if (bindListenRet == false)
-			 return false;
+		 NET_ERROR_CODE bindListenRet = BindAndListen(m_config.Port, m_config.BackLogCount);
+		 if (bindListenRet != NET_ERROR_CODE::NONE)
+			 return bindListenRet;
 		 
 		 FD_ZERO(&m_Readfds);
 		 FD_SET(m_ServerSockfd, &m_Readfds);
@@ -39,9 +40,9 @@ namespace NetworkLib
 			 CreateSessionPool(m_config.MaxClientCount + m_config.ExtraClientCount);
 		 std::cout << "SessionPoolSize : " << SessionPoolSize << std::endl;
 		 
-		 return true;
+		 return NET_ERROR_CODE::NONE;
 	 }
-	 bool SelectNetwork::InitSocket()
+	 NET_ERROR_CODE SelectNetwork::InitSocket()
 	 {
 		 WORD version = MAKEWORD(2, 2);
 		 WSADATA wsaData;
@@ -49,15 +50,15 @@ namespace NetworkLib
 
 		 m_ServerSockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 		 if (m_ServerSockfd < 0)
-			 return false;
+			 return NET_ERROR_CODE::SERVER_SOCKET_CREATE_FAIL;
 		 
 		 auto n = 1;
 		 if (setsockopt(m_ServerSockfd, SOL_SOCKET, SO_REUSEADDR, (char*)&n, sizeof(n)) < 0)
-			 return false;
+			 return  NET_ERROR_CODE::SERVER_SOCKET_SO_REUSEADDR_FAIL;
 		 
-		 return true;
+		 return  NET_ERROR_CODE::NONE;
 	 }
-	 bool SelectNetwork::BindAndListen(unsigned short port, int backlog)
+	 NET_ERROR_CODE SelectNetwork::BindAndListen(unsigned short port, int backlog)
 	 {
 		 SOCKADDR_IN server_addr;
 		 ZeroMemory(&server_addr, sizeof(server_addr));
@@ -66,26 +67,18 @@ namespace NetworkLib
 		 server_addr.sin_port = htons(port);
 
 		 if (bind(m_ServerSockfd, (SOCKADDR*)&server_addr, sizeof(server_addr)) < 0)
-		 {
-			 std::cout << "bind fail...uu";
-			 return false;
-		 }
+			 return NET_ERROR_CODE::SERVER_SOCKET_BIND_FAIL;
+		 
 
 		 unsigned long mode = 1;
 		 if (ioctlsocket(m_ServerSockfd, FIONBIO, &mode) == SOCKET_ERROR)
-		 {
-			 std::cout << " After Bind ... Async socket change failed..";
-			 return false;
-		 }
+			 return NET_ERROR_CODE::SERVER_SOCKET_FIONBIO_FAIL;
 
 		 if (listen(m_ServerSockfd, backlog) == SOCKET_ERROR)
-		 {
-			 std::cout << "listen failed...";
-			 return false;
-		 }
+			 return NET_ERROR_CODE::SERVER_SOCKET_LISTEN_FAIL;
 
 		 
-		 return true;
+		 return NET_ERROR_CODE::NONE;
 	 }
 	 int  SelectNetwork::CreateSessionPool(const int maxClientCount)
 	 {

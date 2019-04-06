@@ -3,18 +3,12 @@
   <ItemGroup>
     <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="PlayerManager.cpp" />
-    <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="LobbyManager.cpp" />
+    <ClCompile Include="Lobby.cpp" />
     <ClCompile Include="Room.cpp" />
-    <ClCompile Include="Game.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
-    <ClInclude Include="PlayerManager.h" />
-    <ClInclude Include="Player.h" />
-    <ClInclude Include="Lobby.h" />
-    <ClInclude Include="LobbyManager.h" />
-    <ClInclude Include="Room.h" />
     <ClInclude Include="Packet.h">
       <Filter>Common</Filter>
     </ClInclude>
@@ -24,7 +18,11 @@
     <ClInclude Include="ErrorSet.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="Game.h" />
+    <ClInclude Include="PlayerManager.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="LobbyManager.h" />
+    <ClInclude Include="Lobby.h" />
+    <ClInclude Include="Room.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">

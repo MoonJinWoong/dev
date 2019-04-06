@@ -25,11 +25,7 @@ namespace LogicLib
 		m_pPlayerManager->Init(2000);
 
 		m_pLobbyManager = std::make_unique<LobbyManager>();
-		m_pLobbyManager->Init({ m_pServerConfig->MaxLobbyCount,
-							m_pServerConfig->MaxLobbyUserCount,
-							m_pServerConfig->MaxRoomCountByLobby,
-							m_pServerConfig->MaxRoomUserCount },
-			m_pNetwork.get());
+		m_pLobbyManager->Init(m_pNetwork.get());
 	}
 }
 
