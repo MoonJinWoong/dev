@@ -5,6 +5,8 @@ namespace NetworkLib
 	// 에러 코드는 1 ~ 200까지 사용한다.
 	enum class NET_ERR_SET : short
 	{
+		SOCKET_ERR = -1,
+
 		NONE = 0,
 
 		SERVER_SOCKET_CREATE_FAIL = 11,

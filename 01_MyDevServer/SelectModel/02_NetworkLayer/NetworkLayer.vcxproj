@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NetErrSet.h" />
+    <ClInclude Include="NetworkConfig.h" />
     <ClInclude Include="SelectNetwork.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -155,6 +155,7 @@
     <ClCompile Include="LogicMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LogicErrSet.h" />
     <ClInclude Include="LogicMain.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
