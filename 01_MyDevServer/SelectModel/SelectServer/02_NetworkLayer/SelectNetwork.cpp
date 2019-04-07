@@ -1,5 +1,4 @@
 
-
 #include "SelectNetwork.h"
 namespace NetworkLib
 {
@@ -25,7 +24,8 @@ namespace NetworkLib
 		if (ret == NET_ERR_SET::SOCKET_ERR) return ret;
 
 
-
+		std::cout << "Select Network Init" << std::endl;
+		return NET_ERR_SET::NONE;
 	}
 	NET_ERR_SET SelectNetwork::InitSocket()
 	{
@@ -113,7 +113,7 @@ namespace NetworkLib
 					"  PORT:"<< ntohs(client_addr.sin_port) << std::endl;
 
 				// Socket 정보에 ADD 해준다.
-				if (AddSocketInfo(m_ClientSocketfd) == false)
+				if (AddSocketInfo(client_sockfd) == false)
 					std::cout << "Add socket is failed...!" << std::endl;
 			}
 	}
@@ -136,6 +136,7 @@ namespace NetworkLib
 		pSocketInfo->socket = sock;
 		pSocketInfo->recvByte = 0;
 		pSocketInfo->sendByte = 0;
+		pSocketInfo->isConnected = true;
 
 		m_pSocketInfo[m_nSocketIdx++] = pSocketInfo;
 
@@ -147,6 +148,7 @@ namespace NetworkLib
 		for (int i = 0; i < m_nSocketIdx; i++)
 		{
 			SocketInfo *pSockInfo = m_pSocketInfo[i];
+
 			if (FD_ISSET(pSockInfo->socket, &m_readSet))
 			{
 				int recvVal = 0;
@@ -163,6 +165,7 @@ namespace NetworkLib
 
 			if (FD_ISSET(pSockInfo->socket, &m_writeSet))
 			{
+			
 				int sendVal = 0;
 				sendVal = send(pSockInfo->socket
 					, pSockInfo->buf + pSockInfo->sendByte
@@ -172,10 +175,11 @@ namespace NetworkLib
 					RemoveSocketInfo(i);
 					continue;
 				}
-
+			
 				pSockInfo->sendByte += sendVal;
 				if (pSockInfo->recvByte == pSockInfo->sendByte)
 					pSockInfo->recvByte = pSockInfo->sendByte = 0;
+			
 			}
 		}
 	}

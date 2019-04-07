@@ -16,6 +16,8 @@ namespace LogicLib
 			std::cout << "ERROR ->" << (int)res << std::endl;
 
 		m_IsRun = true;
+
+		std::cout << "Logic Init Complete...!" << std::endl;
 	}
 	void LogicMain::Run()
 	{

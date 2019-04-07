@@ -13,6 +13,7 @@ namespace NetworkLib
 	struct SocketInfo
 	{
 		SOCKET socket;
+		bool isConnected= false;
 		char buf[1024];
 		int recvByte;
 		int sendByte;
