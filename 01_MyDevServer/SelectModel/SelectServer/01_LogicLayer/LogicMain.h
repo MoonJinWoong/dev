@@ -4,7 +4,7 @@
 //#include "../../Common/Packet.h"
 //#include "../../Common/ErrorCode.h"
 
-#include "../02_NetworkLayer/NetworkConfig.h"
+//#include "../02_NetworkLayer/NetworkConfig.h"
 #include "../02_NetworkLayer/SelectNetwork.h"
 
 namespace LogicLib

@@ -32,16 +32,16 @@ namespace NetworkLib
 	};
 
 
-	//const int MAX_NET_ERROR_STRING_COUNT = 64;
-	//struct NetError
-	//{
-	//	NetError(NET_ERR_SET code)
-	//	{
-	//		Error = code;
-	//	}
+	const int MAX_NET_ERROR_STRING_COUNT = 64;
+	struct NetError
+	{
+		NetError(NET_ERR_SET code)
+		{
+			Error = code;
+		}
 
-	//	NET_ERR_SET Error = NET_ERR_SET::NONE;
-	//	wchar_t Msg[MAX_NET_ERROR_STRING_COUNT] = { 0, };
-	//	int Vlaue = 0;
-	//};
+		NET_ERR_SET Error = NET_ERR_SET::NONE;
+		wchar_t Msg[MAX_NET_ERROR_STRING_COUNT] = { 0, };
+		int Vlaue = 0;
+	};
 }

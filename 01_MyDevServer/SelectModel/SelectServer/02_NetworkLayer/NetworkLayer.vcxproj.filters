@@ -6,6 +6,6 @@
   <ItemGroup>
     <ClInclude Include="SelectNetwork.h" />
     <ClInclude Include="NetErrSet.h" />
-    <ClInclude Include="NetworkConfig.h" />
+    <ClInclude Include="Defines.h" />
   </ItemGroup>
 </Project>
