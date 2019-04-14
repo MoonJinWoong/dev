@@ -5,6 +5,5 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
-    <ClInclude Include="LogicErrSet.h" />
   </ItemGroup>
 </Project>

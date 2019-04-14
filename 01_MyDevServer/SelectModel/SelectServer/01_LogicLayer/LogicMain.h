@@ -1,13 +1,13 @@
 #pragma once
 #include <memory>
-//
-//#include "../../Common/Packet.h"
-//#include "../../Common/ErrorCode.h"
 
-//#include "../02_NetworkLayer/NetworkConfig.h"
-#include "../02_NetworkLayer/SelectNetwork.h"
 
-namespace LogicLib
+namespace NetworkLayer
+{
+	class SelectNetwork;
+}
+
+namespace LogicLayer
 {
 	class LogicMain
 	{
@@ -17,8 +17,8 @@ namespace LogicLib
 		void Init();
 		void Run();
 	private:
+		std::unique_ptr<NetworkLayer::SelectNetwork> m_pNetworkObj;
 		bool m_IsRun = false;
-		std::unique_ptr<NetworkLib::SelectNetwork> m_pNetwork;
 	protected:
 
 	};

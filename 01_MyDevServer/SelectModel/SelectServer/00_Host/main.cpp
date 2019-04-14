@@ -4,12 +4,15 @@
 
 int main()
 {
-	LogicLib::LogicMain main;
+	LogicLayer::LogicMain main;
 	main.Init();
 
 	std::thread logicThread([&]() {
 		main.Run(); }
 	);
 
-	logicThread.join();
+	std::cout << "press any key to exit...";
+	getchar();
+
+
 }

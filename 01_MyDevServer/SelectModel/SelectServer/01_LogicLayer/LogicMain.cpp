@@ -1,30 +1,32 @@
-#include <iostream>
+#include <thread>
+#include <chrono>
+
+#include "../02_NetworkLayer/SelectNetwork.h"
+
 #include "LogicMain.h"
 
-using NET_ERR_SET = NetworkLib::NET_ERR_SET;
 
-
-namespace LogicLib
+namespace LogicLayer
 {
 	LogicMain::LogicMain() {}
 	LogicMain::~LogicMain() {}
 	void LogicMain::Init()
 	{
-		m_pNetwork = std::make_unique<NetworkLib::SelectNetwork>();
-		auto res = m_pNetwork->Init();
-		if (res != NET_ERR_SET::NONE)
-			std::cout << "ERROR ->" << (int)res << std::endl;
+		m_pNetworkObj = std::make_unique<NetworkLayer::SelectNetwork>();
+		auto result = m_pNetworkObj->Init();
+		if (result == true)
+			std::cout << "LogicLayer Init Success...." << std::endl;
+
 
 		m_IsRun = true;
-
-		std::cout << "Logic Init Complete...!" << std::endl;
 	}
 	void LogicMain::Run()
 	{
 		while (m_IsRun)
 		{
-			m_pNetwork->Run();
-
+			m_pNetworkObj->Run();
 		}
 	}
+
+
 }
