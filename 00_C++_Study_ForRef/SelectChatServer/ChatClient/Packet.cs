@@ -61,6 +61,7 @@ namespace csharp_test_client
         }
     }
 
+
     public class LoginResPacket
     {
         public Int16 Result;
@@ -71,6 +72,77 @@ namespace csharp_test_client
             return true;
         }
     }
+
+    public class LobbyListReqPacket
+    {
+    }
+
+
+    public class LobbyListResPacket
+    {
+        public Int16 Result;
+        public Int16 LobbyCnt;
+        public List<Int16> LobbyList = new List<Int16>();
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            var readPos = 0;
+
+            Result = BitConverter.ToInt16(bodyData, 0);
+            LobbyCnt = BitConverter.ToInt16(bodyData, 2);
+            // LobbyList = BitConverter.ToInt16(bodyData, 4);
+
+
+
+            for (int i = 0; i < LobbyCnt; ++i)
+            {
+                var a = BitConverter.ToInt16(bodyData, readPos);
+                readPos += 2;
+                var b = BitConverter.ToInt16(bodyData, readPos);
+                readPos += 2;
+                var c = BitConverter.ToInt16(bodyData, readPos);
+                readPos += 2;
+
+                LobbyList.Add(a);
+                LobbyList.Add(b);
+                LobbyList.Add(c);
+
+            }
+
+            return true;
+        }
+    }
+
+    public class LobbyEnterReqPacket
+    {
+        int LobbyNumber;
+        
+        public void SetValue(string lobbyNumber)
+        {
+            //LobbyNumber = ToInt64(lobbyNumber);
+            LobbyNumber = Int32.Parse(lobbyNumber);
+        }
+        public byte[] ToBytes()
+        {
+            List<byte> dataSource = new List<byte>();
+            dataSource.AddRange(BitConverter.GetBytes(LobbyNumber));
+            return dataSource.ToArray();
+        }
+
+    }
+    public class LobbyEnterResPacket
+    {
+        public Int16 Result;
+        public Int64 RoomUserUniqueId;
+
+        public bool FromBytes(byte[] bodyData)
+        {
+            Result = BitConverter.ToInt16(bodyData, 0);
+            RoomUserUniqueId = BitConverter.ToInt64(bodyData, 2);
+            return true;
+        }
+    }
+
 
 
     public class RoomEnterReqPacket

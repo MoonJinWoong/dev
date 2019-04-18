@@ -115,7 +115,7 @@
             this.textBoxPort.Name = "textBoxPort";
             this.textBoxPort.Size = new System.Drawing.Size(58, 25);
             this.textBoxPort.TabIndex = 18;
-            this.textBoxPort.Text = "5359";
+            this.textBoxPort.Text = "9000";
             this.textBoxPort.WordWrap = false;
             // 
             // label10
@@ -456,6 +456,7 @@
             this.listBoxLobby.Name = "listBoxLobby";
             this.listBoxLobby.Size = new System.Drawing.Size(244, 139);
             this.listBoxLobby.TabIndex = 50;
+            this.listBoxLobby.SelectedIndexChanged += new System.EventHandler(this.ListBoxLobby_SelectedIndexChanged);
             // 
             // mainForm
             // 

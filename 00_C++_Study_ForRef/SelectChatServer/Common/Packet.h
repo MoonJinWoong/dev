@@ -43,6 +43,9 @@ namespace NCommon
 		short LobbyUserCount;
 		short LobbyMaxUserCount;
 	};
+
+	struct PktLobbyListReq {};
+
 	struct PktLobbyListRes : PktBase
 	{
 		short LobbyCount = 0;

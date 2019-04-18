@@ -21,7 +21,9 @@ namespace csharp_test_client
             PacketFuncDic.Add(PACKET_ID.ROOM_LEAVE_USER_NTF, PacketProcess_RoomLeaveUserNotify);
             PacketFuncDic.Add(PACKET_ID.ROOM_CHAT_RES, PacketProcess_RoomChatResponse);            
             PacketFuncDic.Add(PACKET_ID.ROOM_CHAT_NOTIFY, PacketProcess_RoomChatNotify);
-            //PacketFuncDic.Add(PACKET_ID.PACKET_ID_ROOM_RELAY_NTF, PacketProcess_RoomRelayNotify);
+
+            PacketFuncDic.Add(PACKET_ID.LOBBY_LIST_RES, PacketProcess_LobbyListResponse);
+            PacketFuncDic.Add(PACKET_ID.LOBBY_ENTER_RES, PacketProcess_LobbyEnterResponse);
         }
 
         void PacketProcess(PacketData packet)
@@ -55,6 +57,23 @@ namespace csharp_test_client
             responsePkt.FromBytes(bodyData);
 
             DevLog.Write($"로그인 결과:  {(ERROR_CODE)responsePkt.Result}");
+        }
+
+        void PacketProcess_LobbyListResponse(byte[] bodyData)
+        {
+            var responsePkt = new LobbyListResPacket();
+            responsePkt.FromBytes(bodyData);
+
+            for (int i = 0; i < responsePkt.LobbyCnt; i++)
+                listBoxLobby.Items.Add(responsePkt.LobbyList[i]);
+
+            DevLog.Write($"로비 리스트 결과 --> {(ERROR_CODE)responsePkt.Result}");
+        }
+
+        void PacketProcess_LobbyEnterResponse(byte[] bodyData)
+        {
+            var responsePkt = new LobbyListResPacket();
+            DevLog.Write($"로비 입장 결과:  {(ERROR_CODE)responsePkt.Result}");
         }
 
 

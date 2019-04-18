@@ -330,7 +330,7 @@ namespace csharp_test_client
             requestPkt.SetValue(textBoxRoomNumber.Text.ToInt32());
 
             PostSendPacket(PACKET_ID.ROOM_ENTER_REQ, requestPkt.ToBytes());
-            DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
+            DevLog.Write($"로비 입장 요청:  {textBoxRoomNumber.Text} 번");
         }
 
         private void btn_RoomLeave_Click(object sender, EventArgs e)
@@ -377,11 +377,21 @@ namespace csharp_test_client
         // 로비 입장 요청
         private void button4_Click(object sender, EventArgs e)
         {
+            var requestPkt = new LobbyEnterReqPacket();
+            requestPkt.
+                SetValue(listBoxLobby.Items[listBoxLobby.SelectedIndex].ToString());
 
+            PostSendPacket(PACKET_ID.LOBBY_ENTER_REQ, requestPkt.ToBytes());
+            DevLog.Write($"방 입장 요청:  {textBoxRoomNumber.Text} 번");
         }
 
         // 로비 나가기 요청
         private void button5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ListBoxLobby_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
