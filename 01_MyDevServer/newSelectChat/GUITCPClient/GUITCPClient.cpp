@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "resource.h"
-
+#include "Packet.h"
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
 #define BUFSIZE    512
@@ -74,7 +74,15 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//	WaitForSingleObject(hReadEvent, INFINITE); // 읽기 완료 기다리기
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 
-			auto ret = send(sock, buf, strlen(buf), 0);
+			Packet packet;
+			packet.UserID = 12;
+			packet.Operation = 4;
+			packet.bodySize = sizeof(buf);
+			packet.data = buf;
+			//packet.data = buf;
+
+
+			auto ret = send(sock,reinterpret_cast<char*>(&packet), sizeof(Packet), 0);
 			if (ret == SOCKET_ERROR) {
 				err_display("send()");
 				break;

@@ -3,7 +3,7 @@
 #include <winsock2.h>
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "Packet.h"
 #define SERVERPORT 9000
 #define BUFSIZE    512
 
@@ -100,7 +100,15 @@ int main(int argc, char *argv[])
             SOCKETINFO *ptr = SocketInfoArray[i];
             if (FD_ISSET(ptr->sock, &rset)) {
                 // 데이터 받기
-                retval = recv(ptr->sock, ptr->buf, BUFSIZE, 0);
+
+				Packet *packet = new Packet;
+				ZeroMemory(packet->data, 64);
+
+                retval = recv(ptr->sock,
+					reinterpret_cast<char*>(&packet), sizeof(Packet), 0);
+
+
+
                 if (retval == SOCKET_ERROR) {
                     err_display("recv()");
                     RemoveSocketInfo(i);
@@ -114,9 +122,10 @@ int main(int argc, char *argv[])
                 // 받은 데이터 출력
                 addrlen = sizeof(clientaddr);
                 getpeername(ptr->sock, (SOCKADDR *)&clientaddr, &addrlen);
-                ptr->buf[retval] = '\0';
+                //ptr->buf[retval] = '\0';
+				//packet->data = '\0';
                 printf("[TCP/%s:%d] %s\n", inet_ntoa(clientaddr.sin_addr),
-                    ntohs(clientaddr.sin_port), ptr->buf);
+                    ntohs(clientaddr.sin_port), packet->data);
             }
             if (FD_ISSET(ptr->sock, &wset)) {
                 // 데이터 보내기

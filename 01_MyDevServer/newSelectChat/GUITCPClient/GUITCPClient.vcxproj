@@ -80,6 +80,7 @@
     <ClCompile Include="GUITCPClient.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
