@@ -22,7 +22,9 @@
     <ClCompile Include="SelectNetwork.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Defines.h" />
+    <ClInclude Include="Define.h" />
+    <ClInclude Include="ErrorSet.h" />
+    <ClInclude Include="PacketInfo.h" />
     <ClInclude Include="SelectNetwork.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

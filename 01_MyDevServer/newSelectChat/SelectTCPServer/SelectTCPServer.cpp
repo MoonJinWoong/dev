@@ -70,9 +70,9 @@ int main(int argc, char *argv[])
         FD_ZERO(&wset);
         FD_SET(listen_sock, &rset);
         for (i = 0; i < nTotalSockets; i++) {
-            if (SocketInfoArray[i]->recvbytes > SocketInfoArray[i]->sendbytes)
+           // if (SocketInfoArray[i]->recvbytes > SocketInfoArray[i]->sendbytes)
                 FD_SET(SocketInfoArray[i]->sock, &wset);
-            else
+           // else
                 FD_SET(SocketInfoArray[i]->sock, &rset);
         }
 
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
         // 소켓 셋 검사(2): 데이터 통신
         for (i = 0; i < nTotalSockets; i++) {
             SOCKETINFO *ptr = SocketInfoArray[i];
-            if (FD_ISSET(ptr->sock, &rset)) {
+            if (FD_ISSET(ptr->sock, &rset)) 
+			{
                 // 데이터 받기
 				char recvBuffer[521];
 				Packet *packet = new Packet;
@@ -132,14 +133,18 @@ int main(int argc, char *argv[])
 				//packet->data = '\0';
                 printf("[TCP/%s:%d] %s\n", inet_ntoa(clientaddr.sin_addr),
                     ntohs(clientaddr.sin_port), packet->data);
-            }
-            if (FD_ISSET(ptr->sock, &wset)) {
-                // 데이터 보내기
-				
-                retval = send(ptr->sock, ptr->buf + ptr->sendbytes,
-                    ptr->recvbytes - ptr->sendbytes, 0);
+
+
+				// 데이터 보내기
+
+				retval = send(ptr->sock, packet->data,
+					512, 0);
 				printf(" Send Byte : %d \n", retval);
-                if (retval == SOCKET_ERROR) {
+            }
+            if (FD_ISSET(ptr->sock, &wset)) 
+			{
+
+ /*               if (retval == SOCKET_ERROR) {
                     err_display("send()");
                     RemoveSocketInfo(i);
                     continue;
@@ -147,7 +152,7 @@ int main(int argc, char *argv[])
                 ptr->sendbytes += retval;
                 if (ptr->recvbytes == ptr->sendbytes) {
                     ptr->recvbytes = ptr->sendbytes = 0;
-                }
+                }*/
             }
         }
     }

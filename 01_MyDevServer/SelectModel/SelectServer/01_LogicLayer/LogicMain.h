@@ -16,8 +16,9 @@ namespace LogicLayer
 		~LogicMain();
 		void Init();
 		void Run();
+		void Stop();
 	private:
-		std::unique_ptr<NetworkLayer::SelectNetwork> m_pNetworkObj;
+		std::unique_ptr<NetworkLayer::SelectNetwork> m_pSelectNetwork;
 		bool m_IsRun = false;
 	protected:
 

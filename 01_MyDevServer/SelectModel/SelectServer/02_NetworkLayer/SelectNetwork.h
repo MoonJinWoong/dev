@@ -1,16 +1,14 @@
 #pragma once
+#define FD_SETSIZE 5096
+#include <vector>
+#include <deque>
 
-#define FD_SETSIZE 5096 // http://blog.naver.com/znfgkro1/220175848048
 
 #pragma comment(lib, "ws2_32")
 #include <winsock2.h>
 #include <ws2tcpip.h>
-
-#include <vector>
-#include <deque>
-#include <unordered_map>
 #include <iostream>
-#include "Defines.h"
+#include "Define.h"     // 클라 정보 구조체 담겨 있음 
 
 
 namespace NetworkLayer
@@ -20,15 +18,22 @@ namespace NetworkLayer
 	public:
 		SelectNetwork();
 		~SelectNetwork();
-		bool Init();
-		void Run();
-		bool CheckNewClient();
-		void SetSockOption(const SOCKET fd);
-
+		void	InitNetwork();
+		bool	BindAndListen();
+		void	CreateClientPool(const int &maxClient);
+		void	Run();
+		void	AcceptNewClient();
+		int		AllocClientIndex();
+		void	RejectClient(SOCKET socket);
+		void	ConnectedClient(const int client_index
+			, const SOCKET whoSocket, const char* pIP);
 	private:
-		SOCKET m_ServerSockfd;
 
-		fd_set m_Readfds;
-		CommonPkt m_packet;
+		SOCKET m_ServerSocket;
+		int64_t m_ConnectSeq = 0;
+		FD_SET m_ReadSet, m_WriteSet;
+		size_t m_ConnectedSessionCount = 0;
+		std::vector<ClientsInfo> m_ClientsPool;
+		std::deque<int> m_ClientPoolIndex;
 	};
 }

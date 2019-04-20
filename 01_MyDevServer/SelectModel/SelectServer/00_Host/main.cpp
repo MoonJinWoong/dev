@@ -14,5 +14,8 @@ int main()
 	std::cout << "press any key to exit...";
 	getchar();
 
+	main.Stop();
+	logicThread.join();
+
 
 }
