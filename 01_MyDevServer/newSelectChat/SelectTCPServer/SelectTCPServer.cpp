@@ -100,14 +100,20 @@ int main(int argc, char *argv[])
             SOCKETINFO *ptr = SocketInfoArray[i];
             if (FD_ISSET(ptr->sock, &rset)) {
                 // 데이터 받기
-
+				char recvBuffer[521];
 				Packet *packet = new Packet;
-				ZeroMemory(packet->data, 64);
+
 
                 retval = recv(ptr->sock,
-					reinterpret_cast<char*>(&packet), sizeof(Packet), 0);
+					recvBuffer, sizeof(Packet), 0);
+
+				recvBuffer[retval] = '\0';
+				
+				
+				packet = (Packet*)recvBuffer;
 
 
+				
 
                 if (retval == SOCKET_ERROR) {
                     err_display("recv()");

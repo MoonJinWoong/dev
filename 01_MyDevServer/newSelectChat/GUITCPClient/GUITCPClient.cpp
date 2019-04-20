@@ -77,8 +77,11 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			Packet packet;
 			packet.UserID = 12;
 			packet.Operation = 4;
-			packet.bodySize = sizeof(buf);
-			packet.data = buf;
+			packet.bodySize = strlen(buf);
+			//packet.data = buf;
+
+			memcpy(packet.data, buf, strlen(buf)+1);
+			//memcpy(packet.data+)
 			//packet.data = buf;
 
 
