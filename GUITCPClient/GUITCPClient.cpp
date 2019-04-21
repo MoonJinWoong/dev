@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "resource.h"
-#include "Packet.h"
+
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
 #define BUFSIZE    512
@@ -27,9 +27,7 @@ SOCKET sock; // 소켓
 char buf[BUFSIZE + 1]; // 데이터 송수신 버퍼
 HANDLE hReadEvent, hWriteEvent; // 이벤트
 HWND hSendButton; // 보내기 버튼
-HWND hSendButton2; // 로그인 버튼
 HWND hEdit1, hEdit2; // 편집 컨트롤
-HWND hEdit3, hEdit4;  // 로그인 편집 컨트롤
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     LPSTR lpCmdLine, int nCmdShow)
@@ -65,13 +63,7 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     case WM_INITDIALOG:
         hEdit1 = GetDlgItem(hDlg, IDC_EDIT1);
         hEdit2 = GetDlgItem(hDlg, IDC_EDIT2);
-
-		hEdit3 = GetDlgItem(hDlg, INPUT_LOGIN);
-		hEdit4 = GetDlgItem(hDlg, INPUT_PWD);
-
         hSendButton = GetDlgItem(hDlg, IDOK);
-
-		//hSendButton2 = GetDlgItem(hDlg, IDLOGIN);
         SendMessage(hEdit1, EM_SETLIMITTEXT, BUFSIZE, 0);
         return TRUE;
     case WM_COMMAND:
@@ -82,31 +74,7 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		//	WaitForSingleObject(hReadEvent, INFINITE); // 읽기 완료 기다리기
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 
-			// 여기서부터 다시 
-			Packet packet;
-			packet.UserID = 12;
-			packet.Operation = 4;
-			packet.bodySize = strlen(buf);
-			memcpy(packet.data, buf, strlen(buf)+1);
-
-
-
-			//SendPacketInfo sendPkt;
-			//sendPkt.Index = 0;
-			//sendPkt.PacketId = 2;
-			//sendPkt.PacketBodySize = strlen(buf);
-			//sendPkt.pRefData = buf;
-
-			//PacketHead head;
-			//head.TotalSize = 10;
-			//head.Id = 100;
-			//head.Reserve = (unsigned char*)buf;
-
-
-			auto ret = send(sock,(char*)& packet,
-				sizeof(SendPacketInfo), 0);
-
-
+			auto ret = send(sock, buf, strlen(buf), 0);
 			if (ret == SOCKET_ERROR) {
 				err_display("send()");
 				break;
@@ -119,12 +87,6 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 			return TRUE;
-		}
-		case INPUT_LOGIN:
-		{
-			// 로그인 버튼을 눌렀을 때 string을 가져옴
-
-			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 		}
 		case IDCANCEL:
 		{
