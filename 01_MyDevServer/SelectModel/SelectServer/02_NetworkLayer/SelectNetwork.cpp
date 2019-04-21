@@ -38,8 +38,8 @@ namespace NetworkLayer
 		 if(isServerReady == false) std::cout << "BindAndListen failed.." << std::endl;
 
 
-		 FD_ZERO(&m_ReadSet);
-		 FD_SET(m_ServerSocket, &m_ReadSet);
+		 // FD_ZERO(&m_ReadSet);
+		 // FD_SET(m_ServerSocket, &m_ReadSet);
 
 
 		 // 각 클라마다 정보를 가지고 있을 수 있게 객체 생성
@@ -96,20 +96,24 @@ namespace NetworkLayer
 	void SelectNetwork::Run()
 	{
 		// 소켓 셋 초기화
-		auto rset = m_ReadSet;
-		auto wset = m_ReadSet;
+		FD_ZERO(&m_ReadSet);
+		FD_ZERO(&m_WriteSet);
+		FD_SET(m_ServerSocket, &m_ReadSet);
 
+
+		// select 
 		timeval timeout{ 0, 1000 }; //tv_sec, tv_usec
-		auto selectResult = select(0, &rset, &wset, 0, &timeout);
+		auto selectResult = select(0, &m_ReadSet, &m_WriteSet, 0, &timeout);
 		if (selectResult < 0) std::cout << "select is faild...!"<< selectResult << std::endl;
 
 
 		// Accept
-		if (FD_ISSET(m_ServerSocket, &rset))
+		if (FD_ISSET(m_ServerSocket, &m_ReadSet))
 			AcceptNewClient();
 		
 
-
+		// 데이터가 왔나, 보낼 것이 있나 
+		CheckClients(m_ReadSet, m_WriteSet);
 
 	}
 
@@ -126,7 +130,7 @@ namespace NetworkLayer
 			auto client_sock = accept(m_ServerSocket, (SOCKADDR*)& client_addr, &client_len);
 			//m_pRefLogger->Write(LOG_TYPE::L_DEBUG, "%s | client_sockfd(%I64u)", __FUNCTION__, client_sockfd);
 			if (client_sock == INVALID_SOCKET)
-				std::cout << "Accept error...!" << std::endl;
+				return;
 			
 
 
@@ -163,7 +167,6 @@ namespace NetworkLayer
 		} while (tryCount < 100);   // 100 대신에 FS_SETSIZE 해야함
 	}
 
-
 	int SelectNetwork::AllocClientIndex()
 	{
 		if (m_ClientPoolIndex.empty()) return -1;
@@ -176,7 +179,6 @@ namespace NetworkLayer
 	{
 		// 여기 구현해야함
 	}
-
 	void SelectNetwork::ConnectedClient(const int client_index
 		, const SOCKET whoSocket, const char* pIP)
 	{
@@ -191,5 +193,95 @@ namespace NetworkLayer
 
 
 		std::cout << "user id = " << client_index << std::endl;
+	}
+
+	void SelectNetwork::CheckClients(FD_SET& read_set, FD_SET& write_set)
+	{
+		for (int i = 0; i < m_ClientsPool.size(); ++i)
+		{
+			auto& client = m_ClientsPool[i];
+
+			if (client.IsConnected() == false) continue;
+			
+			SOCKET fd = client.SocketFD;
+			auto clientIndex = client.Index;
+
+			// check read
+			auto retRecv = ProcessRecv(clientIndex, fd, read_set);
+			if (retRecv == false) continue;
+			
+			// check write
+			//RunProcessWrite(clientIndex, fd, write_set);
+		}
+	}
+
+	bool SelectNetwork::ProcessRecv(const int sessionIndex, const SOCKET fd, fd_set& read_set)
+	{
+		if (!FD_ISSET(fd, &read_set))
+			return true;
+		
+
+		// 데이터를 recv 하고 
+		auto ret = RecvData(sessionIndex);
+		if (ret != 0)
+		{
+			//RejectClient( fd, sessionIndex);
+			return false;
+		}
+
+		// 받은 데이터를 처리한다.
+		//ret = RecvBufferProcess(sessionIndex);
+		//if (ret != 0)
+		//{
+			//CloseSession(SOCKET_CLOSE_CASE::SOCKET_RECV_BUFFER_PROCESS_ERROR, fd, sessionIndex);
+		//	return false;
+		//}
+
+		return true;
+	}
+
+	bool SelectNetwork::RecvData(const int clientIndex)
+	{
+		auto& client = m_ClientsPool[clientIndex];
+		auto fd = static_cast<SOCKET>(client.SocketFD);
+
+		if (client.IsConnected() == false)
+		{
+			std::cout << " this client[" << clientIndex << "] not connected..!" << std::endl;
+			return false;
+		}
+
+		int recvPos = 0;
+
+		if (client.RemainingDataSize > 0)
+		{
+			memcpy(client.pRecvBuffer, &client.pRecvBuffer[client.PrevReadPosInRecvBuffer], client.RemainingDataSize);
+			recvPos += client.RemainingDataSize;
+		}
+
+		auto recvSize = recv(fd, &client.pRecvBuffer[recvPos], (MAX_PACKET_BODY_SIZE * 2), 0);
+
+		if (recvSize == 0)
+		{
+			std::cout << "원격 호스트가 종료함" << std::endl;
+			return false;
+		}
+
+		if (recvSize < 0)
+		{
+			auto error = WSAGetLastError();
+			if (error != WSAEWOULDBLOCK)
+			{
+				std::cout << "recv error...!" << std::endl;
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		client.RemainingDataSize += recvSize;
+		return 0;
 	}
 }

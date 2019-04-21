@@ -26,7 +26,12 @@ namespace NetworkLayer
 		int		AllocClientIndex();
 		void	RejectClient(SOCKET socket);
 		void	ConnectedClient(const int client_index
-			, const SOCKET whoSocket, const char* pIP);
+			    , const SOCKET whoSocket, const char* pIP);
+		void    CheckClients(FD_SET& read_set, FD_SET& write_set);
+		bool    ProcessRecv(const int sessionIndex,
+			    const SOCKET fd, fd_set& read_set);
+		bool    RecvData(const int sessionIndex);
+
 	private:
 
 		SOCKET m_ServerSocket;
