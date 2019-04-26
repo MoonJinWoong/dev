@@ -1,5 +1,8 @@
 #pragma once
-#include <memory>
+#include <thread>
+#include <chrono>
+
+#include "LogicProcess.h"
 
 
 namespace NetworkLayer
@@ -19,6 +22,7 @@ namespace LogicLayer
 		void Stop();
 	private:
 		std::unique_ptr<NetworkLayer::SelectNetwork> m_pSelectNetwork;
+		std::unique_ptr<LogicProcess> m_pLogicPacketProcess;
 		bool m_IsRun = false;
 	protected:
 

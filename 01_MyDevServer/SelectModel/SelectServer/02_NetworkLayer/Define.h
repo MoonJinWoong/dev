@@ -55,13 +55,28 @@ namespace NetworkLayer
 
 #pragma pack(push, 1)
 
+	//- 로그인 요청
+	const int MAX_USER_ID_SIZE = 16;
+	const int MAX_USER_PASSWORD_SIZE = 16;
+
+	// 클라가 서버한테 보내는 패킷
+	struct Packet_Login_ClientToServer
+	{
+		char szID[MAX_USER_ID_SIZE + 1] = { 0, };
+		char szPW[MAX_USER_PASSWORD_SIZE + 1] = { 0, };
+	};
+
+	// 서버가 클라한테 보내는 패킷
+	struct Packet_Login_ServerToClient
+	{
+	};
+
+
 	// test packet
 	struct testPacket
 	{
-		int UserID = 0;
-		short Operation = 0;
-		short bodySize = 0;
-		char data[64];
+		char szID[MAX_USER_ID_SIZE + 1] = { 0, };
+		char szPW[MAX_USER_PASSWORD_SIZE + 1] = { 0, };
 	};
 
 
@@ -69,7 +84,6 @@ namespace NetworkLayer
 	{
 		short TotalSize;
 		short Id;
-		unsigned char* Reserve;
 	};
 
 	const int PACKET_HEADER_SIZE = sizeof(PacketHead);

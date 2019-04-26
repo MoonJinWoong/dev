@@ -153,9 +153,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LogicMain.cpp" />
+    <ClCompile Include="LogicProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
+    <ClInclude Include="LogicProcess.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

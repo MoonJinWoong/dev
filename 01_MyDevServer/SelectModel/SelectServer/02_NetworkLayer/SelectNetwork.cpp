@@ -55,7 +55,17 @@ namespace NetworkLayer
 
 		return true;
 	}
+	RecvPacketInfo SelectNetwork::GetPacketInfo()
+	{
+		RecvPacketInfo packetInfo;
 
+		if (m_PacketQueue.empty() == false)
+		{
+			packetInfo = m_PacketQueue.front();
+			m_PacketQueue.pop_front();
+		}
+		return packetInfo;
+	}
 	void SelectNetwork::CreateClientPool(const int &maxClient)
 	{
 		for (int i = 0; i < MAX_CLIENTS; ++i)
@@ -199,7 +209,7 @@ namespace NetworkLayer
 			}
 
 			// check write
-			ProcessWrite(sessionIndex, fd, write_set);
+			//ProcessWrite(sessionIndex, fd, write_set);
 		}
 
 	}
@@ -224,91 +234,6 @@ namespace NetworkLayer
 			//CloseSession(SOCKET_CLOSE_CASE::SOCKET_RECV_BUFFER_PROCESS_ERROR, fd, sessionIndex);
 			return false;
 		}
-
-		return true;
-	}
-	void SelectNetwork::ProcessWrite(const int sessionIndex, const SOCKET fd, fd_set& write_set)
-	{
-		if (!FD_ISSET(fd, &write_set))
-		{
-			return;
-		}
-
-		//auto retsend = FlushSendBuff(sessionIndex);
-
-		auto& session = m_ClientsPool[sessionIndex];
-		auto sockfd = static_cast<SOCKET>(session.SocketFD);
-
-		if (session.IsConnected() == false)
-		{
-			std::cout << "client disconnect " << std::endl;
-		}
-
-		//auto result = SendData(sockfd, session.pSendBuffer, session.SendSize);
-		//if (result != true)
-		//	std::cout << "send data filed...!" << std::endl;
-
-
-		//auto sendSize = result.Vlaue;
-		//if (sendSize < session.SendSize)
-		//{
-		//	memmove(&session.pSendBuffer[0],
-		//		&session.pSendBuffer[sendSize],
-		//		session.SendSize - sendSize);
-
-		//	session.SendSize -= sendSize;
-		//}
-		//else
-		//{
-		//	session.SendSize = 0;
-		//}
-		//return result;
-
-
-
-
-
-		//if (retsend.Error != NET_ERROR_CODE::NONE)
-		//{
-		//	CloseSession(SOCKET_CLOSE_CASE::SOCKET_SEND_ERROR, fd, sessionIndex);
-		//}
-	}
-	bool SelectNetwork::RecvBufferProcess(const int sessionIndex)
-	{
-		auto& session = m_ClientsPool[sessionIndex];
-
-		auto readPos = 0;
-		const auto remainDataSize = session.RemainingDataSize;
-		//PacketHead* pPktHead;
-		testPacket* testPkt;
-
-		// 여기서부터 다시 
-		while ((remainDataSize - readPos) >= PACKET_HEADER_SIZE)
-		{
-			testPkt = (testPacket*)& session.pRecvBuffer[readPos];
-			readPos += PACKET_HEADER_SIZE;
-			auto bodySize = (INT16)(testPkt->bodySize - PACKET_HEADER_SIZE);
-
-			if (bodySize > 0)
-			{
-				if (bodySize > (remainDataSize - readPos))
-				{
-					readPos -= PACKET_HEADER_SIZE;
-					break;
-				}
-
-				if (bodySize > MAX_PACKET_BODY_SIZE)
-				{
-					return false;
-				}
-			}
-
-			//AddPacketQueue(sessionIndex, pPktHead->Id, bodySize, &session.pRecvBuffer[readPos]);
-			readPos += bodySize;
-		}
-
-		session.RemainingDataSize -= readPos;
-		session.PrevReadPosInRecvBuffer = readPos;
 
 		return true;
 	}
@@ -356,6 +281,98 @@ namespace NetworkLayer
 		session.RemainingDataSize += recvSize;
 		return true;
 	}
+	bool SelectNetwork::RecvBufferProcess(const int sessionIndex)
+	{
+		auto& session = m_ClientsPool[sessionIndex];
+
+		auto readPos = 0;
+		const auto remainDataSize = session.RemainingDataSize;
+		//PacketHead* pPktHead;
+		PacketHead* testPkt;
+
+		while ((remainDataSize - readPos) >= PACKET_HEADER_SIZE)
+		{
+			testPkt = (PacketHead*)& session.pRecvBuffer[readPos];
+			readPos += PACKET_HEADER_SIZE;
+			auto bodySize = (INT16)(testPkt->TotalSize - PACKET_HEADER_SIZE);
+
+			if (bodySize > 0)
+			{
+				if (bodySize > (remainDataSize - readPos))
+				{
+					readPos -= PACKET_HEADER_SIZE;
+					break;
+				}
+
+				if (bodySize > MAX_PACKET_BODY_SIZE)
+				{
+					// 더 이상 이 세션과는 작업을 하지 않을 예정. 클라이언트 보고 나가라고 하던가 직접 짤라야 한다.
+					return false;
+				}
+			}
+
+			AddPacketQueue(sessionIndex, testPkt->Id, bodySize, &session.pRecvBuffer[readPos]);
+			readPos += bodySize;
+		}
+
+		session.RemainingDataSize -= readPos;
+		session.PrevReadPosInRecvBuffer = readPos;
+
+		return true;
+	}
+	
+	
+	void SelectNetwork::ProcessWrite(const int sessionIndex, const SOCKET fd, fd_set& write_set)
+	{
+		if (!FD_ISSET(fd, &write_set))
+		{
+			return;
+		}
+
+
+		auto retsend = FlushSendBuff(sessionIndex);
+		if (retsend != 0)std::cout << "send error..!" << std::endl;
+
+
+
+
+		auto & session = m_ClientsPool[sessionIndex];
+		auto sockfd = static_cast<SOCKET>(session.SocketFD);
+
+		if (session.IsConnected() == false)
+		{
+			std::cout << "client disconnect " << std::endl;
+		}
+
+		//auto result = SendData(sockfd, session.pSendBuffer, session.SendSize);
+		//if (result != true)
+		//	std::cout << "send data filed...!" << std::endl;
+
+
+		//auto sendSize = result.Vlaue;
+		//if (sendSize < session.SendSize)
+		//{
+		//	memmove(&session.pSendBuffer[0],
+		//		&session.pSendBuffer[sendSize],
+		//		session.SendSize - sendSize);
+
+		//	session.SendSize -= sendSize;
+		//}
+		//else
+		//{
+		//	session.SendSize = 0;
+		//}
+		//return result;
+
+
+
+
+
+		//if (retsend.Error != NET_ERROR_CODE::NONE)
+		//{
+		//	CloseSession(SOCKET_CLOSE_CASE::SOCKET_SEND_ERROR, fd, sessionIndex);
+		//}
+	}
 	bool SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
 	{
 
@@ -374,6 +391,40 @@ namespace NetworkLayer
 
 		 return true;
 	}
+	bool SelectNetwork::FlushSendBuff(const int sessionIndex)
+	{
+		auto& session = m_ClientsPool[sessionIndex];
+		auto fd = static_cast<SOCKET>(session.SocketFD);
+
+		if (session.IsConnected() == false)
+		{
+			return false;
+		}
+
+		auto result = SendData(fd, session.pSendBuffer, session.SendSize);
+
+		if (result != 0) return false;
+
+
+
+		auto sendSize = result;
+
+
+		if (sendSize < session.SendSize)
+		{
+			memmove(&session.pSendBuffer[0],
+				&session.pSendBuffer[sendSize],
+				session.SendSize - sendSize);
+
+			session.SendSize -= sendSize;
+		}
+		else
+		{
+			session.SendSize = 0;
+		}
+		return result;
+	}
+	
 	void SelectNetwork::AddPacketQueue(const int Index, const short pktId, const short bodySize, char* pDataPos)
 	{
 		RecvPacketInfo packetInfo;

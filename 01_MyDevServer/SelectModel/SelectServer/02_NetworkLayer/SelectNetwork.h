@@ -38,9 +38,13 @@ namespace NetworkLayer
 		bool    RecvBufferProcess(const int sessionIndex);
 
 		bool    SendData(const SOCKET fd, const char* pMsg, const int size);
+		bool    FlushSendBuff(const int sessionIndex);
 
 		void    AddPacketQueue(const int sessionIndex
 			    ,const short pktId, const short bodySize, char* pDataPos);
+
+		RecvPacketInfo GetPacketInfo();
+
 	private:
 
 		SOCKET m_ServerSocket;

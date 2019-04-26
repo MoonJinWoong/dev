@@ -11,6 +11,9 @@
 #define BUFSIZE    512
 #define	WM_SOCKET				WM_USER + 1
 
+const int MAX_PACKET_SIZE = 1024;
+const int MAX_SOCK_RECV_BUFFER = 8016;
+
 // 대화상자 프로시저
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 // 편집 컨트롤 출력 함수
@@ -78,33 +81,33 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		{
-			//EnableWindow(hSendButton, FALSE); // 보내기 버튼 비활성화
-		//	WaitForSingleObject(hReadEvent, INFINITE); // 읽기 완료 기다리기
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 
-			// 여기서부터 다시 
-			Packet packet;
-			packet.UserID = 12;
-			packet.Operation = 4;
-			packet.bodySize = strlen(buf);
-			memcpy(packet.data, buf, strlen(buf)+1);
+		
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+			
+
+			// 패킷 바디 세팅
+			Packet_Login_CtoS packet;
+			//ZeroMemory(packet, sizeof(Packet_Login_CtoS));
+			strcpy(packet.szID, buf);
+			strcpy(packet.szPW, buf);
 
 
-
-			//SendPacketInfo sendPkt;
-			//sendPkt.Index = 0;
-			//sendPkt.PacketId = 2;
-			//sendPkt.PacketBodySize = strlen(buf);
-			//sendPkt.pRefData = buf;
-
-			//PacketHead head;
-			//head.TotalSize = 10;
-			//head.Id = 100;
-			//head.Reserve = (unsigned char*)buf;
+			PacketHead header{sizeof(packet)+ PACKET_HEADER_SIZE, 123 };
 
 
-			auto ret = send(sock,(char*)& packet,
-				sizeof(SendPacketInfo), 0);
+			memcpy(&sendbuf[0], (char*)&header, PACKET_HEADER_SIZE);
+
+
+			if (sizeof(Packet_Login_CtoS) > 0)
+			{
+				memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)&packet, sizeof(Packet_Login_CtoS));
+			}
+
+
+			auto ret = send(sock,(char*)& sendbuf,
+				sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
 
 
 			if (ret == SOCKET_ERROR) {

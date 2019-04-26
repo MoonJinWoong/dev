@@ -2,8 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="LogicMain.cpp" />
+    <ClCompile Include="LogicProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
+    <ClInclude Include="LogicProcess.h" />
   </ItemGroup>
 </Project>
