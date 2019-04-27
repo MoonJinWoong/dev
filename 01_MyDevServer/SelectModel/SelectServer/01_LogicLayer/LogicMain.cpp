@@ -2,6 +2,10 @@
 #include <chrono>
 #include "../02_NetworkLayer/SelectNetwork.h"
 
+
+#include "PktProcessMain.h"
+#include "ClientManager.h"
+
 #include "LogicMain.h"
 
 
@@ -15,8 +19,13 @@ namespace LogicLayer
 		m_pSelectNetwork->InitNetwork();
 	
 
+		m_pClientManager = std::make_unique<ClientManager>();
+		m_pClientManager->Init();
+
+
 		m_pPacketProcess = std::make_unique<PktProcessMain>();
 		m_pPacketProcess->Init(m_pSelectNetwork.get());
+
 
 		m_IsRun = true;
 	}

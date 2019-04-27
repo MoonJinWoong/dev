@@ -4,9 +4,12 @@
     <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="PktProcessMain.cpp" />
     <ClCompile Include="PktProcLogin.cpp" />
+    <ClCompile Include="ClientManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="PktProcessMain.h" />
+    <ClInclude Include="ClientManager.h" />
+    <ClInclude Include="Client.h" />
   </ItemGroup>
 </Project>

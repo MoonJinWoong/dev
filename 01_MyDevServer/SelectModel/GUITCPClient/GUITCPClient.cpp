@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "resource.h"
-#include "Packet.h"
+#include "../PacketDefine/Packet.h"
 #define SERVERIP   "127.0.0.1"
 #define SERVERPORT 9000
 #define BUFSIZE    512
@@ -86,37 +86,35 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		{
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 
-			char sendbuf[MAX_PACKET_SIZE] = { 0, };
-			
-			// 패킷 바디 세팅
-			Packet_Login_CtoS packet;
-			//ZeroMemory(packet, sizeof(Packet_Login_CtoS));
-			strcpy(packet.szID, buf);
-			strcpy(packet.szPW, buf);
+			//char sendbuf[MAX_PACKET_SIZE] = { 0, };
+			//
+			//// 패킷 바디 세팅
+			//Packet_Login_CtoS packet;
+			////ZeroMemory(packet, sizeof(Packet_Login_CtoS));
+			//strcpy(packet.szID, buf);
+			//strcpy(packet.szPW, buf);
 
-			PacketHead header{sizeof(packet)+ PACKET_HEADER_SIZE, 11 };
-			memcpy(&sendbuf[0], (char*)&header, PACKET_HEADER_SIZE);
+			//PacketHead header{sizeof(packet)+ PACKET_HEADER_SIZE, 11 };
+			//memcpy(&sendbuf[0], (char*)&header, PACKET_HEADER_SIZE);
 
-			if (sizeof(Packet_Login_CtoS) > 0)
-			{
-				memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)&packet, sizeof(Packet_Login_CtoS));
-			}
+			//if (sizeof(Packet_Login_CtoS) > 0)
+			//{
+			//	memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)&packet, sizeof(Packet_Login_CtoS));
+			//}
 
-			auto ret = send(sock,(char*)& sendbuf,
-				sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
+			//auto ret = send(sock,(char*)& sendbuf,
+			//	sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
 
 
-			if (ret == SOCKET_ERROR) {
-				err_display("send()");
-				break;
-			}
-			DisplayText("[TCP 클라이언트] %d바이트를 보냈습니다.\r\n", ret);
-			//SetEvent(hWriteEvent); // 쓰기 완료 알리기
-			SetFocus(hEdit1);
-			SendMessage(hEdit1, EM_SETSEL, 0, -1);
+			//if (ret == SOCKET_ERROR) {
+			//	err_display("send()");
+			//	break;
+			//}
+			//DisplayText("[TCP 클라이언트] %d바이트를 보냈습니다.\r\n", ret);
+			////SetEvent(hWriteEvent); // 쓰기 완료 알리기
+			//SetFocus(hEdit1);
+			//SendMessage(hEdit1, EM_SETSEL, 0, -1);
 
-			//ZeroMemory(buf, BUFSIZE + 1);
-			//char buf[BUFSIZE+1] = { 0, };
 
 			return TRUE;
 		}
@@ -127,21 +125,28 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 			char sendbuf[MAX_PACKET_SIZE] = { 0, };
 
-			// 패킷 바디 세팅
-			Packet_Login_CtoS packet;
-			//ZeroMemory(packet, sizeof(Packet_Login_CtoS));
+			// 패킷 바디 선언 및 id 세팅 
+			PacketLayer::PktLogInReq packet;
 			strcpy(packet.szID, buf);
-			strcpy(packet.szPW, buf);
 
-			PacketHead header{ sizeof(packet) + PACKET_HEADER_SIZE, 11 };
 
-			memcpy(&sendbuf[0], (char*)& header, PACKET_HEADER_SIZE);
 
-			if (sizeof(Packet_Login_CtoS) > 0)
-				memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)& packet, sizeof(Packet_Login_CtoS));
+			// 헤더 세팅 후 버퍼에 세팅 
+			PacketLayer::PktHeader header{ sizeof(packet) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::LOGIN_IN_REQ };
+
+			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+
+
+			// 바디를 버퍼에 세팅
+			if (sizeof(PacketLayer::PktLogInReq) > 0)
+				memcpy(&sendbuf[sizeof(PacketLayer::PktHeader)], (char*)& packet, sizeof(PacketLayer::PktLogInReq));
 			
+
+			// send
 			auto ret = send(sock, (char*)& sendbuf,
-				sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
+				sizeof(PacketLayer::PktLogInReq) + sizeof(PacketLayer::PktHeader), 0);
 
 
 			if (ret == SOCKET_ERROR) {

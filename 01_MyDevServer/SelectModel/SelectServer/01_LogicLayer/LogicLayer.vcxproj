@@ -155,10 +155,13 @@
     <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="PktProcessMain.cpp" />
     <ClCompile Include="PktProcLogin.cpp" />
+    <ClCompile Include="ClientManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Client.h" />
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="PktProcessMain.h" />
+    <ClInclude Include="ClientManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

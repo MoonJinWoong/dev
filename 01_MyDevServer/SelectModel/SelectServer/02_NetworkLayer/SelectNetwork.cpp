@@ -55,9 +55,9 @@ namespace NetworkLayer
 
 		return true;
 	}
-	RecvPacketInfo SelectNetwork::GetPacketInfo()
+	PacketLayer::RecvPacketInfo SelectNetwork::GetPacketInfo()
 	{
-		RecvPacketInfo packetInfo;
+		RecvPacket packetInfo;
 
 		if (m_PacketQueue.empty() == false)
 		{
@@ -168,9 +168,23 @@ namespace NetworkLayer
 		m_ClientPoolIndex.pop_front();
 		return index;
 	}
-	void SelectNetwork::RejectClient(SOCKET socket)
+	void SelectNetwork::RejectClient(SOCKET socket, const int sessionIndex)
 	{
-		// 여기 구현해야함
+
+		if (m_ClientsPool[sessionIndex].IsConnected() == false) {
+			return;
+		}
+
+		closesocket(socket);
+		FD_CLR(socket, &m_ReadSet);
+
+		m_ClientsPool[sessionIndex].Clear();
+		--m_ConnectedSessionCount;
+		
+		m_ClientPoolIndex.push_back(sessionIndex);
+		m_ClientsPool[sessionIndex].Clear();
+
+		AddPacketQueue(sessionIndex, (short)PacketId::CLIENT_CLOSE, 0, nullptr);
 	}
 	void SelectNetwork::ConnectedClient(const int client_index
 		, const SOCKET whoSocket, const char* pIP)
@@ -209,7 +223,7 @@ namespace NetworkLayer
 			}
 
 			// check write
-			//ProcessWrite(sessionIndex, fd, write_set);
+			ProcessSend(sessionIndex, fd, write_set);
 		}
 
 	}
@@ -288,19 +302,19 @@ namespace NetworkLayer
 		auto readPos = 0;
 		const auto remainDataSize = session.RemainingDataSize;
 		//PacketHead* pPktHead;
-		PacketHead* testPkt;
+		PacketHeader* testPkt;
 
-		while ((remainDataSize - readPos) >= PACKET_HEADER_SIZE)
+		while ((remainDataSize - readPos) >= sizeof(PacketHeader))
 		{
-			testPkt = (PacketHead*)& session.pRecvBuffer[readPos];
-			readPos += PACKET_HEADER_SIZE;
-			auto bodySize = (INT16)(testPkt->TotalSize - PACKET_HEADER_SIZE);
+			testPkt = (PacketHeader*)& session.pRecvBuffer[readPos];
+			readPos += sizeof(PacketHeader);
+			auto bodySize = (INT16)(testPkt->TotalSize - sizeof(PacketHeader));
 
 			if (bodySize > 0)
 			{
 				if (bodySize > (remainDataSize - readPos))
 				{
-					readPos -= PACKET_HEADER_SIZE;
+					readPos -= sizeof(PacketHeader);
 					break;
 				}
 
@@ -322,84 +336,27 @@ namespace NetworkLayer
 	}
 	
 	
-	void SelectNetwork::ProcessWrite(const int sessionIndex, const SOCKET fd, fd_set& write_set)
+	void SelectNetwork::ProcessSend(const int sessionIndex, const SOCKET fd, fd_set& write_set)
 	{
 		if (!FD_ISSET(fd, &write_set))
-		{
 			return;
-		}
 
-
-		auto retsend = FlushSendBuff(sessionIndex);
-		if (retsend != 0)std::cout << "send error..!" << std::endl;
-
-
-
-
-		auto & session = m_ClientsPool[sessionIndex];
-		auto sockfd = static_cast<SOCKET>(session.SocketFD);
-
-		if (session.IsConnected() == false)
+		auto retsend = SettingSendBuff(sessionIndex);
+		if (retsend != 0)
 		{
-			std::cout << "client disconnect " << std::endl;
+			std::cout << "FlushSendBuff error..!" << std::endl;
+			RejectClient(fd, sessionIndex);
 		}
-
-		//auto result = SendData(sockfd, session.pSendBuffer, session.SendSize);
-		//if (result != true)
-		//	std::cout << "send data filed...!" << std::endl;
-
-
-		//auto sendSize = result.Vlaue;
-		//if (sendSize < session.SendSize)
-		//{
-		//	memmove(&session.pSendBuffer[0],
-		//		&session.pSendBuffer[sendSize],
-		//		session.SendSize - sendSize);
-
-		//	session.SendSize -= sendSize;
-		//}
-		//else
-		//{
-		//	session.SendSize = 0;
-		//}
-		//return result;
-
-
-
-
-
-		//if (retsend.Error != NET_ERROR_CODE::NONE)
-		//{
-		//	CloseSession(SOCKET_CLOSE_CASE::SOCKET_SEND_ERROR, fd, sessionIndex);
-		//}
 	}
-	bool SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
-	{
 
-		auto rfds = m_ReadSet;
-
-		// 접속 되어 있는지 또는 보낼 데이터가 있는지
-		if (size <= 0)
-		{
-			return false;
-		}
-		int retSend = 0;
-		 retSend = send(fd, pMsg, size, 0);
-
-		 if (retSend < 0)
-			 return false;
-
-		 return true;
-	}
-	bool SelectNetwork::FlushSendBuff(const int sessionIndex)
+	bool SelectNetwork::SettingSendBuff(const int sessionIndex)
 	{
 		auto& session = m_ClientsPool[sessionIndex];
 		auto fd = static_cast<SOCKET>(session.SocketFD);
 
 		if (session.IsConnected() == false)
-		{
 			return false;
-		}
+		
 
 		auto result = SendData(fd, session.pSendBuffer, session.SendSize);
 
@@ -419,16 +376,38 @@ namespace NetworkLayer
 			session.SendSize -= sendSize;
 		}
 		else
-		{
 			session.SendSize = 0;
-		}
+		
+
+
 		return result;
 	}
+	bool SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
+	{
+
+		auto rfds = m_ReadSet;
+
+		// 접속 되어 있는지 또는 보낼 데이터가 있는지
+		if (size <= 0)
+		{
+			return false;
+		}
+		int retSend = 0;
+		 retSend = send(fd, pMsg, size, 0);
+
+		 if (retSend < 0)
+			 return false;
+
+		 return true;
+	}
+
 	
+
+
 	void SelectNetwork::AddPacketQueue(const int Index, const short pktId, const short bodySize, char* pDataPos)
 	{
-		RecvPacketInfo packetInfo;
-		packetInfo.Index = Index;
+		RecvPacket packetInfo;
+		packetInfo.SessionIndex = Index;
 		packetInfo.PacketId = pktId;
 		packetInfo.PacketBodySize = bodySize;
 		packetInfo.pRefData = pDataPos;

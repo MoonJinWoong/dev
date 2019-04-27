@@ -3,7 +3,9 @@
 
 
 #include "../02_NetworkLayer/Define.h"
-#include "../02_NetworkLayer/PacketInfo.h"
+//#include "../02_NetworkLayer/PacketInfo.h"
+#include "../../PacketDefine/Packet.h"
+
 namespace NetworkLayer
 {
 	class SelectNetwork;
@@ -11,11 +13,16 @@ namespace NetworkLayer
 
 namespace LogicLayer
 {
+	class ClientManager;
+
+
 	class PktProcessMain
 	{
 		using SelNet = NetworkLayer::SelectNetwork;
-		using RecvPckInfo = NetworkLayer::RecvPacketInfo;
-		using PktID = NetworkLayer::PACKET_ID;
+		using RecvPckInfo = PacketLayer::RecvPacketInfo;
+		using PktID = PacketLayer::PACKET_ID;
+
+
 	public:
 		PktProcessMain();
 		~PktProcessMain();
@@ -26,6 +33,7 @@ namespace LogicLayer
 		void StateCheck();
 	private:
 		NetworkLayer::SelectNetwork* m_RefSelectNetObj;
+		ClientManager* m_pRefClientMgr;
 
 	};
 }
