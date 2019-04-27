@@ -2,7 +2,8 @@
 #include <thread>
 #include <chrono>
 
-#include "LogicProcess.h"
+
+#include "PktProcessMain.h"
 
 
 namespace NetworkLayer
@@ -22,7 +23,7 @@ namespace LogicLayer
 		void Stop();
 	private:
 		std::unique_ptr<NetworkLayer::SelectNetwork> m_pSelectNetwork;
-		std::unique_ptr<LogicProcess> m_pLogicPacketProcess;
+		std::unique_ptr<PktProcessMain> m_pPacketProcess;
 		bool m_IsRun = false;
 	protected:
 

@@ -18,3 +18,18 @@ struct RecvPacketInfo
 	short PacketBodySize = 0;
 	char* pRefData = 0;
 };
+
+
+namespace NetworkLayer
+{
+	// 21 이상부터 시작해야 한다!!!
+	enum class PACKET_ID : short
+	{
+		LOGIN_IN_REQ = 11,
+		LOGIN_IN_RES = 22
+
+		//MAX = 256
+	};
+
+}
+

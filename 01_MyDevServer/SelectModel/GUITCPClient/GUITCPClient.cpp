@@ -30,7 +30,7 @@ SOCKET sock; // 소켓
 char buf[BUFSIZE + 1]; // 데이터 송수신 버퍼
 HANDLE hReadEvent, hWriteEvent; // 이벤트
 HWND hSendButton; // 보내기 버튼
-HWND hSendButton2; // 로그인 버튼
+HWND hLoginButton; // 로그인 버튼
 HWND hEdit1, hEdit2; // 편집 컨트롤
 HWND hEdit3, hEdit4;  // 로그인 편집 컨트롤
 
@@ -70,41 +70,37 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
         hEdit2 = GetDlgItem(hDlg, IDC_EDIT2);
 
 		hEdit3 = GetDlgItem(hDlg, INPUT_LOGIN);
-		hEdit4 = GetDlgItem(hDlg, INPUT_PWD);
 
         hSendButton = GetDlgItem(hDlg, IDOK);
+		hLoginButton = GetDlgItem(hDlg, IDLOGIN);
 
-		//hSendButton2 = GetDlgItem(hDlg, IDLOGIN);
+		SendMessage(hEdit3, EM_SETLIMITTEXT, BUFSIZE, 0);
         SendMessage(hEdit1, EM_SETLIMITTEXT, BUFSIZE, 0);
+		
         return TRUE;
+
+
     case WM_COMMAND:
 		switch (LOWORD(wParam)) {
 		case IDOK:
 		{
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
 
-		
 			char sendbuf[MAX_PACKET_SIZE] = { 0, };
 			
-
 			// 패킷 바디 세팅
 			Packet_Login_CtoS packet;
 			//ZeroMemory(packet, sizeof(Packet_Login_CtoS));
 			strcpy(packet.szID, buf);
 			strcpy(packet.szPW, buf);
 
-
-			PacketHead header{sizeof(packet)+ PACKET_HEADER_SIZE, 123 };
-
-
+			PacketHead header{sizeof(packet)+ PACKET_HEADER_SIZE, 11 };
 			memcpy(&sendbuf[0], (char*)&header, PACKET_HEADER_SIZE);
-
 
 			if (sizeof(Packet_Login_CtoS) > 0)
 			{
 				memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)&packet, sizeof(Packet_Login_CtoS));
 			}
-
 
 			auto ret = send(sock,(char*)& sendbuf,
 				sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
@@ -119,15 +115,47 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetFocus(hEdit1);
 			SendMessage(hEdit1, EM_SETSEL, 0, -1);
 
-
+			//ZeroMemory(buf, BUFSIZE + 1);
+			//char buf[BUFSIZE+1] = { 0, };
 
 			return TRUE;
 		}
-		case INPUT_LOGIN:
+		case IDLOGIN:
 		{
 			// 로그인 버튼을 눌렀을 때 string을 가져옴
+			GetDlgItemText(hDlg,INPUT_LOGIN , buf, BUFSIZE + 1);
 
-			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+			// 패킷 바디 세팅
+			Packet_Login_CtoS packet;
+			//ZeroMemory(packet, sizeof(Packet_Login_CtoS));
+			strcpy(packet.szID, buf);
+			strcpy(packet.szPW, buf);
+
+			PacketHead header{ sizeof(packet) + PACKET_HEADER_SIZE, 11 };
+
+			memcpy(&sendbuf[0], (char*)& header, PACKET_HEADER_SIZE);
+
+			if (sizeof(Packet_Login_CtoS) > 0)
+				memcpy(&sendbuf[PACKET_HEADER_SIZE], (char*)& packet, sizeof(Packet_Login_CtoS));
+			
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(Packet_Login_CtoS) + PACKET_HEADER_SIZE, 0);
+
+
+			if (ret == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+			DisplayText("[TCP 클라이언트] %d바이트를 보냈습니다.\r\n", ret);
+			//SetEvent(hWriteEvent); // 쓰기 완료 알리기
+			SetFocus(hEdit1);
+			SendMessage(hEdit1, EM_SETSEL, 0, -1);
+
+
+		//	char buf[BUFSIZE + 1] = { 0, };
+			return true;
 		}
 		case IDCANCEL:
 		{
