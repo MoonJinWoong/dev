@@ -24,7 +24,7 @@ namespace LogicLayer
 
 
 		m_pPacketProcess = std::make_unique<PktProcessMain>();
-		m_pPacketProcess->Init(m_pSelectNetwork.get());
+		m_pPacketProcess->Init(m_pSelectNetwork.get(), m_pClientManager.get());
 
 
 		m_IsRun = true;
@@ -43,7 +43,6 @@ namespace LogicLayer
 				else
 					// 로직 단에서 받은 패킷을 처리한다. 
 					m_pPacketProcess->Process(packetInfo);
-				
 			}
 
 			// 로직단에서 유저의 상태 체크 

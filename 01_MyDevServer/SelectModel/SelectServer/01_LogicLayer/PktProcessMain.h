@@ -26,7 +26,7 @@ namespace LogicLayer
 	public:
 		PktProcessMain();
 		~PktProcessMain();
-		void Init(SelNet* pNetObj);
+		void Init(SelNet* pNetObj,ClientManager* pClientMgr);
 		void Process(RecvPckInfo packet);
 		void ProcLogin(RecvPckInfo packet);
 

@@ -6,6 +6,9 @@
 #include <iostream>
 
 
+using PACKE_ID = PacketLayer::PACKET_ID;
+using PktLoginResponse = PacketLayer::PktLogInRes;
+
 
 namespace LogicLayer
 {
@@ -13,19 +16,23 @@ namespace LogicLayer
 
 	void PktProcessMain::ProcLogin(RecvPckInfo packetInfo)
 	{
-		PacketLayer::PktLogInRes packet;
-		auto reqPkt = (PacketLayer::PktLogInReq*)packetInfo.pRefData;
+		PacketLayer::PktLogInRes resPkt;
+		auto requestPkt = (PacketLayer::PktLogInReq*)packetInfo.pRefData;
 
-		auto addRet = m_pRefClientMgr->Add(packetInfo.SessionIndex, reqPkt->szID);
+		auto addRet = m_pRefClientMgr->Add(packetInfo.SessionIndex, requestPkt->szID);
 		
+
 		if (addRet == false)
+		{
 			std::cout << "ClientManager Add is failed..!" << std::endl;
+			strcpy(resPkt.msg, "LoginFail");
+		}
+		else
+			strcpy(resPkt.msg, "LoginSucc");
+			
 
-
-		// 여기서부터 다시 
-		// 로직단에서 처리한걸 네트워크로 실어 보낼때 구조를 어찌할 것인가
-		// send
-		m_RefSelectNetObj->
+		m_RefSelectNetObj->LogicSendBufferSet(packetInfo.SessionIndex, (short)PACKE_ID::LOGIN_IN_RES
+			, sizeof(PktLoginResponse), (char*)& resPkt);
 
 	}
 }

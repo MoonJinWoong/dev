@@ -42,10 +42,12 @@ namespace NetworkLayer
 		bool    RecvData(const int sessionIndex);
 		bool    RecvBufferProcess(const int sessionIndex);
 
-		bool    SendData(const SOCKET fd, const char* pMsg, const int size);
+		int    SendData(const SOCKET fd, const char* pMsg, const int size);
 		bool    SettingSendBuff(const int sessionIndex);
 
 
+		bool 	LogicSendBufferSet(const int sessionIndex, const short packetID
+			    ,const short bodysize, const char* msg);
 	
 
 		void    AddPacketQueue(const int sessionIndex

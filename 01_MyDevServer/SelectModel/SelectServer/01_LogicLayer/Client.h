@@ -33,7 +33,25 @@ namespace LogicLayer
 
 		}
 
+		void Clear()
+		{
+			m_Index = 0;
+			m_ID = "";
+			m_IsConfirm = false;
+			m_CurState = CLIENT_STATE::NONE;
+			//m_LobbyIndex = -1;
+			//m_RoomIndex = -1;
+		}
 
+		short GetIndex() 
+		{ 
+			return m_Index; 
+		}
+
+		std::string& GetID() 
+		{ 
+			return m_ID; 
+		}
 
 	protected:
 

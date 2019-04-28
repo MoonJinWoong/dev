@@ -29,14 +29,18 @@ namespace PacketLayer
 	const int MAX_USER_ID_SIZE = 16;
 	const int MAX_USER_PASSWORD_SIZE = 16;
 	
+
+	// 클라에서 서버로 보냄
 	struct PktLogInReq
 	{
 		char szID[MAX_USER_ID_SIZE+1] = { 0, };
 		//char szPW[MAX_USER_PASSWORD_SIZE+1] = { 0, };
 	};
 
+	// 서버에서 클라로 보냄
 	struct PktLogInRes 
 	{
+		char msg[11] = { 0, };
 	};
 
 #pragma pack(pop)

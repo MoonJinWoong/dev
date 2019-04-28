@@ -3,7 +3,7 @@
 
 namespace NetworkLayer
 {
-	const int MAX_CLIENTS = 1000;
+	const int MAX_CLIENTS = 2000;
 
 
 

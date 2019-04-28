@@ -26,8 +26,13 @@ int recvn(SOCKET s, char *buf, int len, int flags);
 // 소켓 통신 스레드 함수
 DWORD WINAPI ClientMain(LPVOID arg);
 
+// 받은 패킷 처리하는 함수 
+void PacketProcess(char* recvbuf);
+
+
 SOCKET sock; // 소켓
 char buf[BUFSIZE + 1]; // 데이터 송수신 버퍼
+char recvbuf[BUFSIZE + 1]; // 데이터 송수신 버퍼
 HANDLE hReadEvent, hWriteEvent; // 이벤트
 HWND hSendButton; // 보내기 버튼
 HWND hLoginButton; // 로그인 버튼
@@ -267,29 +272,21 @@ DWORD WINAPI ClientMain(LPVOID arg)
 
     // 서버와 데이터 통신
     while (1) {
-       // WaitForSingleObject(hWriteEvent, INFINITE); // 쓰기 완료 기다리기
-
-        // 문자열 길이가 0이면 보내지 않음
-        //if (strlen(buf) == 0) {
-        //    EnableWindow(hSendButton, TRUE); // 보내기 버튼 활성화
-        //    SetEvent(hReadEvent); // 읽기 완료 알리기
-        //    continue;
-        //}
-
+ 
 		// 데이터 보내기
 		int retval = 0;
-		//retval = send(sock, buf, strlen(buf), 0);
-		//if (retval == SOCKET_ERROR) {
-		//	err_display("send()");
-		//	break;
-		//}
-		//DisplayText("[TCP 클라이언트] %d바이트를 보냈습니다.\r\n", retval);
-		
-		ZeroMemory(buf, sizeof(buf));
+
+
+		char recvBuf[MAX_PACKET_SIZE] = { 0, };
+		//ZeroMemory(recvBuf, sizeof(recvBuf));
 
 
         // 데이터 받기
-        retval = recv(sock, buf, 512, 0);
+        retval = recv(sock, recvBuf, 1024, 0);
+		PacketProcess(recvbuf);
+
+
+
         if (retval == SOCKET_ERROR) {
             err_display("recv()");
             break;
@@ -298,13 +295,22 @@ DWORD WINAPI ClientMain(LPVOID arg)
             break;
 
         // 받은 데이터 출력
-        buf[retval] = '\0';
+		recvBuf[retval] = '\0';
         DisplayText("[TCP 클라이언트] %d바이트를 받았습니다.\r\n", retval);
-        DisplayText("[받은 데이터] %s\r\n", buf);
+        DisplayText("[받은 데이터] %s\r\n", recvBuf);
 
         EnableWindow(hSendButton, TRUE); // 보내기 버튼 활성화
       //  SetEvent(hReadEvent); // 읽기 완료 알리기
     }
 
     return 0;
+}
+
+void PacketProcess(char* recvbuf)
+{
+	// 패킷 바디 선언 및 id 세팅 
+	PacketLayer::PktLogInRes packet;
+	strcpy(packet.msg, recvbuf);
+
+
 }

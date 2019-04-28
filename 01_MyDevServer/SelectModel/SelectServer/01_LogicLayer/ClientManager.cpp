@@ -1,9 +1,8 @@
-
-
-
+#include <algorithm>
+#include "../02_NetworkLayer/Define.h"
 #include "Client.h"
 #include "ClientManager.h"
-#include "../02_NetworkLayer/Define.h"
+
 
 
 namespace LogicLayer
@@ -13,7 +12,7 @@ namespace LogicLayer
 	ClientManager::~ClientManager() {};
 	void ClientManager::Init()
 	{
-		// Ãµ¹ø µ·´Ù
+		// Ãµ¹ø µ·´Ù 
 		for (int i = 0; i < NetworkLayer::MAX_CLIENTS; ++i)
 		{
 			Client client;
@@ -41,8 +40,28 @@ namespace LogicLayer
 
 		pClient->Set(sessionIndex, ID);
 
+
+		// ¸Ê¿¡ ³Ö¾îÁØ´Ù.
 		m_integerSearch.insert({ sessionIndex, pClient });
 		m_charSearch.insert({ ID, pClient });
+
+		return true;
+	}
+
+	bool ClientManager::Remove(const int sessionIndex)
+	{
+		auto pClient = Find(sessionIndex);
+
+		if (pClient == nullptr)
+			return false;
+		
+
+		auto index = pClient->GetIndex();
+		auto pszID = pClient->GetID();
+
+		m_integerSearch.erase(sessionIndex);
+		m_charSearch.erase(pszID.c_str());
+		ReleaseClientPoolIndex(index);
 
 		return true;
 	}
@@ -57,6 +76,15 @@ namespace LogicLayer
 		return (Client*)Iter->second;
 	}
 
+	Client* ClientManager::Find(const int index)
+	{
+		auto Iter = m_integerSearch.find(index);
+
+		if (Iter == m_integerSearch.end())
+			return nullptr;
+
+		return (Client*)Iter->second;
+	}
 
 	Client* ClientManager::AllocUserObjPoolIndex()
 	{
@@ -68,8 +96,10 @@ namespace LogicLayer
 
 		return &m_ClientObjPool[index];
 	}
-	
 
-
-	
+	void ClientManager::ReleaseClientPoolIndex(const int index)
+	{
+		m_ClientObjPoolIndex.push_back(index);
+		m_ClientObjPool[index].Clear();
+	}
 }

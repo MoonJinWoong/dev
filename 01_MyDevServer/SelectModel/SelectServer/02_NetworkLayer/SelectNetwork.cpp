@@ -5,7 +5,16 @@ namespace NetworkLayer
 	SelectNetwork::SelectNetwork() {}
 	SelectNetwork::~SelectNetwork() 
 	{
-	
+		for (auto& client : m_ClientsPool)
+		{
+			if (client.pRecvBuffer) {
+				delete[] client.pRecvBuffer;
+			}
+
+			if (client.pSendBuffer) {
+				delete[] client.pSendBuffer;
+			}
+		}
 	}
 	void SelectNetwork::InitNetwork()
 	{
@@ -200,7 +209,7 @@ namespace NetworkLayer
 
 		std::cout << "client unique id = " << client_index << std::endl;
 
-		//AddPacketQueue(sessionIndex, (short)PACKET_ID::NTF_SYS_CONNECT_SESSION, 0, nullptr);
+		AddPacketQueue(client_index, (short)PacketLayer::PACKET_ID::CONNECTED, 0, nullptr);
 	}
 
 	void SelectNetwork::CheckClients(fd_set& read_set, fd_set& write_set)
@@ -270,6 +279,7 @@ namespace NetworkLayer
 			recvPos += session.RemainingDataSize;
 		}
 
+		// 왜 이걸 여러번 보내나? 
 		auto recvSize = recv(fd, &session.pRecvBuffer[recvPos], (MAX_PACKET_BODY_SIZE * 2), 0);
 		std::cout << "recv size - " << recvSize << std::endl;
 
@@ -301,14 +311,13 @@ namespace NetworkLayer
 
 		auto readPos = 0;
 		const auto remainDataSize = session.RemainingDataSize;
-		//PacketHead* pPktHead;
-		PacketHeader* testPkt;
+		PacketHeader* pPktHeader;
 
 		while ((remainDataSize - readPos) >= sizeof(PacketHeader))
 		{
-			testPkt = (PacketHeader*)& session.pRecvBuffer[readPos];
+			pPktHeader = (PacketHeader*)& session.pRecvBuffer[readPos];
 			readPos += sizeof(PacketHeader);
-			auto bodySize = (INT16)(testPkt->TotalSize - sizeof(PacketHeader));
+			auto bodySize = (INT16)(pPktHeader->TotalSize - sizeof(PacketHeader));
 
 			if (bodySize > 0)
 			{
@@ -320,12 +329,12 @@ namespace NetworkLayer
 
 				if (bodySize > MAX_PACKET_BODY_SIZE)
 				{
-					// 더 이상 이 세션과는 작업을 하지 않을 예정. 클라이언트 보고 나가라고 하던가 직접 짤라야 한다.
+					//클라이언트 보고 나가라고 하던가 직접 짤라야 한다.
 					return false;
 				}
 			}
 
-			AddPacketQueue(sessionIndex, testPkt->Id, bodySize, &session.pRecvBuffer[readPos]);
+			AddPacketQueue(sessionIndex, pPktHeader->Id, bodySize, &session.pRecvBuffer[readPos]);
 			readPos += bodySize;
 		}
 
@@ -341,14 +350,15 @@ namespace NetworkLayer
 		if (!FD_ISSET(fd, &write_set))
 			return;
 
+		// 여기 리턴부터 다시 
+		// 여기를 공부해야함 
 		auto retsend = SettingSendBuff(sessionIndex);
-		if (retsend != 0)
+		if (retsend != true)
 		{
 			std::cout << "FlushSendBuff error..!" << std::endl;
 			RejectClient(fd, sessionIndex);
 		}
 	}
-
 	bool SelectNetwork::SettingSendBuff(const int sessionIndex)
 	{
 		auto& session = m_ClientsPool[sessionIndex];
@@ -382,27 +392,52 @@ namespace NetworkLayer
 
 		return result;
 	}
-	bool SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
+	int SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
 	{
 
-		auto rfds = m_ReadSet;
+		//auto rfds = m_ReadSet;
 
 		// 접속 되어 있는지 또는 보낼 데이터가 있는지
-		if (size <= 0)
-		{
-			return false;
-		}
-		int retSend = 0;
-		 retSend = send(fd, pMsg, size, 0);
+		if (size == 0) return 0;
+		else if(size < 0) return -1;
 
-		 if (retSend < 0)
-			 return false;
 
-		 return true;
+		auto retSend = 0;
+		retSend = send(fd, pMsg, size, 0);
+		std::cout << "send size ->" << retSend << std::endl;
+
+		 if (retSend <= 0)
+			 return 0;
+
+		 return retSend;
 	}
 
-	
 
+	bool SelectNetwork::LogicSendBufferSet(const int sessionIndex, const short packetID
+		, const short bodysize, const char* msg)
+	{
+		auto& session = m_ClientsPool[sessionIndex];
+
+		auto pos = session.SendSize;
+		auto totalSize = (bodysize + sizeof(PacketLayer::PktHeader));
+
+		if ((pos + totalSize) > MaxClientSendBufferSize) 
+		{
+			std::cout << "client SendBuffer is Full ..." << std::endl;
+			return false;
+		}
+
+		PacketHeader pktHeader{ totalSize, packetID };
+		memcpy(&session.pSendBuffer[pos], (char*)& pktHeader, sizeof(PacketLayer::PktHeader));
+
+		if (bodysize > 0)
+			memcpy(&session.pSendBuffer[pos + sizeof(PacketLayer::PktHeader)], msg, bodysize);
+		
+		session.SendSize += totalSize;
+
+		return true;
+	}
+	
 
 	void SelectNetwork::AddPacketQueue(const int Index, const short pktId, const short bodySize, char* pDataPos)
 	{

@@ -49,7 +49,7 @@ namespace PacketLayer
 		DEV_ECHO_RES = 242,
 
 		CLIENT_CLOSE = 243,
-
+		CONNECTED = 244,
 		MAX = 256
 	};
 
