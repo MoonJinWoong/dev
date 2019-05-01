@@ -152,16 +152,26 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="InGame.cpp" />
+    <ClCompile Include="Lobby.cpp" />
+    <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="PktProcessMain.cpp" />
+    <ClCompile Include="PktProcLobby.cpp" />
     <ClCompile Include="PktProcLogin.cpp" />
     <ClCompile Include="ClientManager.cpp" />
+    <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h" />
+    <ClInclude Include="InGame.h" />
+    <ClInclude Include="Lobby.h" />
+    <ClInclude Include="LobbyManager.h" />
+    <ClInclude Include="LogicErrorSet.h" />
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="PktProcessMain.h" />
     <ClInclude Include="ClientManager.h" />
+    <ClInclude Include="Room.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

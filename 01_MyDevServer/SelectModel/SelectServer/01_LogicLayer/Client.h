@@ -53,6 +53,11 @@ namespace LogicLayer
 			return m_ID; 
 		}
 
+		bool IsConfirm() { return m_IsConfirm; }
+
+		bool IsCurDomainInLogIn() {
+			return m_CurState == CLIENT_STATE::LOGIN ? true : false;
+		}
 	protected:
 
 		short m_Index = -1;

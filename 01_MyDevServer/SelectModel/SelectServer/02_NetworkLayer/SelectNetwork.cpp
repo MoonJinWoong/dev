@@ -98,17 +98,16 @@ namespace NetworkLayer
 		// Select 
 		timeval timeout{ 0, 1000 }; //tv_sec, tv_usec
 		auto ret = select(0, &r_set, &w_set, 0, &timeout);
-		if (ret == 0 || ret == -1)
-		{
-			std::cout << "select error..!" << std::endl;
+		if (ret == 0 || ret == -1) // -1은 에러이다
 			return;
-		}
+		
 
 		// Accept
 		if (FD_ISSET(m_ServerSocket, &r_set))
 		{
 			auto accepRet = AcceptNewClient();
 		}
+
 
 		// 모든 클라이언트풀 돌면서 read write 검사
 		CheckClients(r_set, w_set);
@@ -205,6 +204,7 @@ namespace NetworkLayer
 		ReleaseClientIndex(clientIndex);
 
 		AddPacketQueue(clientIndex, (short)PacketId::CLOSE_CLIENT, 0, nullptr);
+		std::cout << "this client get out ->" << clientIndex << std::endl;
 	}
 	void SelectNetwork::SetSocketOpt(const SOCKET socket)
 	{
@@ -325,7 +325,7 @@ namespace NetworkLayer
 		{
 			pPktHeader = (PacketHeader*)& client.pRecvBuffer[readPos];
 			readPos += sizeof(PacketHeader);
-			auto bodySize = (INT16)(pPktHeader->TotalSize - sizeof(PacketHeader));
+			auto bodySize = pPktHeader->TotalSize - sizeof(PacketHeader);
 
 			if (bodySize > 0)
 			{
@@ -391,14 +391,15 @@ namespace NetworkLayer
 	}
 
 
-
 	NET_ERROR_SET SelectNetwork::LogicSendBufferSet(const int sessionIndex, const short packetID
 		, const short bodysize, const char* msg)
 	{
+		// 로직레이어에서 호출하는 함수 
+
 		auto& client = m_ClientsPool[sessionIndex];
 
 		auto pos = client.SendSize;
-		auto totalSize = (INT16)(bodysize + sizeof(PacketHeader));
+		auto totalSize = bodysize + sizeof(PacketHeader);
 
 		if ((pos + totalSize) > MaxClientSendBufferSize)
 			return NET_ERROR_SET::CLIENT_SEND_BUFFER_FULL;

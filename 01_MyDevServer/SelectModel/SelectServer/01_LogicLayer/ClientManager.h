@@ -9,6 +9,8 @@ namespace LogicLayer
 {
 	// 전방선언
 	class Client;
+	
+
 
 	class ClientManager
 	{
@@ -16,6 +18,8 @@ namespace LogicLayer
 		ClientManager();
 		~ClientManager();
 		void Init();
+		std::tuple<LOGIC_ERROR_SET, Client*> GetClient(const int sessionIndex);
+
 		bool Add(const int sessionIndex, const char* ID);
 		bool Remove(const int sessionIndex);
 

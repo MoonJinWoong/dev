@@ -283,21 +283,34 @@ DWORD WINAPI ClientMain(LPVOID arg)
 
         // 데이터 받기
         retval = recv(sock, recvBuf, 1024, 0);
-		PacketProcess(recvbuf);
+		
+		if (retval == SOCKET_ERROR) {
+			err_display("recv()");
+			break;
+		}
+		else if (retval == 0)
+			break;
 
 
 
-        if (retval == SOCKET_ERROR) {
-            err_display("recv()");
-            break;
-        }
-        else if (retval == 0)
-            break;
+		// 받은거 처리 
+		auto readPos = 0;
+		PacketLayer::PktHeader* pPktHeader;
+		pPktHeader = (PacketLayer::PktHeader*)& recvBuf[readPos];
+
+
+
+		readPos += sizeof(PacketLayer::PktHeader);
+		auto bodySize = pPktHeader->TotalSize - sizeof(PacketLayer::PktHeader);
+		PacketLayer::PktLogInRes bodyData;
+		memcpy(&bodyData.msg[0],(char*) &recvBuf[readPos], bodySize);
+ 
+
 
         // 받은 데이터 출력
 		recvBuf[retval] = '\0';
         DisplayText("[TCP 클라이언트] %d바이트를 받았습니다.\r\n", retval);
-        DisplayText("[받은 데이터] %s\r\n", recvBuf);
+        DisplayText("[받은 데이터] %s\r\n", bodyData.msg);
 
         EnableWindow(hSendButton, TRUE); // 보내기 버튼 활성화
       //  SetEvent(hReadEvent); // 읽기 완료 알리기

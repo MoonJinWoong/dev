@@ -23,7 +23,8 @@ namespace LogicLayer
 		{
 		case (int)PktID::LOGIN_IN_REQ:
 			this->ProcLogin(packet);
-		case (int)PktID::LOGIN_IN_RES:
+		case (int)PktID::LOBBY_LIST_REQ:
+			this->ProcLobbyList(packet);
 		default:
 			break;
 

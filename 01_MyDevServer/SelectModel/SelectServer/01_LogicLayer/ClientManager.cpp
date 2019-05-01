@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "../02_NetworkLayer/Define.h"
+#include "LogicErrorSet.h"
 #include "Client.h"
 #include "ClientManager.h"
 
@@ -12,7 +13,6 @@ namespace LogicLayer
 	ClientManager::~ClientManager() {};
 	void ClientManager::Init()
 	{
-		// Ãµ¹ø µ·´Ù 
 		for (int i = 0; i < NetworkLayer::MAX_CLIENTS; ++i)
 		{
 			Client client;
@@ -23,6 +23,19 @@ namespace LogicLayer
 		}
 	}
 
+	std::tuple<LOGIC_ERROR_SET, Client*> ClientManager::GetClient(const int sessionIndex)
+	{
+		auto pClient = Find(sessionIndex);
+
+		if (pClient == nullptr)
+			return { LOGIC_ERROR_SET::CLIENT_MGR_INVALID_INDEX, nullptr };
+		
+		if (pClient->IsConfirm() == false) 
+			return{ LOGIC_ERROR_SET::CLIENT_MGR_NOT_CONFIRM_USER, nullptr };
+		
+
+		return{ LOGIC_ERROR_SET::NONE, pClient };
+	}
 	bool ClientManager::Add(const int sessionIndex, const char* ID)
 	{
 		if (Find(ID) != nullptr)

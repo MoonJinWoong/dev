@@ -1,7 +1,6 @@
 #pragma once
 #include <memory>
-
-
+#include <array>
 #include "../02_NetworkLayer/Define.h"
 //#include "../02_NetworkLayer/PacketInfo.h"
 #include "../../PacketDefine/Packet.h"
@@ -31,6 +30,7 @@ namespace LogicLayer
 		void Init(SelNet* pNetObj,ClientManager* pClientMgr);
 		void Process(RecvPckInfo packet);
 		void ProcLogin(RecvPckInfo packet);
+		void ProcLobbyList(RecvPckInfo packet);
 
 		void StateCheck();
 	private:

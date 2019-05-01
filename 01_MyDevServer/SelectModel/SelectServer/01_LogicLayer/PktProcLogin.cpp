@@ -28,7 +28,7 @@ namespace LogicLayer
 			strcpy(resPkt.msg, "LoginFail");
 		}
 		else
-			strcpy(resPkt.msg, "LoginSucc");
+			strcpy(resPkt.msg, "LoginSuccess");
 			
 
 		auto ret = m_RefSelectNetObj->LogicSendBufferSet(packetInfo.SessionIndex, (short)PACKE_ID::LOGIN_IN_RES

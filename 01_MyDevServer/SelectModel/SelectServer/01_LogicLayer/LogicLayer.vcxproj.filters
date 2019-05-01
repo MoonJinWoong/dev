@@ -5,11 +5,48 @@
     <ClCompile Include="PktProcessMain.cpp" />
     <ClCompile Include="PktProcLogin.cpp" />
     <ClCompile Include="ClientManager.cpp" />
+    <ClCompile Include="PktProcLobby.cpp" />
+    <ClCompile Include="Lobby.cpp">
+      <Filter>Lobby</Filter>
+    </ClCompile>
+    <ClCompile Include="LobbyManager.cpp">
+      <Filter>Lobby</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Room</Filter>
+    </ClCompile>
+    <ClCompile Include="InGame.cpp">
+      <Filter>InGame</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="PktProcessMain.h" />
     <ClInclude Include="ClientManager.h" />
     <ClInclude Include="Client.h" />
+    <ClInclude Include="LogicErrorSet.h" />
+    <ClInclude Include="Lobby.h">
+      <Filter>Lobby</Filter>
+    </ClInclude>
+    <ClInclude Include="LobbyManager.h">
+      <Filter>Lobby</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Room</Filter>
+    </ClInclude>
+    <ClInclude Include="InGame.h">
+      <Filter>InGame</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Lobby">
+      <UniqueIdentifier>{fcec9ed4-27e3-4d01-ac3e-645cf8bd334d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Room">
+      <UniqueIdentifier>{8f686374-387c-4ed1-9521-3e829b845d63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="InGame">
+      <UniqueIdentifier>{73dd72e6-3284-4dbc-9726-6541e0a47edd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>
