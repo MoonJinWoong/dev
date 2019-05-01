@@ -5,6 +5,10 @@ namespace PacketLayer
 	// 21 이상부터 시작해야 한다!!!
 	enum class PACKET_ID : short
 	{		
+		CONNECT_CLIENT = 11,
+		CLOSE_CLIENT   = 12,
+
+
 		LOGIN_IN_REQ = 21,
 		LOGIN_IN_RES = 22,
 

@@ -41,4 +41,6 @@ namespace NetworkLayer
 		char* pSendBuffer = nullptr;
 		int     SendSize = 0;
 	};
+
+
 }

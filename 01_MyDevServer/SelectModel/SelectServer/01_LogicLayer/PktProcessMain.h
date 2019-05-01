@@ -5,6 +5,7 @@
 #include "../02_NetworkLayer/Define.h"
 //#include "../02_NetworkLayer/PacketInfo.h"
 #include "../../PacketDefine/Packet.h"
+#include "../02_NetworkLayer/ErrorSet.h"
 
 namespace NetworkLayer
 {
@@ -21,6 +22,7 @@ namespace LogicLayer
 		using SelNet = NetworkLayer::SelectNetwork;
 		using RecvPckInfo = PacketLayer::RecvPacketInfo;
 		using PktID = PacketLayer::PACKET_ID;
+		using NET_ERROR_SET = NetworkLayer::NET_ERROR_SET;
 
 
 	public:

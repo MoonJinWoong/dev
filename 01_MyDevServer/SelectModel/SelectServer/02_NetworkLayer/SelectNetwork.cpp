@@ -42,7 +42,6 @@ namespace NetworkLayer
 
 		CreateClientPool(MAX_CLIENTS+64);
 	}
-
 	bool SelectNetwork::BindAndListen()
 	{
 		SOCKADDR_IN server_addr;
@@ -96,10 +95,14 @@ namespace NetworkLayer
 		//연결된 모든 세션을 write 이벤트를 조사하고 있는데 사실 다 할 필요는 없다. 이전에 send 버퍼가 다 찼던 세션만 조사해도 된다.
 		auto w_set = m_ReadSet;
 
+		// Select 
 		timeval timeout{ 0, 1000 }; //tv_sec, tv_usec
-		auto selectResult = select(0, &r_set, &w_set, 0, &timeout);
-		if (selectResult == SOCKET_ERROR) std::cout << "select error..!" << std::endl;
-
+		auto ret = select(0, &r_set, &w_set, 0, &timeout);
+		if (ret == 0 || ret == -1)
+		{
+			std::cout << "select error..!" << std::endl;
+			return;
+		}
 
 		// Accept
 		if (FD_ISSET(m_ServerSocket, &r_set))
@@ -107,11 +110,12 @@ namespace NetworkLayer
 			auto accepRet = AcceptNewClient();
 		}
 
-		// 
+		// 모든 클라이언트풀 돌면서 read write 검사
 		CheckClients(r_set, w_set);
 
 	}
-	bool SelectNetwork::AcceptNewClient()
+
+	NET_ERROR_SET SelectNetwork::AcceptNewClient()
 	{
 		auto tryCount = 0; // 너무 많이 accept를 시도하지 않도록 한다.
 
@@ -121,332 +125,295 @@ namespace NetworkLayer
 
 			SOCKADDR_IN client_addr;
 			auto client_len = static_cast<int>(sizeof(client_addr));
-			auto client_sockfd = accept(m_ServerSocket, (SOCKADDR*)& client_addr, &client_len);
-		
-			if (client_sockfd == INVALID_SOCKET)
+			auto accept_socket = accept(m_ServerSocket, (SOCKADDR*)& client_addr, &client_len);
+			
+			if (accept_socket == INVALID_SOCKET)
 			{
 				if (WSAGetLastError() == WSAEWOULDBLOCK)
-				{
-					return true;
-				}
-
-				return false;
+					return NET_ERROR_SET::ACCEPT_API_WSAEWOULDBLOCK;
+				
+				return NET_ERROR_SET::ACCEPT_ERROR;
 			}
 
 			auto newSessionIndex = AllocClientIndex();
 			if (newSessionIndex < 0)
 			{
-				return false;
+				ShutdownClient(SOCKET_CLOSE_CASE::SESSION_POOL_MAX, accept_socket, -1);
+				return NET_ERROR_SET::ACCEPT_MAX_COUNT;
 			}
 
 
 			char clientIP[MAX_IP_LEN] = { 0, };
 			inet_ntop(AF_INET, &(client_addr.sin_addr), clientIP, MAX_IP_LEN - 1);
 
+			SetSocketOpt(accept_socket);
 
-
-			linger ling;
-			ling.l_onoff = 0;
-			ling.l_linger = 0;
-			setsockopt(client_sockfd, SOL_SOCKET, SO_LINGER, (char*)& ling, sizeof(ling));
-
-			int size1 = MaxClientSockOptRecvBufferSize;
-			int size2 = MaxClientSockOptSendBufferSize;
-
-			setsockopt(client_sockfd, SOL_SOCKET, SO_RCVBUF, (char*)& size1, sizeof(size1));
-			setsockopt(client_sockfd, SOL_SOCKET, SO_SNDBUF, (char*)& size2, sizeof(size2));
-
-
-
-			FD_SET(client_sockfd, &m_ReadSet);
-
-			ConnectedClient(newSessionIndex, client_sockfd, clientIP);
+			FD_SET(accept_socket, &m_ReadSet);
+			ConnectedClient(newSessionIndex, accept_socket, clientIP);
 
 		} while (tryCount < FD_SETSIZE);
 
-		return true;
+		return NET_ERROR_SET::NONE;
+	}
+	void SelectNetwork::ConnectedClient(const int index, const SOCKET socket, const char* IP)
+	{
+		++m_ConnectSeq;
 
+		auto& session = m_ClientsPool[index];
+		session.unique_id = m_ConnectSeq;
+		session.SocketFD = socket;
+		memcpy(session.IP, IP, MAX_IP_LEN - 1);
+
+		++m_IsConnectedCnt;
+
+		AddPacketQueue(index, (short)PacketId::CONNECT_CLIENT, 0, nullptr);
+		std::cout << "client connected index -> " << index << std::endl;
 	}
 	int SelectNetwork::AllocClientIndex()
 	{
-		if (m_ClientPoolIndex.empty()) {
+		// --> 더이상 뺄게 없으면 죄다 할당한 상태
+		if (m_ClientPoolIndex.empty())
 			return -1;
-		}
-
+		
 		int index = m_ClientPoolIndex.front();
 		m_ClientPoolIndex.pop_front();
 		return index;
 	}
-	void SelectNetwork::RejectClient(SOCKET socket, const int sessionIndex)
+	void SelectNetwork::ReleaseClientIndex(const int index)
 	{
+		m_ClientPoolIndex.push_back(index);
+		m_ClientsPool[index].Clear();
+	}
 
-		if (m_ClientsPool[sessionIndex].IsConnected() == false) {
+	void SelectNetwork::ShutdownClient(const SOCKET_CLOSE_CASE closeCase, const SOCKET socket, const int clientIndex)
+	{
+		if (closeCase == SOCKET_CLOSE_CASE::SESSION_POOL_MAX)
+		{
+			closesocket(socket);
+			FD_CLR(socket, &m_ReadSet);
 			return;
 		}
 
+		if (m_ClientsPool[clientIndex].IsConnected() == false)
+			return;
+		
 		closesocket(socket);
 		FD_CLR(socket, &m_ReadSet);
 
-		m_ClientsPool[sessionIndex].Clear();
-		--m_ConnectedSessionCount;
-		
-		m_ClientPoolIndex.push_back(sessionIndex);
-		m_ClientsPool[sessionIndex].Clear();
+		m_ClientsPool[clientIndex].Clear();
+		--m_IsConnectedCnt;
+		ReleaseClientIndex(clientIndex);
 
-		AddPacketQueue(sessionIndex, (short)PacketId::CLIENT_CLOSE, 0, nullptr);
+		AddPacketQueue(clientIndex, (short)PacketId::CLOSE_CLIENT, 0, nullptr);
 	}
-	void SelectNetwork::ConnectedClient(const int client_index
-		, const SOCKET whoSocket, const char* pIP)
+	void SelectNetwork::SetSocketOpt(const SOCKET socket)
 	{
-		++m_ConnectSeq;
+		// 공부 해야함
+		linger ling;
+		ling.l_onoff = 0;
+		ling.l_linger = 0;
+		setsockopt(socket, SOL_SOCKET, SO_LINGER, (char*)& ling, sizeof(ling));
 
-		auto& session = m_ClientsPool[client_index];
-		session.unique_id = m_ConnectSeq;
-		session.SocketFD = whoSocket;
-		memcpy(session.IP, pIP, MAX_IP_LEN - 1);
 
-		++m_ConnectedSessionCount;
-
-		std::cout << "client unique id = " << client_index << std::endl;
-
-		AddPacketQueue(client_index, (short)PacketLayer::PACKET_ID::CONNECTED, 0, nullptr);
+		// 소켓 버퍼 크기 늘림
+		int size1 = MaxClientSockOptRecvBufferSize;
+		int size2 = MaxClientSockOptSendBufferSize;
+		setsockopt(socket, SOL_SOCKET, SO_RCVBUF, (char*)& size1, sizeof(size1));
+		setsockopt(socket, SOL_SOCKET, SO_SNDBUF, (char*)& size2, sizeof(size2));
 	}
 
-	void SelectNetwork::CheckClients(fd_set& read_set, fd_set& write_set)
-	{
-		for (int i = 0; i < m_ClientsPool.size(); ++i)
-		{
-			auto& session = m_ClientsPool[i];
-
-			if (session.IsConnected() == false) {
-				continue;
-			}
-
-			SOCKET fd = session.SocketFD;
-			auto sessionIndex = session.Index;
-
-			// check read
-			auto retReceive = ProcessRecv(sessionIndex, fd, read_set);
-			if (retReceive == false) {
-				continue;
-			}
-
-			// check write
-			ProcessSend(sessionIndex, fd, write_set);
-		}
-
-	}
-
-	bool SelectNetwork::ProcessRecv(const int clientIndex, const SOCKET fd, fd_set& read_set)
-	{
-		if (!FD_ISSET(fd, &read_set))
-		{
-			return true;
-		}
-
-		auto ret = RecvData(clientIndex);
-		if (ret != true)
-		{
-			//CloseSession(SOCKET_CLOSE_CASE::SOCKET_RECV_ERROR, fd, sessionIndex);
-			return false;
-		}
-
-		ret = RecvBufferProcess(clientIndex);
-		if (ret != true)
-		{
-			//CloseSession(SOCKET_CLOSE_CASE::SOCKET_RECV_BUFFER_PROCESS_ERROR, fd, sessionIndex);
-			return false;
-		}
-
-		return true;
-	}
-	bool SelectNetwork::RecvData(const int clientIndex)
-	{
-		auto& session = m_ClientsPool[clientIndex];
-		auto fd = static_cast<SOCKET>(session.SocketFD);
-
-		if (session.IsConnected() == false)
-		{
-			std::cout << "this client is not connected" << std::endl;
-			return false;
-		}
-
-		int recvPos = 0;
-
-		if (session.RemainingDataSize > 0)
-		{
-			memcpy(session.pRecvBuffer, &session.pRecvBuffer[session.PrevReadPosInRecvBuffer], session.RemainingDataSize);
-			recvPos += session.RemainingDataSize;
-		}
-
-		// 왜 이걸 여러번 보내나? 
-		auto recvSize = recv(fd, &session.pRecvBuffer[recvPos], (MAX_PACKET_BODY_SIZE * 2), 0);
-		std::cout << "recv size - " << recvSize << std::endl;
-
-
-		if (recvSize == 0)
-		{
-			return false;
-		}
-
-		if (recvSize < 0)
-		{
-			auto error = WSAGetLastError();
-			if (error != WSAEWOULDBLOCK)
-			{
-				return false;
-			}
-			else
-			{
-				return true;
-			}
-		}
-
-		session.RemainingDataSize += recvSize;
-		return true;
-	}
-	bool SelectNetwork::RecvBufferProcess(const int sessionIndex)
-	{
-		auto& session = m_ClientsPool[sessionIndex];
-
-		auto readPos = 0;
-		const auto remainDataSize = session.RemainingDataSize;
-		PacketHeader* pPktHeader;
-
-		while ((remainDataSize - readPos) >= sizeof(PacketHeader))
-		{
-			pPktHeader = (PacketHeader*)& session.pRecvBuffer[readPos];
-			readPos += sizeof(PacketHeader);
-			auto bodySize = (INT16)(pPktHeader->TotalSize - sizeof(PacketHeader));
-
-			if (bodySize > 0)
-			{
-				if (bodySize > (remainDataSize - readPos))
-				{
-					readPos -= sizeof(PacketHeader);
-					break;
-				}
-
-				if (bodySize > MAX_PACKET_BODY_SIZE)
-				{
-					//클라이언트 보고 나가라고 하던가 직접 짤라야 한다.
-					return false;
-				}
-			}
-
-			AddPacketQueue(sessionIndex, pPktHeader->Id, bodySize, &session.pRecvBuffer[readPos]);
-			readPos += bodySize;
-		}
-
-		session.RemainingDataSize -= readPos;
-		session.PrevReadPosInRecvBuffer = readPos;
-
-		return true;
-	}
-	
-	
-	void SelectNetwork::ProcessSend(const int sessionIndex, const SOCKET fd, fd_set& write_set)
-	{
-		if (!FD_ISSET(fd, &write_set))
-			return;
-
-		// 여기 리턴부터 다시 
-		// 여기를 공부해야함 
-		auto retsend = SettingSendBuff(sessionIndex);
-		if (retsend != true)
-		{
-			std::cout << "FlushSendBuff error..!" << std::endl;
-			RejectClient(fd, sessionIndex);
-		}
-	}
-	bool SelectNetwork::SettingSendBuff(const int sessionIndex)
-	{
-		auto& session = m_ClientsPool[sessionIndex];
-		auto fd = static_cast<SOCKET>(session.SocketFD);
-
-		if (session.IsConnected() == false)
-			return false;
-		
-
-		auto result = SendData(fd, session.pSendBuffer, session.SendSize);
-
-		if (result != 0) return false;
-
-
-
-		auto sendSize = result;
-
-
-		if (sendSize < session.SendSize)
-		{
-			memmove(&session.pSendBuffer[0],
-				&session.pSendBuffer[sendSize],
-				session.SendSize - sendSize);
-
-			session.SendSize -= sendSize;
-		}
-		else
-			session.SendSize = 0;
-		
-
-
-		return result;
-	}
-	int SelectNetwork::SendData(const SOCKET fd, const char* pMsg, const int size)
-	{
-
-		//auto rfds = m_ReadSet;
-
-		// 접속 되어 있는지 또는 보낼 데이터가 있는지
-		if (size == 0) return 0;
-		else if(size < 0) return -1;
-
-
-		auto retSend = 0;
-		retSend = send(fd, pMsg, size, 0);
-		std::cout << "send size ->" << retSend << std::endl;
-
-		 if (retSend <= 0)
-			 return 0;
-
-		 return retSend;
-	}
-
-
-	bool SelectNetwork::LogicSendBufferSet(const int sessionIndex, const short packetID
-		, const short bodysize, const char* msg)
-	{
-		auto& session = m_ClientsPool[sessionIndex];
-
-		auto pos = session.SendSize;
-		auto totalSize = (bodysize + sizeof(PacketLayer::PktHeader));
-
-		if ((pos + totalSize) > MaxClientSendBufferSize) 
-		{
-			std::cout << "client SendBuffer is Full ..." << std::endl;
-			return false;
-		}
-
-		PacketHeader pktHeader{ totalSize, packetID };
-		memcpy(&session.pSendBuffer[pos], (char*)& pktHeader, sizeof(PacketLayer::PktHeader));
-
-		if (bodysize > 0)
-			memcpy(&session.pSendBuffer[pos + sizeof(PacketLayer::PktHeader)], msg, bodysize);
-		
-		session.SendSize += totalSize;
-
-		return true;
-	}
-	
-
-	void SelectNetwork::AddPacketQueue(const int Index, const short pktId, const short bodySize, char* pDataPos)
+	void SelectNetwork::AddPacketQueue(const int sessionIndex, const short pktId, const short bodySize, char* pDataPos)
 	{
 		RecvPacket packetInfo;
-		packetInfo.SessionIndex = Index;
+		packetInfo.SessionIndex = sessionIndex;
 		packetInfo.PacketId = pktId;
 		packetInfo.PacketBodySize = bodySize;
 		packetInfo.pRefData = pDataPos;
 
 		m_PacketQueue.push_back(packetInfo);
 	}
+
+	void SelectNetwork::CheckClients(fd_set& read_set, fd_set& write_set)
+	{
+		for (int i = 0; i < m_ClientsPool.size(); ++i)
+		{
+			auto& client = m_ClientsPool[i];
+
+			if (client.IsConnected() == false)
+				continue;
+			
+			SOCKET sock = client.SocketFD;
+			auto clientIndex = client.Index;
+
+			// check read  --> recv 처리 
+			auto retReceive = checkReadSet(clientIndex, sock, read_set);
+			if (retReceive == false)
+				continue;
+			
+			// check write
+			checkWriteSet(clientIndex, sock, write_set);
+		}
+	}
+
+	bool SelectNetwork::checkReadSet(const int index, const SOCKET fd, fd_set& read_set)
+	{
+		if (!FD_ISSET(fd, &read_set))
+			return true;
+
+		// recv 
+		auto ret = RecvData(index);
+		if (ret != NET_ERROR_SET::NONE)
+		{
+			ShutdownClient(SOCKET_CLOSE_CASE::RECV_ERROR, fd, index);
+			return false;
+		}
+
+		// recv 받은거 process --> packetQueue에 집어넣음
+		ret = RecvBufferProcess(index);
+		if (ret != NET_ERROR_SET::NONE)
+		{
+			ShutdownClient(SOCKET_CLOSE_CASE::RECV_BUFFER_PROCESS_ERROR, fd, index);
+			return false;
+		}
+
+		return true;
+	}
+	NET_ERROR_SET SelectNetwork::RecvData(const int index)
+	{
+		auto& client = m_ClientsPool[index];
+		auto fd = static_cast<SOCKET>(client.SocketFD);
+
+		if (client.IsConnected() == false)
+			return NET_ERROR_SET::RECV_PROCESS_NOT_CONNECTED;
+		
+
+		int recvPos = 0;
+		if (client.RemainingDataSize > 0)
+		{
+			memcpy(client.pRecvBuffer, &client.pRecvBuffer[client.PrevReadPosInRecvBuffer]
+				 , client.RemainingDataSize);
+			recvPos += client.RemainingDataSize;
+		}
+
+		auto recvSize = recv(fd, &client.pRecvBuffer[recvPos], (MAX_PACKET_BODY_SIZE * 2), 0);
+
+		if (recvSize == 0)
+			return NET_ERROR_SET::RECV_REMOTE_CLIENT_CLOSE;
+		
+
+		if (recvSize < 0)
+		{
+			auto error = WSAGetLastError();
+			if (error != WSAEWOULDBLOCK)
+				return NET_ERROR_SET::RECV_API_ERROR;
+			else
+				return NET_ERROR_SET::NONE;
+		}
+
+		client.RemainingDataSize += recvSize;
+		return NET_ERROR_SET::NONE;
+	}
+	NET_ERROR_SET SelectNetwork::RecvBufferProcess(const int index)
+	{
+		auto& client = m_ClientsPool[index];
+
+		auto readPos = 0;
+		const auto dataSize = client.RemainingDataSize;
+		PacketHeader* pPktHeader;
+
+		while ((dataSize - readPos) >= sizeof(PacketHeader))
+		{
+			pPktHeader = (PacketHeader*)& client.pRecvBuffer[readPos];
+			readPos += sizeof(PacketHeader);
+			auto bodySize = (INT16)(pPktHeader->TotalSize - sizeof(PacketHeader));
+
+			if (bodySize > 0)
+			{
+				if (bodySize > (dataSize - readPos))
+				{
+					readPos -= sizeof(PacketHeader);
+					break;
+				}
+
+				if (bodySize > MAX_PACKET_BODY_SIZE)
+					return NET_ERROR_SET::RECV_CLIENT_MAX_PACKET;
+				
+			}
+
+			AddPacketQueue(index, pPktHeader->Id, bodySize, &client.pRecvBuffer[readPos]);
+			readPos += bodySize;
+		}
+
+		client.RemainingDataSize -= readPos;
+		client.PrevReadPosInRecvBuffer = readPos;
+
+		return NET_ERROR_SET::NONE;
+	}
+
+	void SelectNetwork::checkWriteSet(const int index, const SOCKET fd, fd_set& write_set)
+	{
+		if (!FD_ISSET(fd, &write_set))
+			return;
+		
+		auto retsend = SendData(index);
+		if (retsend != NET_ERROR_SET::NONE)
+			ShutdownClient(SOCKET_CLOSE_CASE::SEND_ERROR, fd, index);
+		
+	}
+	NET_ERROR_SET SelectNetwork::SendData(const int sessionIndex)
+	{
+		auto& client = m_ClientsPool[sessionIndex];
+		auto sock = static_cast<SOCKET>(client.SocketFD);
+
+		if (client.IsConnected() == false)
+			return NET_ERROR_SET::CLIENT_SEND_BUFF_NOT_CONNECTION;
+		
+		if (client.SendSize <= 0)
+			return NET_ERROR_SET::NONE;
+
+		auto retsend = send(sock, client.pSendBuffer, client.SendSize, 0);
+
+		if (retsend <= 0)
+			return NET_ERROR_SET::SEND_SIZE_ZERO;
+
+
+
+		if (retsend < client.SendSize)
+		{
+			memmove(&client.pSendBuffer[0],&client.pSendBuffer[retsend],
+			    	client.SendSize - retsend);
+			client.SendSize -= retsend;
+		}
+		else
+			client.SendSize = 0;
+		
+		return NET_ERROR_SET::NONE;
+	}
+
+
+
+	NET_ERROR_SET SelectNetwork::LogicSendBufferSet(const int sessionIndex, const short packetID
+		, const short bodysize, const char* msg)
+	{
+		auto& client = m_ClientsPool[sessionIndex];
+
+		auto pos = client.SendSize;
+		auto totalSize = (INT16)(bodysize + sizeof(PacketHeader));
+
+		if ((pos + totalSize) > MaxClientSendBufferSize)
+			return NET_ERROR_SET::CLIENT_SEND_BUFFER_FULL;
+		
+
+		PacketHeader pktHeader{ totalSize, packetID };
+		memcpy(&client.pSendBuffer[pos], (char*)& pktHeader, sizeof(PacketHeader));
+
+		if (bodysize > 0)
+			memcpy(&client.pSendBuffer[pos + sizeof(PacketHeader)], msg, bodysize);
+		
+
+		client.SendSize += totalSize;
+		return NET_ERROR_SET::NONE;
+	}
+
+
 }

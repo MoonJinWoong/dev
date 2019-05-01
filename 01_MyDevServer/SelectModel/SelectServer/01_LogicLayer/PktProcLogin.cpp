@@ -31,8 +31,11 @@ namespace LogicLayer
 			strcpy(resPkt.msg, "LoginSucc");
 			
 
-		m_RefSelectNetObj->LogicSendBufferSet(packetInfo.SessionIndex, (short)PACKE_ID::LOGIN_IN_RES
+		auto ret = m_RefSelectNetObj->LogicSendBufferSet(packetInfo.SessionIndex, (short)PACKE_ID::LOGIN_IN_RES
 			, sizeof(PktLoginResponse), (char*)& resPkt);
+
+		if (ret != NET_ERROR_SET::NONE)
+			std::cout << "logic Send faile...!" << std::endl;
 
 	}
 }
