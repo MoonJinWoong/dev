@@ -7,11 +7,17 @@
 
 namespace LogicLayer
 {
+	enum class LOGIC_ERROR_SET :short;
+}
+using LOGIC_ERROR_SET = LogicLayer::LOGIC_ERROR_SET;
+
+
+
+namespace LogicLayer
+{
 	// 전방선언
 	class Client;
 	
-
-
 	class ClientManager
 	{
 	public:

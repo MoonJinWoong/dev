@@ -1,9 +1,11 @@
-
+#include "../../PacketDefine/Packet.h"
+#include "LogicErrorSet.h"
 #include "../02_NetworkLayer/SelectNetwork.h"
+//#include "ConnectedUserManager.h"
 #include "Client.h"
 #include "ClientManager.h"
+#include "LobbyManager.h"
 #include "PktProcessMain.h"
-#include <iostream>
 
 
 using PACKE_ID = PacketLayer::PACKET_ID;
@@ -35,7 +37,7 @@ namespace LogicLayer
 			, sizeof(PktLoginResponse), (char*)& resPkt);
 
 		if (ret != NET_ERROR_SET::NONE)
-			std::cout << "logic Send faile...!" << std::endl;
+			std::cout << "logic Send failed PrcLogin...!" << std::endl;
 
 	}
 }

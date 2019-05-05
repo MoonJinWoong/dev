@@ -15,6 +15,13 @@ namespace NetworkLayer
 	const int MaxClientSockOptRecvBufferSize = 10240;
 	const int MaxClientSockOptSendBufferSize = 10240;
 
+	//bool IsLoginCheck;	
+
+	//int MaxLobbyCount = 3;   // 로비는 3개로 정의
+	//int MaxLobbyUserCount = 50;    
+	//int MaxRoomCountByLobby = 20;  // 로비 하나당 방 20개 
+	//int MaxRoomClientCount = 4;		// 방 하나당 4명
+
 	struct ClientsInfo
 	{
 		bool IsConnected() { return SocketFD != 0 ? true : false; }

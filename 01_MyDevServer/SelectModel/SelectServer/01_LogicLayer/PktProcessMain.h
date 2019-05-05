@@ -1,10 +1,10 @@
 #pragma once
 #include <memory>
-#include <array>
-#include "../02_NetworkLayer/Define.h"
-//#include "../02_NetworkLayer/PacketInfo.h"
+
 #include "../../PacketDefine/Packet.h"
-#include "../02_NetworkLayer/ErrorSet.h"
+#include "LogicErrorSet.h"
+#include "../02_NetworkLayer/Define.h"
+
 
 namespace NetworkLayer
 {
@@ -14,7 +14,8 @@ namespace NetworkLayer
 namespace LogicLayer
 {
 	class ClientManager;
-
+	class LobbyManager;
+	class Lobby;
 
 	class PktProcessMain
 	{
@@ -27,15 +28,18 @@ namespace LogicLayer
 	public:
 		PktProcessMain();
 		~PktProcessMain();
-		void Init(SelNet* pNetObj,ClientManager* pClientMgr);
+		void Init(SelNet* pNetObj, ClientManager* pClientMgr, LobbyManager* pLobbyMgr);
 		void Process(RecvPckInfo packet);
 		void ProcLogin(RecvPckInfo packet);
 		void ProcLobbyList(RecvPckInfo packet);
+		void ProcLobbyEnter(RecvPckInfo packetInfo);
+
 
 		void StateCheck();
 	private:
 		NetworkLayer::SelectNetwork* m_RefSelectNetObj;
 		ClientManager* m_pRefClientMgr;
+		LobbyManager* m_pRefLobbyMgr;
 
 	};
 }

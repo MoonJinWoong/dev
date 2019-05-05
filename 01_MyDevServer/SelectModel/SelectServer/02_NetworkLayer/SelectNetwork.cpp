@@ -390,7 +390,6 @@ namespace NetworkLayer
 		return NET_ERROR_SET::NONE;
 	}
 
-
 	NET_ERROR_SET SelectNetwork::LogicSendBufferSet(const int sessionIndex, const short packetID
 		, const short bodysize, const char* msg)
 	{

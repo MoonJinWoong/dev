@@ -1,11 +1,13 @@
 #include <thread>
 #include <chrono>
+
+#include "../02_NetworkLayer/ErrorSet.h"
+#include "../02_NetworkLayer/Define.h"
 #include "../02_NetworkLayer/SelectNetwork.h"
 
-
+#include "LobbyManager.h"
 #include "PktProcessMain.h"
 #include "ClientManager.h"
-
 #include "LogicMain.h"
 
 
@@ -23,8 +25,14 @@ namespace LogicLayer
 		m_pClientManager->Init();
 
 
+		LobbyManagerOpt opt;
+
+
+		m_pLobbyManager = std::make_unique<LobbyManager>();
+		m_pLobbyManager->Init(m_pSelectNetwork.get(),opt);
+
 		m_pPacketProcess = std::make_unique<PktProcessMain>();
-		m_pPacketProcess->Init(m_pSelectNetwork.get(), m_pClientManager.get());
+		m_pPacketProcess->Init(m_pSelectNetwork.get(), m_pClientManager.get(),m_pLobbyManager.get());
 
 
 		m_IsRun = true;

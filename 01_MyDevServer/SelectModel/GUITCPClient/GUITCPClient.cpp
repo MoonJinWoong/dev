@@ -38,6 +38,9 @@ HWND hSendButton; // 보내기 버튼
 HWND hLoginButton; // 로그인 버튼
 HWND hEdit1, hEdit2; // 편집 컨트롤
 HWND hEdit3, hEdit4;  // 로그인 편집 컨트롤
+HWND hLobbyPrint;
+HWND hLobbyEnter;
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
     LPSTR lpCmdLine, int nCmdShow)
@@ -71,13 +74,17 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg) {
     case WM_INITDIALOG:
-        hEdit1 = GetDlgItem(hDlg, IDC_EDIT1);
-        hEdit2 = GetDlgItem(hDlg, IDC_EDIT2);
+        hEdit1 = GetDlgItem(hDlg, IDC_EDIT1);  // 채팅 메세지 입력란
+        hEdit2 = GetDlgItem(hDlg, IDC_EDIT2);  //  출력창
 
-		hEdit3 = GetDlgItem(hDlg, INPUT_LOGIN);
+		hEdit3 = GetDlgItem(hDlg, INPUT_LOGIN);  // id 입력란
 
-        hSendButton = GetDlgItem(hDlg, IDOK);
-		hLoginButton = GetDlgItem(hDlg, IDLOGIN);
+        hSendButton = GetDlgItem(hDlg, IDOK);   // 채팅 보내기 버튼
+		hLoginButton = GetDlgItem(hDlg, IDLOGIN);  // 로그인 버튼
+
+
+		hLobbyPrint = GetDlgItem(hDlg, LOBBY_PRINT);
+		hLobbyEnter = GetDlgItem(hDlg, LOBBY_ENTER);
 
 		SendMessage(hEdit3, EM_SETLIMITTEXT, BUFSIZE, 0);
         SendMessage(hEdit1, EM_SETLIMITTEXT, BUFSIZE, 0);
@@ -166,6 +173,55 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 		//	char buf[BUFSIZE + 1] = { 0, };
 			return true;
+		}
+		case LOBBYLIST:
+		{
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+			// 패킷 바디 세팅 
+			PacketLayer::PktLobbyListReq packet;
+
+
+			// 헤더 세팅
+			PacketLayer::PktHeader header{ sizeof(packet) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::LOBBY_LIST_REQ };
+			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+
+
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(PacketLayer::PktLogInReq) + sizeof(PacketLayer::PktHeader), 0);
+
+
+
+			DisplayText("[TCP 클라이언트] 로비 리스트 요청.\r\n");
+			break;
+		}
+		case LOBBY_ENTER:
+		{
+			// 현재 선택된 텍스트를 가져옴
+			int i = SendMessage(hLobbyPrint, LB_GETCURSEL, 0, 0);
+
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+			// 패킷 바디 세팅 
+			PacketLayer::PktLobbyEnterReq packet;
+			packet.selectedLobbyID = i;
+
+			// 헤더 세팅
+			PacketLayer::PktHeader header{ sizeof(packet) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::LOBBY_ENTER_REQ };
+			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+
+
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(PacketLayer::PktLobbyEnterReq) + sizeof(PacketLayer::PktHeader), 0);
+				
+			DisplayText("[Client ->Server] [%d]Lobby Enter Request.....\r\n", i);
+			break;
+			
+				
 		}
 		case IDCANCEL:
 		{
@@ -298,21 +354,58 @@ DWORD WINAPI ClientMain(LPVOID arg)
 		PacketLayer::PktHeader* pPktHeader;
 		pPktHeader = (PacketLayer::PktHeader*)& recvBuf[readPos];
 
+		switch (pPktHeader->Id)
+		{
+		case (int)PacketLayer::PACKET_ID::LOGIN_IN_RES:
+		{
+			readPos += sizeof(PacketLayer::PktHeader);
+			auto bodySize = pPktHeader->TotalSize - sizeof(PacketLayer::PktHeader);
+			PacketLayer::PktLogInRes bodyData;
+			memcpy(&bodyData.msg[0], (char*)& recvBuf[readPos], bodySize);
+
+			// 받은 데이터 출력
+			recvBuf[retval] = '\0';
+			DisplayText("[TCP 클라이언트] %d바이트를 받았습니다.\r\n", retval);
+			DisplayText("[받은 데이터] %s\r\n", bodyData.msg);
+
+			EnableWindow(hSendButton, TRUE); // 보내기 버튼 활성화
+			break;
+		}
+		case (int)PacketLayer::PACKET_ID::LOBBY_LIST_RES:
+		{
+			readPos += sizeof(PacketLayer::PktHeader);
+			auto bodySize = pPktHeader->TotalSize - sizeof(PacketLayer::PktHeader);
+			
+			PacketLayer::PktLobbyListRes bodyData;
+
+			memcpy(&bodyData.LobbyCount, (short*)& recvBuf[readPos], 2);
+
+			readPos += 2;
 
 
-		readPos += sizeof(PacketLayer::PktHeader);
-		auto bodySize = pPktHeader->TotalSize - sizeof(PacketLayer::PktHeader);
-		PacketLayer::PktLogInRes bodyData;
-		memcpy(&bodyData.msg[0],(char*) &recvBuf[readPos], bodySize);
- 
+			// max만큼 돌면 다뿌린다. 그래서 받은거만 뿌려주자
+			for (int i = 0; i < bodyData.LobbyCount; i++)
+			{
+				memcpy(&bodyData.LobbyList[i].LobbyId, (short*)& recvBuf[readPos], 2);
+				readPos += 2;
+				memcpy(&bodyData.LobbyList[i].LobbyMaxUserCount, (short*)& recvBuf[readPos], 2);
+				readPos += 2;
+				memcpy(&bodyData.LobbyList[i].LobbyUserCount, (short*)& recvBuf[readPos], 2);
+				readPos += 2;
+
+				char str[10];
+				sprintf(str, "%d", i);
+				SendMessage(hLobbyPrint, LB_ADDSTRING, NULL, (LPARAM)str);
+			}
 
 
-        // 받은 데이터 출력
-		recvBuf[retval] = '\0';
-        DisplayText("[TCP 클라이언트] %d바이트를 받았습니다.\r\n", retval);
-        DisplayText("[받은 데이터] %s\r\n", bodyData.msg);
+			break;
+		}
 
-        EnableWindow(hSendButton, TRUE); // 보내기 버튼 활성화
+		}
+
+
+
       //  SetEvent(hReadEvent); // 읽기 완료 알리기
     }
 

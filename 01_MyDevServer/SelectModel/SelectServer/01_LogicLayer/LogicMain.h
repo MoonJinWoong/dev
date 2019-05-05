@@ -1,9 +1,8 @@
 #pragma once
-#include <thread>
-#include <chrono>
+#include <memory>
 
-
-#include "PktProcessMain.h"
+#include "../../PacketDefine/Packet.h"
+#include "LogicErrorSet.h"
 
 
 namespace NetworkLayer
@@ -16,6 +15,7 @@ namespace LogicLayer
 	// 전방 선언
 	class ClientManager;
 	class PktProcessMain;
+	class LobbyManager;
 
 	class LogicMain
 	{
@@ -29,7 +29,7 @@ namespace LogicLayer
 		std::unique_ptr<NetworkLayer::SelectNetwork> m_pSelectNetwork;
 		std::unique_ptr<PktProcessMain> m_pPacketProcess;
 		std::unique_ptr<ClientManager> m_pClientManager;
-
+		std::unique_ptr<LobbyManager> m_pLobbyManager;
 		bool m_IsRun = false;
 	protected:
 

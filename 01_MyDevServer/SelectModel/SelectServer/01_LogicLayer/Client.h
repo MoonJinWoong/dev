@@ -58,12 +58,20 @@ namespace LogicLayer
 		bool IsCurDomainInLogIn() {
 			return m_CurState == CLIENT_STATE::LOGIN ? true : false;
 		}
+		void EnterLobby(const short lobbyIndex)
+		{
+			m_LobbyIndex = lobbyIndex;
+			m_CurState = CLIENT_STATE::LOBBY;
+		}
+
 	protected:
 
 		short m_Index = -1;
 		int m_SessionIndex = -1;
 		std::string m_ID;
 		bool m_IsConfirm = false;
+		short m_LobbyIndex = -1;
+		short m_RoomIndex = -1;
 		CLIENT_STATE m_CurState = CLIENT_STATE::NONE;
 
 	};

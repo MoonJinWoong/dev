@@ -79,8 +79,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GUITCPClient.cpp" />
+    <ClCompile Include="LobbyBox.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="LobbyBox.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

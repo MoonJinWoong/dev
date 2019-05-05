@@ -1,5 +1,4 @@
 #pragma once
-
 #include "PacketID.h"
 
 
@@ -54,10 +53,32 @@ namespace PacketLayer
 	// 로비 리스트 요청 - 클라에서 서버로 보냄
 	struct PktLobbyListReq
 	{
-
+		// 보낼게 있나....? 
 	};
 	// 로비 리스트 응답 - 서버에서 클라로 보냄
 	struct PktLobbyListRes
+	{
+		short LobbyCount = 0;   // 로비가 몇개냐 
+		LobbyInfo LobbyList[MAX_LOBBY_COUNT];
+	};
+
+	// 로비 입장 요청
+	struct PktLobbyEnterReq
+	{
+		short selectedLobbyID;
+	};
+
+	struct PktLobbyEnterRes
+	{
+
+	};
+
+	// 로비 떠나기 요청 
+	struct PktLobbyLeaveReq
+	{
+
+	};
+	struct PktLobbyLeaveRes
 	{
 
 	};

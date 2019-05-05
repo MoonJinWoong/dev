@@ -1,7 +1,8 @@
 #include <iostream>
 #include <thread>
 #include "../01_LogicLayer/LogicMain.h"
-#include "../../PacketDefine/Packet.h"
+
+
 int main()
 {
 	LogicLayer::LogicMain main;
