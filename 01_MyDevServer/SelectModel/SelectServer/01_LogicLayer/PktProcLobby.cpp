@@ -69,8 +69,19 @@ namespace LogicLayer
 		
 		
 		auto enterRet = pLobby->Enter(pClient);
-		if (enterRet != LOGIC_ERROR_SET::NONE) 
+		if (enterRet != LOGIC_ERROR_SET::NONE)
+		{
 			std::cout << "logic error -> " << (short)LOGIC_ERROR_SET::LOBBY_ENTER_EMPTY_USER_LIST << std::endl;
+		}
+			
 		
+
+		auto ret = m_RefSelectNetObj->LogicSendBufferSet(packetInfo.SessionIndex,
+			(short)PACKE_ID::LOBBY_ENTER_RES, sizeof(PktLobbyEnterRes), (char*)& resPkt);
+
+		if (ret != NET_ERROR_SET::NONE)
+		{
+			std::cout << "logic Send failed LobbyEnter...!" << std::endl;
+		}
 	}
 }

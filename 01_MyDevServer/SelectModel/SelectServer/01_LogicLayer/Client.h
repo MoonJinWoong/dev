@@ -39,8 +39,8 @@ namespace LogicLayer
 			m_ID = "";
 			m_IsConfirm = false;
 			m_CurState = CLIENT_STATE::NONE;
-			//m_LobbyIndex = -1;
-			//m_RoomIndex = -1;
+			m_LobbyIndex = -1;
+			m_RoomIndex = -1;
 		}
 
 		short GetIndex() 

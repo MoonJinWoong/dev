@@ -93,7 +93,8 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
     case WM_COMMAND:
-		switch (LOWORD(wParam)) {
+		switch (LOWORD(wParam)) 
+		{
 		case IDOK:
 		{
 			GetDlgItemText(hDlg, IDC_EDIT1, buf, BUFSIZE + 1);
@@ -189,37 +190,48 @@ BOOL CALLBACK DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 
 
-			auto ret = send(sock, (char*)& sendbuf,
+			auto ret = send(sock, (char*)&sendbuf,
 				sizeof(PacketLayer::PktLogInReq) + sizeof(PacketLayer::PktHeader), 0);
 
 
 
 			DisplayText("[TCP 클라이언트] 로비 리스트 요청.\r\n");
-			break;
+			return true;
 		}
 		case LOBBY_ENTER:
 		{
 			// 현재 선택된 텍스트를 가져옴
 			int i = SendMessage(hLobbyPrint, LB_GETCURSEL, 0, 0);
-
+			i = 1;
 			char sendbuf[MAX_PACKET_SIZE] = { 0, };
 
-			// 패킷 바디 세팅 
+			// 패킷 바디 
 			PacketLayer::PktLobbyEnterReq packet;
 			packet.selectedLobbyID = i;
 
-			// 헤더 세팅
+			// 헤더 세팅 후 버퍼에 세팅 
 			PacketLayer::PktHeader header{ sizeof(packet) + sizeof(PacketLayer::PktHeader)
 				, (int)PacketLayer::PACKET_ID::LOBBY_ENTER_REQ };
 			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
 
-
+			// 바디도 헤더 뒤에다가 세팅
+			if (sizeof(PacketLayer::PktLobbyEnterReq) > 0)
+				memcpy(&sendbuf[sizeof(PacketLayer::PktHeader)], (char*)& packet, sizeof(PacketLayer::PktLobbyEnterReq));
 
 			auto ret = send(sock, (char*)& sendbuf,
 				sizeof(PacketLayer::PktLobbyEnterReq) + sizeof(PacketLayer::PktHeader), 0);
+
+
+			if (ret == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+
+
+
 				
 			DisplayText("[Client ->Server] [%d]Lobby Enter Request.....\r\n", i);
-			break;
+			return true;
 			
 				
 		}
@@ -393,7 +405,7 @@ DWORD WINAPI ClientMain(LPVOID arg)
 				memcpy(&bodyData.LobbyList[i].LobbyUserCount, (short*)& recvBuf[readPos], 2);
 				readPos += 2;
 
-				char str[10];
+				char str[10] = { 0, };
 				sprintf(str, "%d", i);
 				SendMessage(hLobbyPrint, LB_ADDSTRING, NULL, (LPARAM)str);
 			}

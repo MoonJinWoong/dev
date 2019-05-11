@@ -27,7 +27,7 @@ namespace LogicLayer
 	public:
 		LobbyManager();
 		~LobbyManager();
-		void Init(SelectNet* network, const LobbyManagerOpt& opt);
+		void Init(SelectNet* network, const LobbyManagerOpt opt);
 		NET_ERR_SET SendLobbyListInfo(const int Index);
 		Lobby* GetLobby(short lobbyId);
 
