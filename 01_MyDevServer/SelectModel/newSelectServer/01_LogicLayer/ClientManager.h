@@ -2,16 +2,16 @@
 #include <unordered_map>
 #include <deque>
 #include <string>
+#include <iostream>
 
 
 
-enum class LOGIC_ERROR_SET :short;
+//enum class LOGIC_ERROR_SET :short;
 
 namespace LogicLayer
 {
 
 	class Client; // 전방 선언
-
 
 	class ClientManager
 	{
@@ -21,6 +21,7 @@ namespace LogicLayer
 		~ClientManager();
 		void Init(const int maxClientCnt);
 		int AddClient(const int sessionIndex, const char* pszID);
+		 Client* GetClient(const int Index);
 
 	private:
 		Client* AllocClientObjPoolIndex();

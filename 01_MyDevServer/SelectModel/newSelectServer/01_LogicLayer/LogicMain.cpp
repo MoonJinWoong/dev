@@ -5,7 +5,7 @@
 #include "../02_NetworkLayer/Define.h"
 #include "../02_NetworkLayer/SelectNetwork.h"
 
-//#include "LobbyManager.h"
+#include "LobbyManager.h"
 #include "PktProcMain.h"
 #include "ClientManager.h"
 #include "LogicMain.h"
@@ -24,9 +24,11 @@ namespace LogicLayer
 		m_ClientMgr = std::make_unique<ClientManager>();
 		m_ClientMgr->Init(NetworkLayer::MAX_CLIENTS);
 
+		m_LobbyMgr = std::make_unique<LobbyManager>();
+		m_LobbyMgr->Init(m_SelectNetwork.get());
 
 		m_PacketProc = std::make_unique<PktProcMain>();
-		m_PacketProc->Init(m_SelectNetwork.get(),m_ClientMgr.get());
+		m_PacketProc->Init(m_SelectNetwork.get(),m_ClientMgr.get(),m_LobbyMgr.get());
 	
 		m_IsRun = true;
 		return NET_ERROR_SET::NONE;

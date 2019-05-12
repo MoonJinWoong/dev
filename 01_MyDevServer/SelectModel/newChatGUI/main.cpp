@@ -15,7 +15,7 @@ HWND hPrint;		// 출력 창
 HWND hLobbyListBox;  // 로비 리스트 창
 HWND hLobbyEnter;
 
-BOOL CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	int msgboxID;
 
@@ -51,8 +51,8 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		{
 		case LOGIN:
 		{
-			char input[input_size] = { 0, };
-			GetDlgItemText(hwnd, INPUT_LOGIN, (LPSTR)input, input_size + 1);
+		    char input[input_size] = { 0, };
+			GetDlgItemText(hwnd, INPUT_LOGIN,(LPSTR)input, input_size + 1);
 			
 			// 버퍼 초기화
 			char sendbuf[MAX_PACKET_SIZE] = { 0, };
@@ -96,7 +96,7 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 
 			// 헤더 세팅 후 버퍼에 세팅 
 			int curPos = 0;
-			PacketLayer::PktHeader header{ sizeof(packet) + sizeof(PacketLayer::PktHeader)
+			PacketLayer::PktHeader header{ sizeof(PacketLayer::CS_LobbyList_Pkt) + sizeof(PacketLayer::PktHeader)
 				, (int)PacketLayer::PACKET_ID::CS_LOBBY_LIST };
 			memcpy(&sendbuf[curPos], (char*)& header, sizeof(PacketLayer::PktHeader));
 
@@ -119,10 +119,81 @@ BOOL CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		}
 		case LOBBYENTER:
 		{
-			int i = SendMessage(hLobbyListBox, LB_GETCURSEL, 0, 0);
+			short i = SendMessage(hLobbyListBox, LB_GETCURSEL, 0, 0);
 
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+
+
+			// 패킷 바디 
+			PacketLayer::CS_LobbyEnter_Pkt packet;
+			packet.lobbyIdBySelected = i;
+
+
+
+			// 헤더 세팅 후 버퍼에 세팅 
+			PacketLayer::PktHeader header{ sizeof(PacketLayer::CS_LobbyEnter_Pkt) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::CS_LOBBY_ENTER};
+			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+
+
+			// 바디도 헤더 뒤에다가 세팅
+			if (sizeof(PacketLayer::CS_LobbyEnter_Pkt) > 0)
+				memcpy(&sendbuf[sizeof(PacketLayer::PktHeader)], (char*)& packet, sizeof(PacketLayer::CS_LobbyEnter_Pkt));
+
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(PacketLayer::CS_LobbyEnter_Pkt) + sizeof(PacketLayer::PktHeader), 0);
+
+
+
+
+			if (ret == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+
+			DisplayText("[Client] [%d]Lobby Enter Request.....\r\n", i);
 			return true;
 		}
+		case LOBBY_CHAT:
+		{
+			char input[input_size] = { 0, };
+			GetDlgItemText(hwnd, LOBBY_CHAT_INPUT, (LPSTR)input, input_size);
+
+			// 버퍼 초기화
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+			// 패킷 바디 선언 및 id 세팅 
+			PacketLayer::CS_Lobby_Chat_Pkt packet;
+			strcpy(packet.msg, input);
+
+			// 헤더 세팅 후 버퍼에 세팅 
+			int curPos = 0;
+			PacketLayer::PktHeader header{ sizeof(PacketLayer::CS_Lobby_Chat_Pkt) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::CS_LOBBY_CHAT };
+			memcpy(&sendbuf[curPos], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+			// 바디를 버퍼에 세팅
+			curPos += sizeof(PacketLayer::PktHeader);
+			if (sizeof(PacketLayer::CS_Lobby_Chat_Pkt) > 0)
+				memcpy(&sendbuf[curPos], (char*)& packet, sizeof(PacketLayer::CS_Lobby_Chat_Pkt));
+
+
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(PacketLayer::CS_Lobby_Chat_Pkt) + sizeof(PacketLayer::PktHeader), 0);
+
+			if (ret == SOCKET_ERROR)
+			{
+				err_display("send()");
+				break;
+			}
+
+			// 여기서 부터 190512 
+			DisplayText("[Client] chat send In lobby .....\r\n");
+			return true;
+		}
+			
 		}
 		break;
 
@@ -142,9 +213,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 	// 소켓 통신 스레드 생성
 	CreateThread(NULL, 0, ClientMain, NULL, 0, NULL);
 
-
+	
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1), NULL, DlgProc);
-
 	// closesocket()
 	closesocket(sock);
 
@@ -205,7 +275,7 @@ DWORD WINAPI ClientMain(LPVOID arg)
 		PacketLayer::PktHeader * pPktHeader;
 		pPktHeader = (PacketLayer::PktHeader*) & recvBuf[readPos];
 
-		readPos += sizeof(pPktHeader);
+		readPos += sizeof(PacketLayer::PktHeader);
 
 
 		switch (pPktHeader->Id)
@@ -232,7 +302,23 @@ DWORD WINAPI ClientMain(LPVOID arg)
 			}
 			break;
 		}
+		case (int)PacketLayer::PACKET_ID::SC_LOBBY_ENTER:
+		{
+			PacketLayer::SC_LobbyEnter_Pkt packet;
 
+			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_LobbyEnter_Pkt));
+
+			DisplayText("[server] lobby  -> %s \r\n", packet.msg);
+			break;
+		}
+		case (int)PacketLayer::PACKET_ID::SC_LOBBY_CHAT:
+		{
+
+
+
+			DisplayText("[server] chat!!!    \r\n");
+			break;
+		}
 
 		}
 

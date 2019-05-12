@@ -24,7 +24,7 @@ namespace LogicLayer
 
 		void Clear()
 		{
-			m_SessionIndex = 0;
+			m_ClientIndex = 0;
 			m_ID = "";
 			m_IsConfirm = false;
 			m_CurDomainState = CLIENT_STATE::NONE;
@@ -37,14 +37,14 @@ namespace LogicLayer
 			m_IsConfirm = true;
 			m_CurDomainState = CLIENT_STATE::LOGIN;
 
-			m_SessionIndex = sessionIndex;
+			m_ClientIndex = sessionIndex;
 			m_ID = pszID;
 
 		}
 
 		short GetIndex() { return m_Index; }
 
-		int GetSessioIndex() { return m_SessionIndex; }
+		int GetClientIndex() { return m_ClientIndex; }
 
 		std::string& GetID() { return m_ID; }
 
@@ -73,15 +73,15 @@ namespace LogicLayer
 			m_CurDomainState = CLIENT_STATE::ROOMIN;
 		}
 
-		bool IsCurDomainInLogIn() {
+
+		// 아래 3개를 템플릿으로 구현 해보자 
+		bool IsCurStateInLogIn() {
 			return m_CurDomainState == CLIENT_STATE::LOGIN ? true : false;
 		}
-
-		bool IsCurDomainInLobby() {
+		bool IsCurStateInLobby() {
 			return m_CurDomainState == CLIENT_STATE::LOBBYIN ? true : false;
 		}
-
-		bool IsCurDomainInRoom() {
+		bool IsCurStateInRoom() {
 			return m_CurDomainState == CLIENT_STATE::ROOMIN ? true : false;
 		}
 
@@ -89,7 +89,7 @@ namespace LogicLayer
 	protected:
 		short m_Index = -1;
 
-		int m_SessionIndex = -1;
+		int m_ClientIndex = -1;
 
 		std::string m_ID;
 

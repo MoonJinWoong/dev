@@ -1,7 +1,11 @@
+
 #include "../02_NetworkLayer/SelectNetwork.h"
+
 #include "Client.h"
 #include "ClientManager.h"
-
+#include "Room.h"
+#include "Lobby.h"
+#include "LobbyManager.h"
 
 #include "PktProcMain.h"
 
@@ -9,10 +13,11 @@ namespace LogicLayer
 {
 	PktProcMain::PktProcMain() {}
 	PktProcMain::~PktProcMain() {}
-	void PktProcMain::Init(SelectNet* NetObj , ClientManager* pClientMgr)
+	void PktProcMain::Init(SelectNet* NetObj , ClientManager* pClientMgr , LobbyManager* pLobbyMgr)
 	{
 		m_pSelecNetObj = NetObj;
 		m_ClientMgr = pClientMgr;
+		m_LobbyMgr = pLobbyMgr;
 	}
 	void PktProcMain::Process(recvPacket packet)
 	{
@@ -28,6 +33,16 @@ namespace LogicLayer
 		case (int)PACKET_ID::CS_LOBBY_LIST:
 		{
 			ProcessLobbyList(packet);
+			break;
+		}
+		case (int)PACKET_ID::CS_LOBBY_ENTER:
+		{
+			ProcessLobbyEnter(packet);
+			break;
+		}
+		case (int)PACKET_ID::CS_LOBBY_CHAT:
+		{
+			ProcessLobbyChat(packet);
 			break;
 		}
 

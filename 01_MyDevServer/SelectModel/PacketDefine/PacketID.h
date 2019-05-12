@@ -16,6 +16,12 @@ namespace PacketLayer
 		CS_LOBBY_LIST = 20,
 		SC_LOBBY_LIST = 21,
 
+		CS_LOBBY_ENTER = 22,
+		SC_LOBBY_ENTER = 23,
+
+		CS_LOBBY_CHAT = 24,
+		SC_LOBBY_CHAT = 25,
+
 		PACKET_TOTAL_COUNT = 50
 	};
 

@@ -83,4 +83,25 @@ namespace LogicLayer
 		m_ClientPoolIndex.push_back(index);
 		m_ClientPool[index].Clear();
 	}
+
+	Client* ClientManager::GetClient(const int sessionIndex)
+	{
+		auto client = FindByIdx(sessionIndex);
+
+		if (client == nullptr)
+		{
+			std::cout << "GetClient in ClientManager ..Error" << std::endl;
+			return nullptr;
+		}
+			
+		
+		if (client->IsConfirm() == false)
+		{
+			std::cout << "GetClient is not Exist ..Error" << std::endl;
+			return nullptr;
+		}
+		
+		
+		return  client;
+	}
 }
