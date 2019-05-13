@@ -5,6 +5,7 @@ DWORD WINAPI ClientMain(LPVOID arg);
 void err_quit(const char* msg);
 void err_display(const char* msg);
 void DisplayText(const char* fmt, ...);
+void LobbyDisPlay(const char* fmt, ...);
 void PacketProcess(char* recvbuf);
 
 
@@ -12,6 +13,7 @@ SOCKET sock;
 HWND hLoginInput; // 편집 컨트롤
 HBRUSH g_hbrBackground = NULL;
 HWND hPrint;		// 출력 창
+HWND hLobbyPrint;   // 로비 채팅창
 HWND hLobbyListBox;  // 로비 리스트 창
 HWND hLobbyEnter;
 
@@ -29,6 +31,7 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		//	MAKEINTRESOURCE(IDI_APPLICATION)));
 		hLoginInput = GetDlgItem(hwnd, INPUT_LOGIN);  // id 입력란
 		hPrint = GetDlgItem(hwnd, IDC_EDIT3);  //  출력창
+		hLobbyPrint = GetDlgItem(hwnd, IDC_EDIT4);  //  출력창
 		hLobbyListBox = GetDlgItem(hwnd, LISTBOX_LOBBY2);
 		hLobbyEnter = GetDlgItem(hwnd, LOBBYENTER);
 
@@ -313,10 +316,13 @@ DWORD WINAPI ClientMain(LPVOID arg)
 		}
 		case (int)PacketLayer::PACKET_ID::SC_LOBBY_CHAT:
 		{
+			PacketLayer::SC_Lobby_Chat_Pkt packet;
+			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_Lobby_Chat_Pkt));
 
 
-
-			DisplayText("[server] chat!!!    \r\n");
+			LobbyDisPlay("[Client Join] - %s   \r\n",packet.sendID);
+			LobbyDisPlay("%s   \r\n", packet.msg);
+			//DisplayText("[server] chat!!!    \r\n");
 			break;
 		}
 
@@ -369,6 +375,20 @@ void DisplayText(const char* fmt, ...)
 	int nLength = GetWindowTextLength(hPrint);
 	SendMessage(hPrint, EM_SETSEL, nLength, nLength);
 	SendMessage(hPrint, EM_REPLACESEL, FALSE, (LPARAM)cbuf);
+
+	va_end(arg);
+}
+void LobbyDisPlay(const char* fmt, ...)
+{
+	va_list arg;
+	va_start(arg, fmt);
+
+	char cbuf[BUFSIZE + 256];
+	vsprintf(cbuf, fmt, arg);
+
+	int nLength = GetWindowTextLength(hLobbyPrint);
+	SendMessage(hLobbyPrint, EM_SETSEL, nLength, nLength);
+	SendMessage(hLobbyPrint, EM_REPLACESEL, FALSE, (LPARAM)cbuf);
 
 	va_end(arg);
 }
