@@ -16,6 +16,9 @@ HWND hPrint;		// 출력 창
 HWND hLobbyPrint;   // 로비 채팅창
 HWND hLobbyListBox;  // 로비 리스트 창
 HWND hLobbyEnter;
+HWND hRoomListBox;
+
+
 
 LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
@@ -32,7 +35,9 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		hLoginInput = GetDlgItem(hwnd, INPUT_LOGIN);  // id 입력란
 		hPrint = GetDlgItem(hwnd, IDC_EDIT3);  //  출력창
 		hLobbyPrint = GetDlgItem(hwnd, IDC_EDIT4);  //  출력창
-		hLobbyListBox = GetDlgItem(hwnd, LISTBOX_LOBBY2);
+		hLobbyListBox = GetDlgItem(hwnd, LISTBOX_LOBBY2); // 로비 선택창 
+
+		hRoomListBox = GetDlgItem(hwnd, LISTBOX_ROOM);
 		hLobbyEnter = GetDlgItem(hwnd, LOBBYENTER);
 
 		break;
@@ -197,6 +202,37 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 			return true;
 		}
 			
+		case ROOM_ENTER:
+		{
+			short i = SendMessage(hRoomListBox, LB_GETCURSEL, 0, 0);
+			char sendbuf[MAX_PACKET_SIZE] = { 0, };
+
+			// 패킷 바디 
+			PacketLayer::CS_Room_Enter packet;
+			packet.roomIdBySelected = i;
+
+
+			// 헤더 세팅 후 버퍼에 세팅 
+			PacketLayer::PktHeader header{ sizeof(PacketLayer::CS_Room_Enter) + sizeof(PacketLayer::PktHeader)
+				, (int)PacketLayer::PACKET_ID::CS_ROOM_ENTER };
+			memcpy(&sendbuf[0], (char*)& header, sizeof(PacketLayer::PktHeader));
+
+
+			// 바디도 헤더 뒤에다가 세팅
+			if (sizeof(PacketLayer::CS_LobbyEnter_Pkt) > 0)
+				memcpy(&sendbuf[sizeof(PacketLayer::PktHeader)], (char*)& packet, sizeof(PacketLayer::CS_LobbyEnter_Pkt));
+
+			auto ret = send(sock, (char*)& sendbuf,
+				sizeof(PacketLayer::CS_LobbyEnter_Pkt) + sizeof(PacketLayer::PktHeader), 0);
+
+			if (ret == SOCKET_ERROR) {
+				err_display("send()");
+				break;
+			}
+
+			DisplayText("[Client] [%d]Room Enter Request.....\r\n", i);
+			break;
+		}
 		}
 		break;
 
@@ -308,9 +344,18 @@ DWORD WINAPI ClientMain(LPVOID arg)
 		case (int)PacketLayer::PACKET_ID::SC_LOBBY_ENTER:
 		{
 			PacketLayer::SC_LobbyEnter_Pkt packet;
-
 			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_LobbyEnter_Pkt));
+			
+			
+			
+			for (int i = 0; i < packet.MaxRoomCount; i++)
+			{
+				char str[10] = { 0, };
+				sprintf(str, "%d", i);
+				SendMessage(hRoomListBox, LB_ADDSTRING, NULL, (LPARAM)str);
+			}
 
+			
 			DisplayText("[server] lobby  -> %s \r\n", packet.msg);
 			break;
 		}
@@ -323,6 +368,15 @@ DWORD WINAPI ClientMain(LPVOID arg)
 			LobbyDisPlay("[Client Join] - %s   \r\n",packet.sendID);
 			LobbyDisPlay("%s   \r\n", packet.msg);
 			//DisplayText("[server] chat!!!    \r\n");
+			break;
+		}
+		case (int)PacketLayer::PACKET_ID::SC_ERROR_MSG:
+		{
+			PacketLayer::SC_Error_Msg packet;
+			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_Lobby_Chat_Pkt));
+
+
+			DisplayText("[Server Error] - %s   \r\n", packet.msg);
 			break;
 		}
 

@@ -27,21 +27,21 @@ namespace LogicLayer
 			m_ClientList.push_back(client);
 		}
 
-		/*for (int i = 0; i < maxRoomCountByLobby; ++i)
+		for (int i = 0; i < maxRoomCountByLobby; ++i)
 		{
 			m_RoomList.emplace_back(new Room());
 			m_RoomList[i]->Init((short)i, maxRoomUserCount);
-		}*/
+		}
 	}
 
 	void Lobby::Release()
 	{
-		/*for (int i = 0; i < (int)m_RoomList.size(); ++i)
+		for (int i = 0; i < (int)m_RoomList.size(); ++i)
 		{
 			delete m_RoomList[i];
-		}*/
+		}
 
-		//m_RoomList.clear();
+		m_RoomList.clear();
 	}
 
 	void Lobby::SetNetwork(SelectNet* pNetwork)

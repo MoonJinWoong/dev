@@ -21,6 +21,9 @@
     <ClCompile Include="LobbyManager.cpp">
       <Filter>Lobby</Filter>
     </ClCompile>
+    <ClCompile Include="PktProcRoom.cpp">
+      <Filter>PacketProcess</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />

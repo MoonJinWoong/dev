@@ -159,6 +159,7 @@
     <ClCompile Include="PktProcLobby.cpp" />
     <ClCompile Include="PktProcLogin.cpp" />
     <ClCompile Include="PktProcMain.cpp" />
+    <ClCompile Include="PktProcRoom.cpp" />
     <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>

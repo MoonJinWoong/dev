@@ -24,6 +24,12 @@ namespace PacketLayer
 
 
 
+	// 에러 던질 때 
+	const int ERR_MSG_MAX = 30;
+	struct SC_Error_Msg
+	{
+		char msg[ERR_MSG_MAX] = { 0, };
+	};
 
 
 
@@ -87,6 +93,22 @@ namespace PacketLayer
 	struct CS_Lobby_Chat_Pkt
 	{
 		char msg[MAX_LOBBY_CHAT_SIZE + 1] = { 0, };
+	};
+
+
+	
+	//
+	// 룸에 대한 구조체
+	//
+	const int ROOM_ENTER_MSG = 20;
+	struct SC_Room_Enter
+	{
+		char ID[MAX_USER_ID_SIZE] = { 0, };
+		char msg[ROOM_ENTER_MSG] = { 0, };
+	};
+	struct CS_Room_Enter
+	{
+		short roomIdBySelected;
 	};
 
 

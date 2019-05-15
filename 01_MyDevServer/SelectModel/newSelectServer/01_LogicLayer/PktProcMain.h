@@ -38,6 +38,8 @@ namespace LogicLayer
 		void ProcessLobbyList(recvPacket packet);
 		void ProcessLobbyEnter(recvPacket packet);
 		void ProcessLobbyChat(recvPacket packet);
+		void ProcessRoomEnter(recvPacket packet);
+
 
 	private:
 		SelectNet* m_pSelecNetObj;

@@ -49,7 +49,7 @@ namespace LogicLayer
 
 		if (client->IsCurStateInLogIn() == false) 
 		{
-			std::cout << "this Client in Lobby Enter is not login" << std::endl;
+			std::cout << "this Client state is not lobby" << std::endl;
 			return;
 		}
 
@@ -86,16 +86,19 @@ namespace LogicLayer
 		auto client = m_ClientMgr->GetClient(packet.clientIdx);
 
 
-		if (client == nullptr)
+		// error
+		if (client == nullptr || client->IsCurStateInLobby() == false)
 		{
 			std::cout << "Get Client in Lobby Chat is fail" << std::endl;
+
+			PacketLayer::SC_Error_Msg errResponse;
+			strcpy(errResponse.msg, "you need join lobby ...!");
+			m_pSelecNetObj->SendInLogic(packet.clientIdx, (short)PACKET_ID::SC_ERROR_MSG,
+				sizeof(PacketLayer::SC_Error_Msg), (char*)& errResponse);
+
 			return;
 		}
-		if (client->IsCurStateInLobby() == false)
-		{
-			std::cout << "this Client  is not Lobby" << std::endl;
-			return;
-		}
+
 
 		// 해당 유저가 속해있는 로비 인덱스
 		auto Idx = client->GetLobbyIndex();

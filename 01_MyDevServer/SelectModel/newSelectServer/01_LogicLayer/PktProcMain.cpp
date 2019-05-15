@@ -21,6 +21,9 @@ namespace LogicLayer
 	}
 	void PktProcMain::Process(recvPacket packet)
 	{
+		// TODO 
+		// 이부분이 많아지면 오버헤드 
+		// 개선을 해보자 
 		auto packetId = packet.PacketId;
 
 		switch (packetId)
@@ -43,6 +46,11 @@ namespace LogicLayer
 		case (int)PACKET_ID::CS_LOBBY_CHAT:
 		{
 			ProcessLobbyChat(packet);
+			break;
+		}
+		case (int)PACKET_ID::CS_ROOM_ENTER:
+		{
+			ProcessRoomEnter(packet);
 			break;
 		}
 
