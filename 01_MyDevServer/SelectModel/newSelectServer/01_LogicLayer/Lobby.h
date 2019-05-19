@@ -46,9 +46,9 @@ namespace LogicLayer
 
 		short GetClientCnt();
 
-		//Room* CreateRoom();
+		Room* CreateRoom();
 
-		//Room* GetRoom(const short roomIndex);
+		Room* GetRoom(const short roomIndex);
 
 		auto MaxClientCount() { return (short)m_MaxUserCount; }
 

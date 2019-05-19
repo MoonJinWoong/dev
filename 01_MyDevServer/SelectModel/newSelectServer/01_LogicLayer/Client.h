@@ -46,7 +46,7 @@ namespace LogicLayer
 
 		int GetClientIndex() { return m_ClientIndex; }
 
-		std::string& GetID() { return m_ID; }
+		std::string GetID() { return m_ID; }
 
 		bool IsConfirm() { return m_IsConfirm; }
 

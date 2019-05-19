@@ -15,11 +15,14 @@
 #define IDC_EDIT3                       1008
 #define LOBBY_CHAT_INPUT                1009
 #define LOBBY_CHAT                      1010
+#define ROOM_CHAT_INPUT                 1011
 #define IDC_EDIT4                       1012
 #define LISTBOX_LOBBY2                  1013
 #define ROOM_LIST                       1014
 #define ROOM_ENTER                      1015
 #define ROOM_LEAVE                      1016
+#define ROOM_PRINT                      1017
+#define ROOM_CHAT_SEND                  1018
 
 // Next default values for new objects
 // 

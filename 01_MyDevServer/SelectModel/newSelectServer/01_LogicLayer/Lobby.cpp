@@ -49,10 +49,10 @@ namespace LogicLayer
 	
 		m_SelNetwork = pNetwork;
 
-		//for (auto pRoom : m_RoomList)
-		//{
-		//	pRoom->SetNetwork(pNetwork, pLogger);
-		//}
+		for (auto pRoom : m_RoomList)
+		{
+			pRoom->SetSelectNetwork(pNetwork);
+		}
 	}
 
 	LOGIC_ERROR_SET Lobby::Enter(Client* pUser)
@@ -142,7 +142,7 @@ namespace LogicLayer
 	{
 		PacketLayer::SC_Lobby_Chat_Pkt packet;
 
-		// strcpy_s 를 써야 하는데 말이지...
+		// TODO : strcpy_s 를 써야함 이거 찾아서 전부 고쳐주기
 		strcpy(packet.sendID, sendID);
 		strcpy(packet.msg, msg);
 
@@ -159,25 +159,24 @@ namespace LogicLayer
 		}
 	}
 
-	//Room* Lobby::CreateRoom()
-	//{
-	//	//for (int i = 0; i < (int)m_RoomList.size(); ++i)
-	//	//{
-	//	//	if (m_RoomList[i]->IsUsed() == false) {
-	//	//		return m_RoomList[i];
-	//	//	}
-	//	//}
-	//	//return nullptr;
-	//}
+	Room* Lobby::CreateRoom()
+	{
+		for (int i = 0; i < (int)m_RoomList.size(); ++i)
+		{
+			if (m_RoomList[i]->IsUsed() == false) {
+				return m_RoomList[i];
+			}
+		}
+		return nullptr;
+	}
 
-	//Room* Lobby::GetRoom(const short roomIndex)
-	//{
-	//	if (roomIndex < 0 || roomIndex >= m_RoomList.size()) {
-	//		return nullptr;
-	//	}
-
-	//	return m_RoomList[roomIndex];
-	//}
+	Room* Lobby::GetRoom(const short roomIndex)
+	{
+		if (roomIndex < 0 || roomIndex >= m_RoomList.size())
+			return nullptr;
+		
+		return m_RoomList[roomIndex];
+	}
 
 
 }

@@ -104,7 +104,6 @@ namespace PacketLayer
 	struct SC_Room_Enter
 	{
 		char ID[MAX_USER_ID_SIZE] = { 0, };
-		char msg[ROOM_ENTER_MSG] = { 0, };
 	};
 	struct CS_Room_Enter
 	{

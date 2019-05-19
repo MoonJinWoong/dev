@@ -6,6 +6,8 @@ void err_quit(const char* msg);
 void err_display(const char* msg);
 void DisplayText(const char* fmt, ...);
 void LobbyDisPlay(const char* fmt, ...);
+void RoomDisPlay(const char* fmt, ...);
+
 void PacketProcess(char* recvbuf);
 
 
@@ -14,6 +16,7 @@ HWND hLoginInput; // 편집 컨트롤
 HBRUSH g_hbrBackground = NULL;
 HWND hPrint;		// 출력 창
 HWND hLobbyPrint;   // 로비 채팅창
+HWND hRoomPrint;	// 룸 채팅 창
 HWND hLobbyListBox;  // 로비 리스트 창
 HWND hLobbyEnter;
 HWND hRoomListBox;
@@ -35,6 +38,7 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 		hLoginInput = GetDlgItem(hwnd, INPUT_LOGIN);  // id 입력란
 		hPrint = GetDlgItem(hwnd, IDC_EDIT3);  //  출력창
 		hLobbyPrint = GetDlgItem(hwnd, IDC_EDIT4);  //  출력창
+		hRoomPrint = GetDlgItem(hwnd, ROOM_PRINT);
 		hLobbyListBox = GetDlgItem(hwnd, LISTBOX_LOBBY2); // 로비 선택창 
 
 		hRoomListBox = GetDlgItem(hwnd, LISTBOX_ROOM);
@@ -370,15 +374,29 @@ DWORD WINAPI ClientMain(LPVOID arg)
 			//DisplayText("[server] chat!!!    \r\n");
 			break;
 		}
+
+		case (int)PacketLayer::PACKET_ID::SC_ROOM_ENTER:
+		{
+			PacketLayer::SC_Room_Enter packet;
+			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_Lobby_Chat_Pkt));
+
+
+			RoomDisPlay("[Client Join] ID - %s   \r\n",packet.ID);
+			DisplayText("[Server] Room Enter Success   \r\n");  // 정보창
+
+			break;
+		}
 		case (int)PacketLayer::PACKET_ID::SC_ERROR_MSG:
 		{
 			PacketLayer::SC_Error_Msg packet;
 			memcpy(&packet, &recvBuf[readPos], sizeof(PacketLayer::SC_Lobby_Chat_Pkt));
 
 
-			DisplayText("[Server Error] - %s   \r\n", packet.msg);
+			DisplayText("[Server Error] - %s   \r\n", packet.msg);  // 정보창
 			break;
 		}
+
+		
 
 		}
 
@@ -443,6 +461,21 @@ void LobbyDisPlay(const char* fmt, ...)
 	int nLength = GetWindowTextLength(hLobbyPrint);
 	SendMessage(hLobbyPrint, EM_SETSEL, nLength, nLength);
 	SendMessage(hLobbyPrint, EM_REPLACESEL, FALSE, (LPARAM)cbuf);
+
+	va_end(arg);
+}
+
+void RoomDisPlay(const char* fmt, ...)
+{
+	va_list arg;
+	va_start(arg, fmt);
+
+	char cbuf[BUFSIZE + 256];
+	vsprintf(cbuf, fmt, arg);
+
+	int nLength = GetWindowTextLength(hRoomPrint);
+	SendMessage(hRoomPrint, EM_SETSEL, nLength, nLength);
+	SendMessage(hRoomPrint, EM_REPLACESEL, FALSE, (LPARAM)cbuf);
 
 	va_end(arg);
 }
