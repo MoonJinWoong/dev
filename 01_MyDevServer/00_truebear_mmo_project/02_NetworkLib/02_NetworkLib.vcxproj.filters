@@ -2,14 +2,24 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="IOCP.cpp" />
-    <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionMgr.cpp" />
+    <ClCompile Include="ServerFrame.cpp">
+      <Filter>core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="IOCP.h" />
+    <ClInclude Include="ServerOpt.h" />
     <ClInclude Include="preCompile.h" />
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionMgr.h" />
+    <ClInclude Include="IOCP.h" />
+    <ClInclude Include="Singleton.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerFrame.h">
+      <Filter>core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{fde1d331-fcc1-49bc-bc82-972437a52be7}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
 </Project>

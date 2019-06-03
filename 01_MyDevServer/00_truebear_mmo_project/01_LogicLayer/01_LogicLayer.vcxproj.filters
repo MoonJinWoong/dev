@@ -1,16 +1,2 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <ItemGroup>
-    <Filter Include="Define">
-      <UniqueIdentifier>{3cce2a5a-a70a-409a-a3ba-f2b02da28cc0}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Packet.h">
-      <Filter>Define</Filter>
-    </ClInclude>
-    <ClInclude Include="PacketID.h">
-      <Filter>Define</Filter>
-    </ClInclude>
-  </ItemGroup>
-</Project>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />

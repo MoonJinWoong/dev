@@ -1,14 +1,20 @@
 #pragma once
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#pragma warning( disable:4786 )
+#pragma warning( disable:4251 )
+#pragma warning( disable:4311 )
+#pragma warning( disable:4244 )
+#pragma warning( disable:4996 )
 
-// winsock2 사용을 위해 아래 코멘트 추가
-#pragma comment(lib, "ws2_32.lib")
-#include <WinSock2.h>
-#include <map>
-#include <vector>
 #include <iostream>
-#include <thread>
-#include <process.h>
-#include <mutex>
+#include <winsock2.h>
+#pragma comment(lib, "ws2_32.lib")
+#include <Mswsock.h>
+#include <windows.h>
 
-using namespace std;
+
+
+#include <vector>
+#include <thread>
+#include <stdio.h>
+#include <memory>
+#include <iostream>

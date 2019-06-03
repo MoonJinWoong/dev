@@ -1,11 +1,9 @@
 #include <iostream>
-
-
+#include <thread>
 
 
 int main()
 {
 
-	std::cout << "asdfa" << std::endl;
 	return 0;
 }

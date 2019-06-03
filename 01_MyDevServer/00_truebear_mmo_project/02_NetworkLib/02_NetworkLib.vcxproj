@@ -18,6 +18,17 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="IOCP.cpp" />
+    <ClCompile Include="ServerFrame.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IOCP.h" />
+    <ClInclude Include="preCompile.h" />
+    <ClInclude Include="ServerFrame.h" />
+    <ClInclude Include="ServerOpt.h" />
+    <ClInclude Include="Singleton.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{87DD5999-B2DE-4BE4-969A-9CECFCADEF67}</ProjectGuid>
@@ -142,18 +153,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="IOCP.cpp" />
-    <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionMgr.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="IOCP.h" />
-    <ClInclude Include="preCompile.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionMgr.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
