@@ -5,6 +5,8 @@
     <ClCompile Include="ServerFrame.cpp">
       <Filter>core</Filter>
     </ClCompile>
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SessionMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServerOpt.h" />
@@ -16,6 +18,8 @@
     <ClInclude Include="ServerFrame.h">
       <Filter>core</Filter>
     </ClInclude>
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionMgr.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="core">

@@ -5,7 +5,7 @@
 
 
 
-namespace NetLib
+namespace Core
 {
 	ServerFrame::ServerFrame() 
 	{

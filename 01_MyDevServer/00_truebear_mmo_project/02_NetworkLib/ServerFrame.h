@@ -4,7 +4,7 @@
 //#include "SessionMgr.h"
 
 
-namespace NetLib
+namespace Core
 {
 	typedef enum STATUS
 	{

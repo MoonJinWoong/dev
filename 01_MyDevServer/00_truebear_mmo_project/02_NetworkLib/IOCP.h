@@ -1,10 +1,24 @@
 #pragma once
 
+
+
 #include "ServerFrame.h"
-namespace NetLib
+
+
+namespace Core
 {
-	class IOCP : public ServerFrame
+	class ServerFrame;
+}
+
+namespace NetworkLayer
+{
+
+	class Session;
+	class SessionMgr;
+
+	class IOCP : public Core::ServerFrame
 	{
+
 	public:
 		IOCP();
 		virtual ~IOCP();
@@ -15,9 +29,11 @@ namespace NetLib
 		void closeServer();
 
 
-		SOCKET getListenSocket();
-		HANDLE getIocpHandle();
-		void onAccept(SOCKET sock, SOCKADDR_IN addrInfo);
+		SOCKET getListenSocket() const;
+		HANDLE getIocpHandle() const;
+
+
+		void ProcAccept(SOCKET sock, SOCKADDR_IN addrInfo);
 	
 	private:
 
@@ -27,6 +43,8 @@ namespace NetLib
 	private:
 		SOCKET m_listenSocket;
 		HANDLE m_hIocp;
+
+		SessionMgr m_sessionMgr;
 		
 	};
 }

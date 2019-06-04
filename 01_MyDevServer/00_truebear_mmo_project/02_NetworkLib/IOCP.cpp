@@ -1,10 +1,13 @@
 
 //#include "ServerOpt.h"
+
 #include "preCompile.h"
+#include "Session.h"
+#include "SessionMgr.h"
 #include "IOCP.h"
 
 
-namespace NetLib
+namespace NetworkLayer
 {
 	IOCP::IOCP() {}
 	IOCP::~IOCP() 
@@ -81,13 +84,19 @@ namespace NetLib
 		return true;
 	}
 
-
+	SOCKET IOCP::getListenSocket() const
+	{
+		return m_listenSocket;
+	}
+	HANDLE IOCP::getIocpHandle() const
+	{
+		return m_hIocp;
+	}
 
 
 
 	bool IOCP::startServer()
 	{
-
 		return true;
 	}
 	void IOCP::closeServer()
@@ -100,12 +109,63 @@ namespace NetLib
 
 
 
-
-
-
-	DWORD WINAPI IOCP::acceptThread(LPVOID server)
+	void IOCP::ProcAccept(SOCKET accepted_sock, SOCKADDR_IN addrInfo)
 	{
-		return 1;
+		Session* session = new Session();
+		
+		if(session == nullptr)
+		{
+			std::cout << "session alloc failed " << std::endl;
+			return;
+		}
+
+		//// 세션 처리 
+		 auto ret = session->ProcAccept(accepted_sock, addrInfo);
+		 if (ret == false)
+		 {
+			 std::cout << "Session Accept failed...!" << std::endl;
+			 delete session;
+			 return;
+		 }
+
+
+		 // 여기부터 시작
+		 auto ret2 = m_sessionMgr
+
+		
+			
+
+		  
+
+
+		HANDLE h;
+	}
+
+	DWORD WINAPI IOCP::acceptThread(LPVOID pServer)
+	{
+		IOCP* server = (IOCP*)pServer;
+
+		while (true)
+		{
+			SOCKET acceptedSock = INVALID_SOCKET;
+			SOCKADDR_IN recvAddr;
+			static int len = sizeof(recvAddr);
+
+			acceptedSock = WSAAccept(server->m_listenSocket, (struct sockaddr*) & recvAddr
+				, &len, NULL,0);
+
+			if (acceptedSock == SOCKET_ERROR)
+			{
+				std::cout << " Accept is failed..." << std::endl;
+				break;
+			}
+
+			// 들어온 client들 처리 
+			server->ProcAccept(acceptedSock, recvAddr);
+
+		}
+
+		return 0;
 	}
 	DWORD WINAPI IOCP::workerThread(LPVOID server)
 	{

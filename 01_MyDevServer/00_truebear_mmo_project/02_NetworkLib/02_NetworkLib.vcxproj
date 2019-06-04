@@ -21,12 +21,16 @@
   <ItemGroup>
     <ClCompile Include="IOCP.cpp" />
     <ClCompile Include="ServerFrame.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SessionMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IOCP.h" />
     <ClInclude Include="preCompile.h" />
     <ClInclude Include="ServerFrame.h" />
     <ClInclude Include="ServerOpt.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionMgr.h" />
     <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
