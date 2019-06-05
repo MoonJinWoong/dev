@@ -52,6 +52,9 @@ namespace NetworkLayer
 		   return false;
 		}
 
+		m_SessionMgr = std::make_unique<SessionMgr>();
+
+
 
 		return true;
 	}
@@ -119,26 +122,24 @@ namespace NetworkLayer
 			return;
 		}
 
-		//// 技记 贸府 
-		 auto ret = session->ProcAccept(accepted_sock, addrInfo);
-		 if (ret == false)
-		 {
-			 std::cout << "Session Accept failed...!" << std::endl;
-			 delete session;
-			 return;
-		 }
 
-
-		 // 咯扁何磐 矫累
-		 auto ret2 = m_sessionMgr
+		 //  技记阑 概聪历俊 持扁
+		 auto ret2 = m_SessionMgr->addSession(session);
 
 		
+		 session->ioData.clear();
+
+		 HANDLE h_obj = CreateIoCompletionPort((HANDLE)accepted_sock, this->m_hIocp,
+			 (ULONG_PTR) & (session), NULL);
 			
 
-		  
+		 if (!h_obj)
+		 {
+			 delete session;
+			 return;
+		  }
 
-
-		HANDLE h;
+		 session->recvReady();
 	}
 
 	DWORD WINAPI IOCP::acceptThread(LPVOID pServer)

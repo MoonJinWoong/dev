@@ -6,4 +6,10 @@
 	const int CPU_CORE = 4;
 
 
+	const int SOCKET_BUF_SIZE = 1024;
+	const int MAX_IO_SIZE = 1024;
+
+
+
+
 

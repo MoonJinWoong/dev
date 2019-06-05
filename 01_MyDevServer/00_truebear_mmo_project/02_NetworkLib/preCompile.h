@@ -14,6 +14,7 @@
 
 
 #include <vector>
+#include <array>
 #include <thread>
 #include <stdio.h>
 #include <memory>

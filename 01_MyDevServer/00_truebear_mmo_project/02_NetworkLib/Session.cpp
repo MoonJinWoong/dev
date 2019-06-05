@@ -1,3 +1,4 @@
+#include "ServerOpt.h"
 #include "preCompile.h"
 #include "Session.h"
 

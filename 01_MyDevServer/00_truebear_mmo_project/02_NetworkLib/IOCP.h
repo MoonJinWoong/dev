@@ -44,7 +44,11 @@ namespace NetworkLayer
 		SOCKET m_listenSocket;
 		HANDLE m_hIocp;
 
-		SessionMgr m_sessionMgr;
+		//std::unique_ptr<Session> m_Session;
+		std::unique_ptr<SessionMgr> m_SessionMgr;
+
+
+		
 		
 	};
 }

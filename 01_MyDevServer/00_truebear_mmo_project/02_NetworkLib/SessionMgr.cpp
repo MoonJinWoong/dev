@@ -6,7 +6,11 @@ namespace NetworkLayer
 {
 	SessionMgr::SessionMgr() {}
 	SessionMgr::~SessionMgr() {}
-	bool SessionMgr::addSession()
+	bool SessionMgr::Init()
+	{
+		return true;
+	}
+	bool SessionMgr::addSession(Session* client)
 	{
 		return true;
 	}
