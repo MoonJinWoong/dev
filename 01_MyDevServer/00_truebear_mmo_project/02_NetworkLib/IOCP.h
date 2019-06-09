@@ -1,9 +1,6 @@
 #pragma once
 
-
-
-#include "ServerFrame.h"
-
+#include "preCompile.h"
 
 namespace Core
 {
@@ -16,7 +13,7 @@ namespace NetworkLayer
 	class Session;
 	class SessionMgr;
 
-	class IOCP : public Core::ServerFrame
+	class IOCP 
 	{
 
 	public:
@@ -24,21 +21,18 @@ namespace NetworkLayer
 		virtual ~IOCP();
 
 		bool InitIocpServer();
-		bool createThreads();
+		bool BindAndListen();
+		bool CreateThreads();
 		bool startServer();
 		void closeServer();
-
-
-		SOCKET getListenSocket() const;
-		HANDLE getIocpHandle() const;
-
+		void ShutdownSocket(Session* sessionInfo, bool isForce);
 
 		void ProcAccept(SOCKET sock, SOCKADDR_IN addrInfo);
 	
 	private:
 
-		static DWORD WINAPI acceptThread(LPVOID server);
-		static DWORD WINAPI workerThread(LPVOID server);
+		 DWORD WINAPI acceptThread();
+		 DWORD WINAPI workerThread();
 
 	private:
 		SOCKET m_listenSocket;
@@ -46,6 +40,10 @@ namespace NetworkLayer
 
 		//std::unique_ptr<Session> m_Session;
 		std::unique_ptr<SessionMgr> m_SessionMgr;
+		long long m_ConectedSeq{ 0 };
+		//std::deque<int> m_SessionPoolIndex;       // 클라 식별 번호
+
+		bool m_bWorkerRun{ false };
 
 
 		

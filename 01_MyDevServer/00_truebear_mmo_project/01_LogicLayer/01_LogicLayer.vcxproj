@@ -25,6 +25,12 @@
       <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="LogicMain.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="LogicMain.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{5FCC5C49-5AE7-4197-9EAF-9B44CB566571}</ProjectGuid>

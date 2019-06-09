@@ -1,5 +1,2 @@
 ﻿  IOCP.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_truebear_mmo_project\02_NetworkLib\ServerFrame.h(14): warning C4091: 'typedef ': 변수를 선언하지 않으면 'Core::STATUS' 왼쪽은 무시됩니다.
-  SessionMgr.cpp
-  코드를 생성하고 있습니다...
   02_NetworkLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_truebear_mmo_project\x64\Debug\02_NetworkLib.lib
