@@ -13,14 +13,18 @@ namespace NetworkLayer
 	SessionMgr::~SessionMgr() {}
 	bool SessionMgr::Init()
 	{
+
 		// session √ ±‚»≠
 		for (int i = 0; i < MAX_CLIENTS; ++i)
 		{
 			Session session;
 			session.Init();
 			m_SessionPool.push_back(session);
-			m_SessionIndex.push(i);
+			m_SessionIndex.push_back(i);
 		}
+
+		
+
 
 		std::cout << "Session Manager Init Complete" << std::endl;
 		return true;
@@ -57,7 +61,7 @@ namespace NetworkLayer
 			return nullptr;
 
 		int index = m_SessionIndex.front();
-		m_SessionIndex.pop();
+		m_SessionIndex.pop_front();
 
 
 		return &m_SessionPool[index];
@@ -72,7 +76,4 @@ namespace NetworkLayer
 
 		return (Session*)findIter->second;
 	}
-
-
-
 }

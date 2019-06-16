@@ -1,5 +1,3 @@
-
-
 #include "Session.h"
 #include "SessionMgr.h"
 #include "IOCP.h"
@@ -115,9 +113,6 @@ namespace NetworkLayer
 		return true;
 	}
 
-
-
-
 	bool IOCP::startServer()
 	{
 		return true;
@@ -127,9 +122,6 @@ namespace NetworkLayer
 		closesocket(m_listenSocket);
 		WSACleanup();
 	}
-
-
-
 
 	DWORD WINAPI IOCP::acceptThread()
 	{
@@ -164,15 +156,17 @@ namespace NetworkLayer
 	{
 
 		//  세션을 매니저에 있는 세션 풀에  등록
-		auto ret2 = m_SessionMgr->addSession(++m_ConectedSeq);
+		auto ret2 = m_SessionMgr->addSession(m_ConectedSeq);
 
 
 		// 가져와서 iocp 와 결합
 		auto session = m_SessionMgr->GetSession(m_ConectedSeq);
 
+		// 이거 멀티스레드로 돌리면 락 걸어야 하나...? 
+		m_ConectedSeq++;
 
 		HANDLE h_obj = CreateIoCompletionPort((HANDLE)accepted_sock, m_hIocp,
-			(ULONG_PTR) & (session), NULL);
+			reinterpret_cast<DWORD>(session), NULL);
 
 		if (!h_obj)
 		{
@@ -207,7 +201,6 @@ namespace NetworkLayer
 		
 		std::cout << "client seq[" << session->getUniqueId() << "]" << std::endl;
 	}
-
 
 	DWORD WINAPI IOCP::workerThread()
 	{
@@ -258,13 +251,19 @@ namespace NetworkLayer
 
 			// 여기서부터 
 
+			SessionIO* pSession = (SessionIO*)lpOverlapped;
+
+			if (pSession->s_eOperation == READ)
+			{
+				pSession->s_szBuf[dwIoSize] = NULL;
+				std::cout << "recv byte :" << dwIoSize << "  msg : "<<pSession->s_szBuf <<std::endl;
+				
+				//pSession->Recv
+
+				//20190616 여기서부터 recv 작업해주어야 함.
 
 
-
-
-			//stOverlappedEx* pOverlappedEx =
-			//	(stOverlappedEx*)lpOverlapped;
-
+			}
 			////Overlapped I/O Recv작업 결과 뒤 처리
 			//if (OP_RECV == pOverlappedEx->m_eOperation)
 			//{

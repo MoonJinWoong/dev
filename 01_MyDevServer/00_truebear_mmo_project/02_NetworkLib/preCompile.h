@@ -20,6 +20,7 @@
 #include <vector>
 #include <deque>
 #include <array>
+#include <list>
 #include <algorithm>
 #include <queue>
 #include <unordered_map>

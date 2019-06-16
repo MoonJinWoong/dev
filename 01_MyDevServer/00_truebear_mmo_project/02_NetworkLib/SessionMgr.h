@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "preCompile.h"
+#include "preCompile.h"
 
 namespace NetworkLayer
 {
@@ -23,7 +23,7 @@ namespace NetworkLayer
 		//std::unique_ptr<Session> m_Session;
 
 		std::vector<Session> m_SessionPool;
-		std::queue<INT64> m_SessionIndex;   // 이거 왜 INT64만 들어가는 걸까 ... 하루 종일 삽질함..
+		std::list<int> m_SessionIndex;   // 
 
 
 		std::unordered_map<long long , Session*> m_SearchByLL;

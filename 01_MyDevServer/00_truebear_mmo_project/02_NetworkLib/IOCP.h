@@ -9,28 +9,23 @@ namespace Core
 
 namespace NetworkLayer
 {
-
 	class Session;
 	class SessionMgr;
 
 	class IOCP 
 	{
-
 	public:
 		IOCP();
 		virtual ~IOCP();
-
 		bool InitIocpServer();
 		bool BindAndListen();
 		bool CreateThreads();
 		bool startServer();
 		void closeServer();
 		void ShutdownSocket(Session* sessionInfo, bool isForce);
-
 		void ProcAccept(SOCKET sock, SOCKADDR_IN addrInfo);
 	
 	private:
-
 		 DWORD WINAPI acceptThread();
 		 DWORD WINAPI workerThread();
 

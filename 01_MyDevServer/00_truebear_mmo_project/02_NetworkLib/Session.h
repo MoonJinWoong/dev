@@ -21,6 +21,12 @@ namespace NetworkLayer
 		WSABUF			s_wsaBuf;				//Overlapped I/O작업 버퍼
 		char			s_szBuf[MAX_IO_SIZE];   //데이터 버퍼
 		IO_OPERATION	s_eOperation;			//작업 동작 종류
+
+		void Clear()
+		{
+			ZeroMemory(s_szBuf, sizeof(char));
+			s_eOperation = NONE;
+		}
 	};
 
 	class Session
@@ -33,26 +39,18 @@ namespace NetworkLayer
 		bool OnAccept(SOCKET sock, SOCKADDR_IN addrLen);
 		
 		void ProcSend(size_t size);
-		void SendData();
 
+		void SendData();
 
 		SessionIO m_IoData;
 
 		void setUniqueId(const long long& id) { m_Unique_id = id; }
 		long long getUniqueId() const { return m_Unique_id; }
 
-
-		
-
 	public:
-
-	
 		long long m_Unique_id{ 0 };
-
 		SOCKET			m_socket;			//Cliet와 연결되는 소켓
 		SessionIO	m_stRecvIO;	//RECV Overlapped I/O작업을 위한 변수
 		SessionIO	m_stSendIO;	//SEND Overlapped I/O작업을 위한 변수
-
-
 	};
 }
