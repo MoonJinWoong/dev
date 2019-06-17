@@ -25,13 +25,15 @@
     <ClCompile Include="SessionMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ServerFrame.h" />
+    <ClInclude Include="ThreadQueue.h" />
+    <ClInclude Include="SingleTon.h" />
+    <ClInclude Include="TypeDefine.h" />
     <ClInclude Include="IOCP.h" />
     <ClInclude Include="preCompile.h" />
-    <ClInclude Include="ServerFrame.h" />
     <ClInclude Include="ServerOpt.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SessionMgr.h" />
-    <ClInclude Include="Singleton.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

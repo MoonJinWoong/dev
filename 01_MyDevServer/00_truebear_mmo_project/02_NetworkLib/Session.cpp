@@ -2,7 +2,7 @@
 #include "Session.h"
 
 
-namespace NetworkLayer
+namespace Network
 {
 	Session::Session() {}
 	Session::~Session() {}

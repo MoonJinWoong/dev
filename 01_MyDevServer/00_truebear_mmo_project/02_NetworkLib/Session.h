@@ -4,7 +4,7 @@
 //#include "ServerOpt.h"
 #include "preCompile.h"
 
-namespace NetworkLayer
+namespace Network
 {
 	typedef enum
 	{

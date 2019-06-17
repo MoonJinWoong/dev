@@ -4,7 +4,7 @@
 #include "SessionMgr.h"
 
 
-namespace NetworkLayer
+namespace Network
 {
 	SessionMgr::SessionMgr() 
 	{

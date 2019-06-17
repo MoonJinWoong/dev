@@ -2,7 +2,7 @@
 
 #include "preCompile.h"
 
-namespace NetworkLayer
+namespace Network
 {
 	class Session;
 

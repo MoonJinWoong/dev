@@ -5,43 +5,35 @@
 namespace Core
 {
 	class ServerFrame;
+	class Singleton;
 }
 
-namespace NetworkLayer
+namespace Network
 {
-	class Session;
-	class SessionMgr;
-
-	class IOCP 
+	class IOCP : public Core::ServerFrame, public Singleton<IOCP>
 	{
+	private:
+		bool CreateSocket();
+		static DWORD WINAPI acceptThread(LPVOID pServer);
+		static DWORD WINAPI workerThread(LPVOID pServer);
+
 	public:
-		IOCP();
+		IOCP(Content* content);
 		virtual ~IOCP();
-		bool InitIocpServer();
-		bool BindAndListen();
-		bool CreateThreads();
-		bool startServer();
-		void closeServer();
-		void ShutdownSocket(Session* sessionInfo, bool isForce);
-		void ProcAccept(SOCKET sock, SOCKADDR_IN addrInfo);
-	
-	private:
-		 DWORD WINAPI acceptThread();
-		 DWORD WINAPI workerThread();
+
+		bool Start();
+
+		SOCKET getSocket();
+		HANDLE getIocpHandle();
+		void   runAccept(SOCKET acceptsock, SOCKADDR_IN addr);
 
 	private:
-		SOCKET m_listenSocket;
+		SOCKET m_listenSock;
 		HANDLE m_hIocp;
+		Thread* acceptthread;
+		std::array<Thread*, 4> workerthread;
 
-		//std::unique_ptr<Session> m_Session;
-		std::unique_ptr<SessionMgr> m_SessionMgr;
-		long long m_ConectedSeq{ 0 };
-		//std::deque<int> m_SessionPoolIndex;       // 클라 식별 번호
+	
 
-		bool m_bWorkerRun{ false };
-
-
-		
-		
 	};
 }

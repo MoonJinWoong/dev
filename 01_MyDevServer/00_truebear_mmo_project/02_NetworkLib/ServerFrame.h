@@ -1,42 +1,32 @@
-//#pragma once
-//
-//// 아래놈 만들어야함
-////#include "SessionMgr.h"
-//
-//
-//namespace Core
-//{
-//	typedef enum STATUS
-//	{
-//		SERVERSTOP,
-//		SERVERINIT,
-//		SERVERREADY
-//	};
-//
-//	class ServerFrame
-//	{
-//	public:
-//		ServerFrame();
-//		virtual ~ServerFrame();
-//
-//
-//		// TODO : initServerFrame에 들어온 것에 따라 Start를
-//		// 다르게 구현할 예정 
-//		virtual void InitServerFrame();
-//		virtual bool StartServer() = 0;
-//
-//		STATUS& status();
-//
-//		
-//
-//
-//	protected:
-//
-//
-//		STATUS m_serverStatus;
-//		wchar_t m_ip[16];
-//		int m_port;
-//		int m_workerThreadCnt;
-//		int m_cpu_core;
-//	};
-//}
+#pragma once
+
+
+namespace Core
+{
+	typedef enum SERVER_STATUS
+	{
+		NONE, START,STOP
+	};
+
+	class ServerFrame
+	{
+	public:
+		ServerFrame(Content* content);
+		virtual ~ServerFrame();
+
+		virtual void Init();
+		virtual bool Start() = 0;		// 순수 가상 함수
+		SERVER_STATUS& getStatus();
+		
+		void PutPacket(PacketBundle* package);
+
+	protected:
+		char m_ip[16];
+		int  m_port;
+		int  m_worker_cnt;
+
+		SERVER_STATUS m_status;
+		Content* m_content;
+	};
+}
+ 
