@@ -14,14 +14,17 @@ namespace Network
 	{
 	private:
 		bool CreateSocket();
-		static DWORD WINAPI acceptThread(LPVOID pServer);
-		static DWORD WINAPI workerThread(LPVOID pServer);
+
+		void acceptThread();
+		void workerThread();
 
 	public:
 		IOCP(Content* content);
 		virtual ~IOCP();
 
 		bool Start();
+		void ShutDownServer();
+
 
 		SOCKET getSocket();
 		HANDLE getIocpHandle();
@@ -30,8 +33,8 @@ namespace Network
 	private:
 		SOCKET m_listenSock;
 		HANDLE m_hIocp;
-		Thread* acceptthread;
-		std::array<Thread*, 4> workerthread;
+		//std::thread * acceptthread;
+		//std::vector<Thread*, 4> workerthread;
 
 	
 

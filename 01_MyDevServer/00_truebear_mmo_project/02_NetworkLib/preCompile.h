@@ -14,7 +14,7 @@
 #pragma comment(lib, "ws2_32.lib")
 #include <Mswsock.h>
 #include <windows.h>
-
+#include <Ws2tcpip.h>
 
 
 #include <vector>

@@ -1,1 +1,1 @@
-﻿  00_GateWay.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_truebear_mmo_project\x64\Debug\00_GateWay.exe
+﻿LINK : fatal error LNK1104: 'C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_truebear_mmo_project\01_LogicLayer\x64\Debug\LogicMain.obj' 파일을 열 수 없습니다.
