@@ -1,5 +1,7 @@
 #include "SingleTon.h"
 #include "ServerFrame.h"
+
+#include "Session.h"
 #include "IOCP.h"
 
 
@@ -124,7 +126,50 @@ namespace Network
 	}
 	void IOCP::workerThread()
 	{
-		// 여기서부터 다시. 
+		while (true)
+		{
+			ExOverIo* exOverIo = nullptr;
+			Session* session = nullptr;
+			DWORD transferSize;
+
+			auto ret = GetQueuedCompletionStatus(m_hIocp, &transferSize,
+				(PULONG_PTR)& session, (LPOVERLAPPED*)& exOverIo, INFINITE);
+
+			if (!ret)
+			{
+				std::cout << "GQCS fail" << std::endl;
+				continue;
+			}
+
+			if (transferSize == 0)
+			{
+				SessionMgr.getInstance().ShutDownSession(session);
+				continue;
+			}
+
+
+			switch (exOverIo->s_eOperation)
+			{
+			case WRITE:
+
+			case READ:
+			{
+				Package* package = session->ProcRecv((size_t)transferSize);
+				if (package != nullptr)
+				{
+					this->PutPacket(package);
+				}
+			}
+			continue;
+
+			// error 처리 필요
+
+			}
+
+				
+
+
+		}
 	}
 
 	void IOCP::ShutDownServer()

@@ -9,8 +9,8 @@ namespace Network
 	void Session::Init()
 	{
 		m_Unique_id = -1;
-		ZeroMemory(&m_stRecvIO, sizeof(SessionIO));
-		ZeroMemory(&m_stSendIO, sizeof(SessionIO));
+		ZeroMemory(&m_stRecvIO, sizeof(ExOverIo));
+		ZeroMemory(&m_stSendIO, sizeof(ExOverIo));
 		m_socket = INVALID_SOCKET;
 	}
 	bool Session::OnAccept(SOCKET sock, SOCKADDR_IN addrInfo)
