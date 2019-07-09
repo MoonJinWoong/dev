@@ -1,2 +1,0 @@
-1. (c4996) 빌드시 WSASOCKET 관련 에러 메세지 출력 문법이 바뀐듯함 예전 printf scanf 뒤에 _s 붙이는거 마냥
--->  #define _WINSOCK_DEPRECATED_NO_WARNINGS  or WSASocket 대신 WSASocketW 을 써주면 해결 가능
