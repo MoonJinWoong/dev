@@ -10,8 +10,6 @@ namespace LogicLayer
 {
 	void PktProcMain::ProcessLogin(recvPacket packet)
 	{
-		// 2019.05.07 이후 로비 리스트 요청 구현해야함
-
 
 		PacketLayer::SC_Login_Pkt resPkt;
 	

@@ -21,6 +21,21 @@ HWND hLobbyListBox;  // 로비 리스트 창
 HWND hLobbyEnter;
 HWND hRoomListBox;
 
+typedef enum
+{
+	READ, WRITE
+}IO_OPERATION;
+
+struct IO_DATA
+{
+	OVERLAPPED		sOver;
+	WSABUF			sWsaBuf;
+	IO_OPERATION	sIoType;
+
+	int				sTotalBytes;
+	int				sCurrByte;
+	char			sBuffer[1024];
+};
 
 
 LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
