@@ -10,6 +10,10 @@
 #include <thread>
 #include <vector>
 #include <array>
+#include <list>
+#include <mutex>
+#include <algorithm>
+
 
 using namespace std;
 #include "NetBase.h"

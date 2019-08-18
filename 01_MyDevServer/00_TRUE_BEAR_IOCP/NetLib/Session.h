@@ -22,7 +22,7 @@ struct IoData
 	WSABUF			dataBuf;
 	SOCKET			socket;
 	//char			messageBuffer[MAX_BUFFER];
-	array<char, MAX_BUFFER>  messageBuffer;
+	array<char, MAX_BUFFER>  msgBuffer;
 	int				totalByte;
 	int				currByte;
 
@@ -48,8 +48,12 @@ public:
 	void runSend(int size);
 	void sendMsg();  // 파라미터에 패킷 
 
-	void runRecv(int size); // 반환형 패키지 
+	void checkSend(int size); // 반환형 패키지 
 	void recvReady();
+
+	void onClose();
+	void setID(int id);
+
 private:
 	void Init();
 	void isError(DWORD errCode);

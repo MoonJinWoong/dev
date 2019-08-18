@@ -9,7 +9,7 @@ void IoData::Init()
 
 void IoData::Clear()
 {
-	messageBuffer.fill(0);
+	msgBuffer.fill(0);
 	totalByte = 0;
 	currByte  = 0;
 }
@@ -29,7 +29,7 @@ bool IoData::isCompleteRecv(int size)
 	return false;
 }
 
-//////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 Session::Session()
 {
@@ -78,5 +78,47 @@ void Session::recvReady()
 	mIoData[IO_READ].Clear();
 
 	WSABUF wsabuf;
-	wsabuf.buf = mIoData[IO_READ].messageBuffer;
+	wsabuf.buf = mIoData[IO_READ].msgBuffer.data();
+	wsabuf.len = MAX_BUFFER;
+
+	this->recv(wsabuf);
+}
+
+
+
+
+
+void Session::send(WSABUF wsabuf)
+{
+	DWORD flag = 0;
+	DWORD sendByte = 0;
+
+	auto ret = WSASend(mSockData.sSocket, &wsabuf, 1, &sendByte, flag,
+		(LPWSAOVERLAPPED) & (mIoData[IO_WRITE].overlapped), NULL);
+
+	this->isError(ret);
+}
+
+void Session::checkSend(int size)
+{
+	if (mIoData[IO_READ].isCompleteRecv(size))
+	{
+		this->send(mIoData[IO_WRITE].dataBuf);
+	}
+}
+
+void Session::sendMsg()
+{
+	// 패키지 파라미터로 받아야함.
+}
+
+
+void Session::onClose()
+{
+	// 여기 작업해야함
+}
+
+void Session::setID(int id)
+{
+	m_ID = id;
 }
