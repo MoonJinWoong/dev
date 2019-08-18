@@ -1,10 +1,12 @@
 #include "Session.h"
 
-void IoData::Init()
+IoData::IoData()
 {
-	ZeroMemory(&overlapped, sizeof(overlapped));
+	// 오버랩드 초기화 안해주면 제대로 동작 안함 wsa err : 6
+	// 이거 때문에 삽질 4시간함. 반드시 기억해둘 것
+	ZeroMemory(&overlapped, sizeof(WSAOVERLAPPED));
 	ioType = IO_ERROR;
-
+	this->Clear();
 }
 
 void IoData::Clear()
@@ -38,7 +40,7 @@ Session::Session()
 
 void Session::Init()
 {
-	ZeroMemory(&mSockData, sizeof(mSockData));
+	ZeroMemory(&mSockData, sizeof(CLIENT_SOCKET));
 	mIoData[IO_READ].setType(IO_READ);
 	mIoData[IO_WRITE].setType(IO_WRITE);
 }
@@ -46,19 +48,20 @@ void Session::Init()
 void Session::isError(DWORD ret)
 {
 	if (ret == SOCKET_ERROR
-		&& WSAGetLastError() != ERROR_IO_PENDING)
+		&& (WSAGetLastError() != ERROR_IO_PENDING))
 	{
 		cout << "socket error : " << WSAGetLastError() << endl;
 	}
 }
+
 
 void Session::recv(WSABUF wsabuf)
 {
 	DWORD flag = 0;
 	DWORD recvByte = 0;
 	
-	auto ret = WSARecv(mSockData.sSocket, &wsabuf, 1, &recvByte, &flag,
-		(LPWSAOVERLAPPED)&(mIoData[IO_READ].overlapped), NULL);
+	auto ret = WSARecv(mSockData.sSocket, &wsabuf, 1, NULL, &flag,
+		&mIoData[IO_READ].overlapped, NULL);
 
 	this->isError(ret);
 }
@@ -121,4 +124,13 @@ void Session::onClose()
 void Session::setID(int id)
 {
 	m_ID = id;
+}
+
+bool Session::resisterSession(SOCKET socket, SOCKADDR_IN addrInfo)
+{
+	mSockData.sSocket = socket;
+	int addrLen = 0;
+	getpeername(mSockData.sSocket, (struct sockaddr *) & mSockData.sAddrInfo, &addrLen);
+	mSockData.sAddrInfo = addrInfo;
+	return true;
 }

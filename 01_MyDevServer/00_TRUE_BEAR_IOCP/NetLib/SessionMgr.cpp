@@ -50,6 +50,8 @@ bool SessionMgr::addSession(Session* session)
 	++mSessionCnt;
 	mSessionlock.unlock();
 
+
+	cout << "Session ID : " << mSessionID << endl;
 	return true;
 }
 
@@ -96,7 +98,6 @@ void SessionMgr::kickSession(Session* session)
 		return;
 	}
 
-
 	LINGER linger;
 	linger.l_onoff = 1; // 사용하겠다
 	linger.l_linger = 0;   // 대기시간 옵션 . 완료 안되도 바로 종료하겠다.
@@ -106,7 +107,6 @@ void SessionMgr::kickSession(Session* session)
 
 	this->closeSession(session);
 	mSessionlock.unlock();
-
 }
 
 Session* SessionMgr::getSession(int id)
@@ -122,8 +122,6 @@ Session* SessionMgr::getSession(int id)
 			break;
 		}
 	}
-
-
 
 	mSessionlock.unlock();
 	return findSession;

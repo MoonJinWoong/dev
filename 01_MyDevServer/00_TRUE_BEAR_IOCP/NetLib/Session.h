@@ -20,13 +20,12 @@ struct IoData
 	WSAOVERLAPPED	overlapped;
 	IO_TYPE			ioType;
 	WSABUF			dataBuf;
-	SOCKET			socket;
 	//char			messageBuffer[MAX_BUFFER];
 	array<char, MAX_BUFFER>  msgBuffer;
 	int				totalByte;
 	int				currByte;
 
-	void Init();
+	IoData();
 	void Clear();
 	void setType(IO_TYPE type);
 	bool isCompleteRecv(int size);
@@ -40,7 +39,7 @@ public:
 	array<IoData,MAX_IO_TYPE>		mIoData;		// read , write용으로 들고 있어야함
 	
 	int				m_ID;
-	int				mIotype;
+	//int				mIotype;
 	bool			setSockOpt();
 
 public:
@@ -53,6 +52,9 @@ public:
 
 	void onClose();
 	void setID(int id);
+
+	bool resisterSession(SOCKET socket, SOCKADDR_IN addrInfo);
+
 
 private:
 	void Init();

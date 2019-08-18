@@ -13,6 +13,7 @@
 #include <list>
 #include <mutex>
 #include <algorithm>
+#include <memory>
 
 
 using namespace std;

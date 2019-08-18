@@ -17,6 +17,8 @@ struct stSOCKETINFO
 };
 
 
+class SessionMgr;
+
 class IocpServer :public NetBase
 {
 
@@ -50,6 +52,8 @@ private:
 	bool			m_bAccept;			// 요청 동작 플래그
 	bool			m_bWorkerThread;	// 작업 스레드 동작 플래그
 	HANDLE* m_pWorkerHandle;	// 작업 스레드 핸들
+
+	unique_ptr<SessionMgr> mSessionMgr;
 
 private:
 };
