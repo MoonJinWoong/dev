@@ -128,6 +128,10 @@ bool IocpServer::Run()
 	return true;
 }
 
+void IocpServer::ResiterSession(SOCKET acceptedSocket, SOCKADDR_IN addrInfo)
+{
+
+}
 
 void IocpServer::WorkerThread()
 {

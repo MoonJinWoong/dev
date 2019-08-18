@@ -9,5 +9,12 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <array>
+
 using namespace std;
 #include "NetBase.h"
+#include "Session.h"
+#include "SessionMgr.h"
+
+
+const int   SERVER_PORT = 8000;

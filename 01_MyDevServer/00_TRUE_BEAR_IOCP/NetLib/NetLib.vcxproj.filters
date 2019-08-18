@@ -3,10 +3,14 @@
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
     <ClCompile Include="NetBase.cpp" />
+    <ClCompile Include="Session.cpp" />
+    <ClCompile Include="SessionMgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="NetBase.h" />
     <ClInclude Include="PreComplie.h" />
+    <ClInclude Include="Session.h" />
+    <ClInclude Include="SessionMgr.h" />
   </ItemGroup>
 </Project>

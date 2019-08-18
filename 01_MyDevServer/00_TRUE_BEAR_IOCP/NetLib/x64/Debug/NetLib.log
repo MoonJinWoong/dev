@@ -1,13 +1,18 @@
 ﻿  IocpServer.cpp
 C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(164,13): warning C4477:  'printf_s' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'SOCKET'입니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(164,13): message :  서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(164,13): message :  서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(164,13): message :  서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(196,58): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(196,58): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(225,58): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(225,58): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(269,55): warning C4311:  '형식 캐스트': 'stSOCKETINFO *'에서 'DWORD'(으)로 포인터가 잘립니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(269,55): warning C4302:  '형식 캐스트': 'stSOCKETINFO *'에서 'DWORD'(으)로 잘립니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(168,13): warning C4477:  'printf_s' : 서식 문자열 '%d'에 'int' 형식의 인수가 필요하지만 variadic 인수 1의 형식이 'SOCKET'입니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(168,13): message :  서식 문자열에서 '%lld'을(를) 사용하는 것이 좋습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(168,13): message :  서식 문자열에서 '%Id'을(를) 사용하는 것이 좋습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(168,13): message :  서식 문자열에서 '%I64d'을(를) 사용하는 것이 좋습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(200,58): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(200,58): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(229,58): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(229,58): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(273,55): warning C4311:  '형식 캐스트': 'stSOCKETINFO *'에서 'DWORD'(으)로 포인터가 잘립니다.
+  NetBase.cpp
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(273,55): warning C4302:  '형식 캐스트': 'stSOCKETINFO *'에서 'DWORD'(으)로 잘립니다.
+  Session.cpp
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
+  코드를 생성하고 있습니다...
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
   NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\x64\Debug\NetLib.lib

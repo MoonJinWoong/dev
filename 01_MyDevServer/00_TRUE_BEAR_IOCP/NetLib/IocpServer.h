@@ -2,8 +2,7 @@
 
 #include "PreComplie.h"
 
-#define	MAX_BUFFER		1024
-#define SERVER_PORT		8000
+
 
 
 
@@ -20,6 +19,8 @@ struct stSOCKETINFO
 
 class IocpServer :public NetBase
 {
+
+
 public:
 	IocpServer();
 	~IocpServer();
@@ -28,17 +29,18 @@ public:
 	bool InitAndCreateSocket();
 	bool Run();
 
-
+	// 세션 생성 및 세션 매니저에 등록 
+	void ResiterSession(SOCKET acceptedSocket, SOCKADDR_IN addrInfo);
 
 	// 작업 스레드 생성
 	//bool CreateWorkerThread();
-
 
 	// 작업 스레드
 	void AcceptThread();
 	void WorkerThread();
 
 	void CloseServer();
+
 
 
 private:
