@@ -55,5 +55,7 @@ private:
 
 	unique_ptr<SessionMgr> mSessionMgr;
 
+	int				mCoreCnt;
+
 private:
 };

@@ -40,7 +40,6 @@ public:
 	
 	int				m_ID;
 	//int				mIotype;
-	bool			setSockOpt();
 
 public:
 	Session();
@@ -54,6 +53,9 @@ public:
 	void setID(int id);
 
 	bool resisterSession(SOCKET socket, SOCKADDR_IN addrInfo);
+
+	void resetSession();
+	bool postAccept();
 
 
 private:

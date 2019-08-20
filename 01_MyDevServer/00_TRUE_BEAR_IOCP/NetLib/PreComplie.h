@@ -4,6 +4,8 @@
 // winsock2 사용을 위해 아래 코멘트 추가
 #pragma comment(lib, "ws2_32.lib")
 #include <WinSock2.h>
+#include <Mswsock.h> //acceptEx
+#include <Ws2tcpip.h>
 #include <string>
 #include <process.h>
 #include <iostream>

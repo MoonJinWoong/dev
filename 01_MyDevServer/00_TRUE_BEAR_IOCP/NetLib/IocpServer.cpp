@@ -21,6 +21,12 @@ IocpServer::IocpServer()
 
 	mSessionMgr = make_unique<SessionMgr>();
 
+	SYSTEM_INFO system;
+	GetSystemInfo(&system);
+	mCoreCnt = system.dwNumberOfProcessors;
+
+	cout << "core count : " << mCoreCnt << endl;
+
 }
 
 
@@ -43,7 +49,7 @@ bool IocpServer::InitAndCreateSocket()
 	}
 
 	// 家南 积己
-	m_listenSocket = WSASocketW(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	m_listenSocket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (m_listenSocket == INVALID_SOCKET)
 	{
 		printf_s("[ERROR] 家南 积己 角菩\n");
@@ -82,10 +88,10 @@ bool IocpServer::InitAndCreateSocket()
 bool IocpServer::Run()
 {
 	// listen_socket 积己 , bind and listen
-	this->InitAndCreateSocket();
+	InitAndCreateSocket();
 
 	// Completion Port 按眉 积己
-	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, NULL, 0);
+	m_hIOCP = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, NULL, mCoreCnt);
 	if (m_hIOCP == nullptr)
 	{
 		printf_s("[INFO] CreateIoCompletionPort fail ! \n");
@@ -95,7 +101,7 @@ bool IocpServer::Run()
 	// worker thread 积己
 	vector<thread*> worker;
 	//worker.reserve(8);
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < mCoreCnt ; ++i)
 	{
 		worker.push_back(new thread{ &IocpServer::WorkerThread,this });
 	}
@@ -146,7 +152,7 @@ void IocpServer::WorkerThread()
 		if (size == 0)
 		{
 			cout << "[INFO]  立加 谗辫 session ID : " << session->m_ID << endl;
-			mSessionMgr->closeSession(session);
+		//	mSessionMgr->retSession(session);
 			continue;
 		}
 
@@ -172,7 +178,7 @@ void IocpServer::WorkerThread()
 			}
 			case IO_ERROR:
 			{
-				mSessionMgr->closeSession(session);
+			//	mSessionMgr->closeSession(session);
 				continue;
 			}
 
@@ -294,12 +300,12 @@ void IocpServer::ResiterSession(SOCKET acceptedSocket, SOCKADDR_IN addrInfo)
 		return;
 	}
 
-	if (!mSessionMgr->addSession(session))
+	/*if (!mSessionMgr->addSession(session))
 	{
 		delete(session);
 		cout << "session manager add fail" << endl;
 		return;
-	}
+	}*/
 
 	session->mIoData[IO_READ].Clear();
 
@@ -331,6 +337,7 @@ void IocpServer::AcceptThread()
 	// 努扼捞攫飘 立加阑 罐澜
 	while (m_bAccept)
 	{
+		
 		acceptedSocket = WSAAccept(
 			m_listenSocket, (struct sockaddr*) & clientAddr, &addrLen, NULL, NULL
 		);

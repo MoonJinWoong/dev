@@ -134,3 +134,15 @@ bool Session::resisterSession(SOCKET socket, SOCKADDR_IN addrInfo)
 	mSockData.sAddrInfo = addrInfo;
 	return true;
 }
+
+
+void Session::resetSession()
+{
+
+}
+
+bool Session::postAccept()
+{
+	// 여기부터 
+	return true;
+}

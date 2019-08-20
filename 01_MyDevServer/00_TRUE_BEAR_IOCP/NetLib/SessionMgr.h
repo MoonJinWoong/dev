@@ -12,18 +12,16 @@ class SessionMgr
 public:
 	SessionMgr();
 	~SessionMgr();
-	int					createSessionID();
-	bool				addSession(Session *session);
-	list<Session*>		&getSessionList();
-	bool				closeSession(Session* session);
-	void				kickSession(Session* session);
 
+
+	void				createSessionPool();
 	Session*			getSession(int id);
-
+	bool				acceptSession();
+	void				retSession(Session* session);
 
 private:
-	typedef list< Session* > SessionList;
-	SessionList				 mSessionList;
+	 list< Session* >		mRetSessionList;
+	 vector<Session*>		mSessionList;
 
 	int						 mSessionCnt;
 	int						 mMaxSession;
@@ -31,7 +29,6 @@ private:
 
 	int					     mSessionID;
 
-
-
-
+	UINT64					mCurSessionCnt;
+	UINT64					mRetSessionCnt;
 };
