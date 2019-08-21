@@ -69,6 +69,8 @@ bool SessionMgr::acceptSession()
 
 		if (false == newSession->postAccept()) 
 		{
+			mSessionlock.unlock();
+
 			return false;
 		}
 	}

@@ -1,19 +1,12 @@
-﻿  IocpServer.cpp
+﻿  NetBase.cpp
+  IocpServer.cpp
 C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(155,29): error C2039:  'closeSession': 'SessionMgr'의 멤버가 아닙니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.h(20): message :  'SessionMgr' 선언을 참조하십시오.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(181,30): error C2039:  'closeSession': 'SessionMgr'의 멤버가 아닙니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.h(20): message :  'SessionMgr' 선언을 참조하십시오.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(303,5): error C2039:  'addSession': 'SessionMgr'의 멤버가 아닙니다.
-  NetBase.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.h(20): message :  'SessionMgr' 선언을 참조하십시오.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
   Session.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(327,6): warning C4101:  'nResult' :참조되지 않은 지역 변수입니다.
   SessionMgr.cpp
 C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\SessionMgr.cpp(42,23): error C2039:  'resetSession': 'Session'의 멤버가 아닙니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\SessionMgr.h(8): message :  'Session' 선언을 참조하십시오.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\SessionMgr.cpp(70,6): error C2039:  'PostAccept': 'Session'의 멤버가 아닙니다.
   코드를 생성하고 있습니다...
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\SessionMgr.h(8): message :  'Session' 선언을 참조하십시오.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\SessionMgr.cpp(79): warning C4715:  'SessionMgr::acceptSession': 모든 제어 경로에서 값을 반환하지는 않습니다.
+  NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\x64\Debug\NetLib.lib
