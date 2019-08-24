@@ -18,10 +18,17 @@
 #include <memory>
 
 
+enum class SocketType
+{
+	TCP,
+	UDP,
+};
+
 using namespace std;
-#include "NetBase.h"
-#include "Session.h"
-#include "SessionMgr.h"
 
 
-const int   SERVER_PORT = 8000;
+#include "NetTool.h"
+
+
+const int   SERVER_PORT = 9000;
+

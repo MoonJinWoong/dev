@@ -143,17 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="NetBase.cpp" />
     <ClCompile Include="IocpServer.cpp" />
-    <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionMgr.cpp" />
+    <ClCompile Include="NetTool.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NetBase.h" />
     <ClInclude Include="IocpServer.h" />
+    <ClInclude Include="NetTool.h" />
     <ClInclude Include="PreComplie.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionMgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

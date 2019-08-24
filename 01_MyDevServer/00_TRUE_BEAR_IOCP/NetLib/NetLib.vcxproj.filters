@@ -2,15 +2,11 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
-    <ClCompile Include="NetBase.cpp" />
-    <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionMgr.cpp" />
+    <ClCompile Include="NetTool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IocpServer.h" />
-    <ClInclude Include="NetBase.h" />
     <ClInclude Include="PreComplie.h" />
-    <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionMgr.h" />
+    <ClInclude Include="NetTool.h" />
   </ItemGroup>
 </Project>

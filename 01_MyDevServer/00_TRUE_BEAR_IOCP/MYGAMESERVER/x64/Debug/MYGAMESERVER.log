@@ -1,3 +1,2 @@
 ﻿  AppMain.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\NetBase.h(12,2): warning C4091:  'typedef ': 변수를 선언하지 않으면 'SERVER_STATUS' 왼쪽은 무시됩니다.
   MYGAMESERVER.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\x64\Debug\MYGAMESERVER.exe
