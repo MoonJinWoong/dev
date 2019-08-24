@@ -5,18 +5,19 @@
 
 
 
-class SessionMgr;
-
 class IocpServer 
 {
 public:
 	IocpServer(const int &threadCnt);
 	~IocpServer();
 	void Resister(NetTool& socket, void* userPtr);
+	bool GQCS(EXOverlapped& inputEvent, int timeoutMs);
 
-private:
+	HANDLE& getIocp() { return mhIocp; }
+
+public:
 	int				mThreadCnt;
 	HANDLE			mhIocp;
-
+	int				mEventCnt;
 private:
 };

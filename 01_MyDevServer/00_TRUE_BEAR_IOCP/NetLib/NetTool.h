@@ -17,16 +17,24 @@ struct EXOverlapped
 class NetTool
 {
 public:
+	NetTool();
 	NetTool(SocketType type);
 	~NetTool();
 	void bindAndListen(const string& ip , int port);
+	bool AsyncAccept(NetTool& candidate);
 
 
 
 
+public:
 	SOCKET mhSock; // 소켓 핸들
 	// 읽기 전용
 	EXOverlapped mReadOverLappedEx;
+	bool		 misReadOverlapped = false;
+
+
+	// AcceptEx 함수 포인터
+	LPFN_ACCEPTEX AcceptEx = NULL;
 private:
 
 };

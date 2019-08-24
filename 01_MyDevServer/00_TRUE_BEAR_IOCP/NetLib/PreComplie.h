@@ -28,6 +28,7 @@ using namespace std;
 
 
 #include "NetTool.h"
+#include "Thread.h"
 
 
 const int   SERVER_PORT = 9000;

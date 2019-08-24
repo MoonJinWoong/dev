@@ -3,10 +3,12 @@
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
     <ClCompile Include="NetTool.cpp" />
+    <ClCompile Include="Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="PreComplie.h" />
     <ClInclude Include="NetTool.h" />
+    <ClInclude Include="Thread.h" />
   </ItemGroup>
 </Project>

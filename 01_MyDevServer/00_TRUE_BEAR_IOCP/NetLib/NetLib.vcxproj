@@ -145,11 +145,13 @@
   <ItemGroup>
     <ClCompile Include="IocpServer.cpp" />
     <ClCompile Include="NetTool.cpp" />
+    <ClCompile Include="Thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="IocpServer.h" />
     <ClInclude Include="NetTool.h" />
     <ClInclude Include="PreComplie.h" />
+    <ClInclude Include="Thread.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

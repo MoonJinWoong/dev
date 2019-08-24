@@ -1,10 +1,15 @@
 #include "NetTool.h"
 
 
+NetTool::NetTool()
+{
+	mhSock = -1;
+	ZeroMemory(&mReadOverLappedEx.overlapped, sizeof(mReadOverLappedEx.overlapped));
+}
+
 NetTool::NetTool(SocketType type)
 {
 	// wsastartup , 소켓 생성 , 오버랩드 초기화 
-
 	WSADATA wsa;
 	WSAStartup(MAKEWORD(2, 2), &wsa);
 
@@ -63,4 +68,44 @@ void NetTool::bindAndListen(const string& ip, int port)
 		cout << "[INFO] listen success" << endl;
 
 	}
+}
+
+bool NetTool::AsyncAccept(NetTool& candidate)
+{
+	// 함수 포인터 가져옴. 이래야 동작함
+	if (AcceptEx == NULL)
+	{
+		DWORD bytes;
+		WSAIoctl(mhSock,
+			SIO_GET_EXTENSION_FUNCTION_POINTER,
+			&UUID(WSAID_ACCEPTEX),
+			sizeof(UUID),
+			&AcceptEx,
+			sizeof(AcceptEx),
+			&bytes,
+			NULL,
+			NULL);
+
+		if (AcceptEx == NULL)
+		{
+			cout << "Accept Ex get fail" << endl;
+			return false;
+		}
+	}
+
+	// 소켓의 로컬주소와 리모트주소
+	char addr[200];
+	DWORD flag = 0;
+
+	bool ret = AcceptEx(mhSock,
+		candidate.mhSock,
+		&addr,
+		0,
+		50,
+		50,
+		&flag,
+		&mReadOverLappedEx.overlapped
+	) == TRUE;
+
+	return ret;
 }
