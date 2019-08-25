@@ -33,23 +33,42 @@ int main()
 
 
 	// 비동기 accpet
-	auto overSession = make_shared<Session>(SocketType::TCP);
-	if (!netTool.AsyncAccept(overSession->acceptedSession)
+	auto candidateSession = make_shared<Session>(SocketType::TCP);
+	if (!netTool.AsyncAccept(candidateSession->acceptedSession)
 		&& WSAGetLastError() != ERROR_IO_PENDING)
 	{
 		cout << "overlapped AcceptEX fail" << endl;
 	}
 	netTool.misReadOverlapped = true;
 
-	EXOverlapped over;
+	
+
+
 
 	while (1)
 	{
+		IocpEvents readEvents;
+		Iocp.RunGQCS(readEvents, 100);
 
-		if (Iocp.GQCS(over, 100))
+		for (int i = 0; i < readEvents.mEventCount; i++)
 		{
-			
+			auto& readEvent = readEvents.mEvents[i];
+			if (readEvent.lpCompletionKey == 0) // 리슨소켓이면
+			{
+				cout << "asdfasdfasfd" << endl;
+				netTool.misReadOverlapped = false;
+				// 이미 accept은 완료되었다. 귀찮지만, Win32 AcceptEx 사용법에 따르는 마무리 작업을 하자. 
+				if (candidateSession->acceptedSession.UpdateAcceptContext(listenSocket) != 0)
+				{
+					//리슨소켓을 닫았던지 하면 여기서 에러날거다. 그러면 리슨소켓 불능상태로 만들자.
+					listenSocket.Close();
+				}
+			}
+	
+
+
 		}
+
 	}
 	
 

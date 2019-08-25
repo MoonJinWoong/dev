@@ -22,7 +22,7 @@ public:
 	~NetTool();
 	void bindAndListen(const string& ip , int port);
 	bool AsyncAccept(NetTool& candidate);
-
+	UpdateAcceptContext
 
 
 

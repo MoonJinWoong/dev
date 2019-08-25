@@ -34,7 +34,7 @@ void IocpServer::Resister(NetTool& netObj, void* userPtr)
 	}
 }
 
-bool IocpServer::GQCS(EXOverlapped& inputEvent, int timeoutMs)
+void IocpServer::RunGQCS(IocpEvents& inputEvent, int waitTime)
 {
 
 	// Overlapped I/O 작업에서 전송된 데이터 크기
@@ -44,22 +44,18 @@ bool IocpServer::GQCS(EXOverlapped& inputEvent, int timeoutMs)
 
 	int key;
 
-	bool ret = GetQueuedCompletionStatus(
-		mhIocp,
-		&recvBytes,
-		(PULONG_PTR)& key,
-		(LPOVERLAPPED*)& inputEvent,
-		timeoutMs);
+	auto ret = GetQueuedCompletionStatusEx(
+				mhIocp,
+				inputEvent.mEvents,
+				MaxEventCount, 
+				(ULONG*)& inputEvent.mEventCount,
+				waitTime,
+				FALSE
+			);
 
 	if (!ret)
 	{
-		// 들어온 event가 없다.
-		return false;
-	}
-	else
-	{
-		cout << "recvByte:" << recvBytes <<endl;
-		return true;
+		mEventCnt = 0;
 	}
 }
 
