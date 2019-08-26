@@ -1,4 +1,0 @@
-﻿  IocpServer.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(45,6): warning C4101:  'key' :참조되지 않은 지역 변수입니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\NetLib\IocpServer.cpp(41,8): warning C4101:  'recvBytes' :참조되지 않은 지역 변수입니다.
-  NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\x64\Debug\NetLib.lib
