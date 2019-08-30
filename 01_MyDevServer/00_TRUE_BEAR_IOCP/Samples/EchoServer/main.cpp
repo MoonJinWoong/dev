@@ -49,9 +49,47 @@ int main()
 
 	printf_s("[SERVER][%s] Start.......\n", __FUNCTION__);
 
-	
+	// overlapped accept할 것들을 전부 걸어놓고 풀을 만들어둔다.
 
 
+	// GClientSessionManager
+	while (GClientSessionManager->AcceptClientSessions())
+	{
+		Sleep(32);
+	}
+
+	// AcceptClientSessions
+	while (mCurrentIssueCount - mCurrentReturnCount < m_MaxSessionCount)
+	{
+		ClientSession* newClient = mFreeSessionList.back();
+		mFreeSessionList.pop_back();
+
+		++mCurrentIssueCount;
+
+		if (false == newClient->PostAccept()) {
+			return false;
+		}
+	}
+
+
+	// PostAccept
+	OverlappedAcceptContext* acceptContext = new OverlappedAcceptContext(this);
+	DWORD bytes = 0;
+	DWORD flags = 0;
+	acceptContext->mWsaBuf.len = 0;
+	acceptContext->mWsaBuf.buf = nullptr;
+
+	if (FALSE == AcceptEx(*GIocpManager->GetListenSocket(), mSocket, GIocpManager->mAcceptBuf, 0,
+		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16, &bytes, (LPOVERLAPPED)acceptContext))
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			DeleteIoContext(acceptContext);
+			printf_s("AcceptEx Error : %d\n", GetLastError());
+
+			return false;
+		}
+	}
 
 
 	//

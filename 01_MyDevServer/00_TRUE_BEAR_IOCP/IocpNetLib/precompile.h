@@ -22,3 +22,5 @@ using namespace std;
 
 #include "NetworkService.h"
 #include "IocpService.h"
+#include "SessionMgr.h"
+#include "Session.h"
