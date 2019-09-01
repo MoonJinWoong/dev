@@ -1,26 +1,21 @@
-#pragma once
-#define _CRT_SECURE_NO_WARNINGS
+#pragma once 
 
-
-// winsock2 »ç¿ë
-#pragma comment(lib, "ws2_32.lib")
-#include <WinSock2.h>
+#include <string>
+#include <Ws2tcpip.h>
 #include <winsock2.h>
 #include <windows.h>
 #include <mswsock.h>
-
-
-#include <map>
-#include <vector>
-#include <thread>
-#include <thread>
 #include <process.h>
-#include <mutex>
 #include <iostream>
-using namespace std;
+#include <list>
+#include <vector>
 
+const int MAX_IO_THREAD = 4;
+const int PORT = 8000;
 
-#include "NetworkService.h"
+#include "FastSpinLock.h"
 #include "IocpService.h"
-#include "SessionMgr.h"
 #include "Session.h"
+#include "SessionManager.h"
+#include "IocpThread.h"
+

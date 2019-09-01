@@ -19,17 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FastSpinLock.cpp" />
     <ClCompile Include="IocpService.cpp" />
-    <ClCompile Include="NetworkService.cpp" />
+    <ClCompile Include="IocpThread.cpp" />
     <ClCompile Include="Session.cpp" />
-    <ClCompile Include="SessionMgr.cpp" />
+    <ClCompile Include="SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FastSpinLock.h" />
+    <ClInclude Include="IocpThread.h" />
+    <ClInclude Include="preCompile.h" />
     <ClInclude Include="IocpService.h" />
-    <ClInclude Include="NetworkService.h" />
-    <ClInclude Include="precompile.h" />
     <ClInclude Include="Session.h" />
-    <ClInclude Include="SessionMgr.h" />
+    <ClInclude Include="SessionManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

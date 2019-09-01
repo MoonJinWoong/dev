@@ -1,18 +1,31 @@
 #pragma once
+#include "preCompile.h"
 
-class NetworkService;
+// I/O Completion Port °´Ã¼.
+class IocpThread;
 
 class IocpService
 {
 public:
-	IocpService(int threadCnt);
+	IocpService();
 	~IocpService();
+	bool Init();
 
-	void resister(NetworkService& sock);
+public:
+	static LPFN_ACCEPTEX mFnAcceptEx;
+	static LPFN_CONNECTEX mFnConnectEx;
+	static char mAcceptBuf[64];
 
-	HANDLE mIocpHanle;
+private:
+	HANDLE	mCompletionPort;
+	SOCKET	mListenSocket;
 
-	int mThreadCnt;
+	IocpThread* mIoWorkerThread[MAX_IO_THREAD];
+
 };
+
+extern IocpService* gIocpService;
+
+
 
 
