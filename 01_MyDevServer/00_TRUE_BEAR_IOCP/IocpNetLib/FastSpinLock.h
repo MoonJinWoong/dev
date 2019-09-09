@@ -1,19 +1,17 @@
 #pragma once
-#include "precompile.h"
-// 락의 범위가 좁을 때 주로 사용한다.
-// 
-class FastSpinlock
+
+class FastSpinLock
 {
 public:
-	FastSpinlock();
-	~FastSpinlock();
+	FastSpinLock();
+	~FastSpinLock();
 
 	void EnterLock();
 	void LeaveLock();
 
 private:
-	FastSpinlock(const FastSpinlock& rhs);
-	FastSpinlock& operator=(const FastSpinlock& rhs);
+	FastSpinLock(const FastSpinLock& rhs);
+	FastSpinLock& operator=(const FastSpinLock& rhs);
 
 	volatile long mLockFlag;
 };
@@ -21,7 +19,7 @@ private:
 class FastSpinlockGuard
 {
 public:
-	FastSpinlockGuard(FastSpinlock& lock) : mLock(lock)
+	FastSpinlockGuard(FastSpinLock& lock) : mLock(lock)
 	{
 		mLock.EnterLock();
 	}
@@ -32,7 +30,7 @@ public:
 	}
 
 private:
-	FastSpinlock& mLock;
+	FastSpinLock& mLock;
 };
 
 template <class TargetClass>
@@ -54,10 +52,10 @@ public:
 	};
 
 private:
-	static FastSpinlock mLock;
+	static FastSpinLock mLock;
 
 	//friend struct LockGuard;
 };
 
 template <class TargetClass>
-FastSpinlock ClassTypeLock<TargetClass>::mLock;
+FastSpinLock ClassTypeLock<TargetClass>::mLock;

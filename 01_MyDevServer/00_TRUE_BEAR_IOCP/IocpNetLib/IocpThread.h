@@ -1,11 +1,11 @@
 #pragma once
 #include "preCompile.h"
 
-class IOThread
+class IocpThread
 {
 public:
-	IOThread(HANDLE hThread, HANDLE hCompletionPort);
-	~IOThread();
+	IocpThread(HANDLE hThread, HANDLE hCompletionPort);
+	~IocpThread();
 
 	DWORD Run();
 

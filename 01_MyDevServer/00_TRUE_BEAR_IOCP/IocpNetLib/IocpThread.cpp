@@ -2,22 +2,23 @@
 #include "IocpThread.h"
 
 
-IOThread::IOThread(HANDLE hThread, HANDLE hCompletionPort)
+IocpThread::IocpThread(HANDLE hThread, HANDLE hCompletionPort)
 	: mThreadHandle(hThread), mCompletionPort(hCompletionPort)
 {
 }
 
 
-IOThread::~IOThread()
+IocpThread::~IocpThread()
 {
 	CloseHandle(mThreadHandle);
 }
 
-DWORD IOThread::Run()
+DWORD IocpThread::Run()
 {
 
 	while (true)
 	{
+		std::cout << "asdfasdf" << std:: endl;
 		DoIocpJob();
 
 		DoSendJob(); ///< aggregated sends
@@ -26,19 +27,28 @@ DWORD IOThread::Run()
 	return 1;
 }
 
-void IOThread::SetManagedSendIOClientSessionIndex(const int maxClientSessionCount, const int thisThreadIndex, const int maxThreadCount)
+void IocpThread::SetManagedSendIOClientSessionIndex(const int maxClientSessionCount, const int thisThreadIndex, const int maxThreadCount)
 {
+	auto averCount = (int)(maxClientSessionCount / maxThreadCount);
+
+	m_SendIOClientSessionBeginIndex = averCount * thisThreadIndex;
+	m_SendIOClientSessionEndIndex = m_SendIOClientSessionBeginIndex + averCount;
+
+	if (thisThreadIndex == (maxThreadCount - 1))
+	{
+		auto restCount = (int)(maxClientSessionCount % maxThreadCount);
+		m_SendIOClientSessionEndIndex += restCount;
+	}
+}
+
+void IocpThread::DoIocpJob()
+{
+
 
 }
 
-void IOThread::DoIocpJob()
-{
 
-
-}
-
-
-void IOThread::DoSendJob()
+void IocpThread::DoSendJob()
 {
 	
 

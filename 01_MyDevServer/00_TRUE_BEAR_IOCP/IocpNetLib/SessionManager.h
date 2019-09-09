@@ -2,26 +2,31 @@
 #include "preCompile.h"
 
 
+class Session;
+
 class SessionManager
 {
 public:
-	SessionManager() : mCurrentIssueCount(0), mCurrentReturnCount(0)
-	{}
-
+	SessionManager();
 	~SessionManager();
 
 	void PrepareClientSessions();
 	bool AcceptClientSessions();
-
-
-
-
-
+	int getMaxSessionCount() const { return m_MaxSessionCount; }
 
 private:
+	typedef std::list<Session*> ClientList;
+	ClientList	mFreeSessionList;
+
+	FastSpinLock mSpinLock;
+
 	uint64_t mCurrentIssueCount;
 	uint64_t mCurrentReturnCount;
+
+
+	int m_MaxSessionCount = 0;
+
+	std::vector<Session*> m_SessionList;
 };
 
-//TODO: 가능하면 전역으로 사용하지 않기
 extern SessionManager* gSessionMgr;

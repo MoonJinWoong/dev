@@ -4,17 +4,30 @@
 
 int main()
 {
-
+	
+	/// Global Managers
 	gSessionMgr = new SessionManager;
 	gIocpService = new IocpService;
-		
-	
-	if (!gIocpService->Init())
+
+
+	if (false == gIocpService->Init())
 	{
-		std::cout << "IocpService Init failed.....!!" << std::endl;
+		std::cout << "Fail GIocpManager->Initialize" << std::endl;
 		return -1;
 	}
 
+	if (false == gIocpService->CreateThreads())
+	{
+		std::cout << "Fail GIocpManager->Create" << std::endl;
+		return -1;
+	}
+
+
+
+	std::cout << "Start Server" << std::endl;
+	gIocpService->RunAsyncAccept(); 
+	gIocpService->ShutDownService();
+	std::cout << "End Server" << std::endl;
 
 	delete gSessionMgr;
 	delete gIocpService;

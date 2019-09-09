@@ -22,7 +22,12 @@ public:
 private:
 
 	SOCKADDR_IN		mClientAddr;
-
+	size_t mSendBufSize;
+	size_t mRecvBufSize;
+	int				mSendPendingCount;
+	volatile long	mRefCount;
+	volatile long	mConnected;
+	SOCKET mSocket;
 
 	friend class ClientSessionManager;
 };
