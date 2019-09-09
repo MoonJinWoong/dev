@@ -3,9 +3,18 @@
 
 // 글로벌하게 사용
 IocpService* gIocpService = nullptr;
+
+
 char IocpService::mAcceptBuf[64] = { 0, };
 LPFN_ACCEPTEX IocpService::mlpfnAcceptEx = nullptr;
 
+
+BOOL AcceptEx(SOCKET sListenSocket, SOCKET sAcceptSocket, PVOID lpOutputBuffer, DWORD dwReceiveDataLength,
+	DWORD dwLocalAddressLength, DWORD dwRemoteAddressLength, LPDWORD lpdwBytesReceived, LPOVERLAPPED lpOverlapped)
+{
+	return IocpService::mlpfnAcceptEx(sListenSocket, sAcceptSocket, lpOutputBuffer, dwReceiveDataLength,
+		dwLocalAddressLength, dwRemoteAddressLength, lpdwBytesReceived, lpOverlapped);
+}
 
 IocpService::IocpService()
 {
@@ -152,8 +161,6 @@ bool IocpService::CreateThreads()
 
 		mIoWorkerThread[i] = new IocpThread(hThread, mCompletionPort);
 		mIoWorkerThread[i]->SetManagedSendIOClientSessionIndex(gSessionMgr->getMaxSessionCount(), i, MAX_IO_THREAD);
-		
-		
 	}
 
 	/// start!

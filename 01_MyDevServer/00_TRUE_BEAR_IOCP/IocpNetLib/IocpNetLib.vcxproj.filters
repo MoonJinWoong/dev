@@ -7,6 +7,7 @@
     <ClInclude Include="SessionManager.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="FastSpinLock.h" />
+    <ClInclude Include="ExOverlappedIO.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpService.cpp" />
@@ -14,5 +15,6 @@
     <ClCompile Include="SessionManager.cpp" />
     <ClCompile Include="Session.cpp" />
     <ClCompile Include="FastSpinLock.cpp" />
+    <ClCompile Include="ExOverlappedIO.cpp" />
   </ItemGroup>
 </Project>

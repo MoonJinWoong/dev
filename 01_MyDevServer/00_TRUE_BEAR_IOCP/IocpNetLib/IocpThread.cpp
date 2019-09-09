@@ -18,7 +18,6 @@ DWORD IocpThread::Run()
 
 	while (true)
 	{
-		std::cout << "asdfasdf" << std:: endl;
 		DoIocpJob();
 
 		DoSendJob(); ///< aggregated sends
@@ -43,7 +42,22 @@ void IocpThread::SetManagedSendIOClientSessionIndex(const int maxClientSessionCo
 
 void IocpThread::DoIocpJob()
 {
+	DWORD dwTransferred = 0;
+	LPOVERLAPPED overlapped = nullptr;
 
+	ULONG_PTR completionKey = 0;
+
+	int ret = GetQueuedCompletionStatus(mCompletionPort, &dwTransferred, (PULONG_PTR)& completionKey, &overlapped, 10);
+
+	if (ret == 0 || dwTransferred == 0)
+	{
+		return;
+	}
+	else
+	{
+		std::cout << "key : " << completionKey << std::endl;
+
+	}
 
 }
 

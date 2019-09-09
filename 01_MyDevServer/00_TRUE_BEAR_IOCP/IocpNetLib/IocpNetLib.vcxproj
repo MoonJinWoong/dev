@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ExOverlappedIO.cpp" />
     <ClCompile Include="FastSpinLock.cpp" />
     <ClCompile Include="IocpService.cpp" />
     <ClCompile Include="IocpThread.cpp" />
@@ -26,6 +27,7 @@
     <ClCompile Include="SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ExOverlappedIO.h" />
     <ClInclude Include="FastSpinLock.h" />
     <ClInclude Include="IocpThread.h" />
     <ClInclude Include="preCompile.h" />

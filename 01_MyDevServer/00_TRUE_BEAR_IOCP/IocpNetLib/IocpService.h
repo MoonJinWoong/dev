@@ -16,6 +16,8 @@ public:
 	void RunAsyncAccept();
 	void ShutDownService();
 
+	SOCKET* GetListenSocket() { return &mListenSocket; }
+
 
 public:
 	static LPFN_ACCEPTEX mlpfnAcceptEx;

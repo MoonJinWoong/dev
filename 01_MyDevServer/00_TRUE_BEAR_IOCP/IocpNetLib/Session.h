@@ -17,6 +17,9 @@ public:
 	virtual void OnDisconnect();
 	virtual void OnRelease();
 
+	void AddRef();
+	void ReleaseRef();
+
 public:
 
 private:
