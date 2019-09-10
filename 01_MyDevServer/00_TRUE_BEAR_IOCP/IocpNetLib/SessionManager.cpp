@@ -21,7 +21,7 @@ void SessionManager::PrepareClientSessions()
 	{
 		Session* client = new Session();
 		mFreeSessionList.push_back(client);
-		m_SessionList.push_back(client);
+		m_SessionList.emplace_back(client);
 	}
 
 	printf_s("[DEBUG][%s] m_MaxSessionCount: %d\n", __FUNCTION__, m_MaxSessionCount);
@@ -32,7 +32,7 @@ void SessionManager::PrepareClientSessions()
 bool SessionManager::AcceptClientSessions()
 {
 	FastSpinlockGuard guard(mSpinLock);
-
+	int i = 0;
 	while (mCurrentIssueCount - mCurrentReturnCount < m_MaxSessionCount)
 	{
 		Session* newClient = mFreeSessionList.back();
@@ -44,7 +44,10 @@ bool SessionManager::AcceptClientSessions()
 		{
 			return false;
 		}
+
 	}
+
+	//std::cout << "current new session count : " << mCurrentIssueCount << std::endl;
 
 	return true;
 }
