@@ -1,0 +1,13 @@
+﻿  ExOverlappedIO.cpp
+  FastSpinLock.cpp
+  IocpService.cpp
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpNetLib\IocpService.cpp(12,6): error C2373:  'AcceptEx': 재정의. 형식 한정자가 다릅니다.
+  IocpThread.cpp
+  Session.cpp
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\um\mswsock.h(179): message :  'AcceptEx' 선언을 참조하십시오.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpNetLib\Session.cpp(162,11): warning C4477:  'printf_s' : 서식 문자열 '%I64u'에 'unsigned __int64' 형식의 인수가 필요하지만 variadic 인수 2의 형식이 'SOCKET'입니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpNetLib\Session.cpp(162,11): message :  서식 문자열에서 '%u'을(를) 사용하는 것이 좋습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpNetLib\Session.cpp(162,11): message :  서식 문자열에서 '%Iu'을(를) 사용하는 것이 좋습니다.
+  SessionManager.cpp
+  코드를 생성하고 있습니다...
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpNetLib\Session.cpp(162,11): message :  서식 문자열에서 '%I32u'을(를) 사용하는 것이 좋습니다.

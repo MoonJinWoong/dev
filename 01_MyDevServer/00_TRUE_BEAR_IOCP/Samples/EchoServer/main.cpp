@@ -22,7 +22,7 @@ int main()
 		return -1;
 	}
 
-
+	Sleep(1000);
 
 	std::cout << "Start Server" << std::endl;
 	gIocpService->RunAsyncAccept(); 

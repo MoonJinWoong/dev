@@ -1,10 +1,12 @@
 #pragma once 
+#pragma comment(lib, "winmm.lib") // timeBegin,end Period()  사용을 위해
 
 #include <string>
 #include <Ws2tcpip.h>
 #include <winsock2.h>
 #include <windows.h>
 #include <mswsock.h>
+#include <memory>
 #include <process.h>
 #include <iostream>
 #include <list>

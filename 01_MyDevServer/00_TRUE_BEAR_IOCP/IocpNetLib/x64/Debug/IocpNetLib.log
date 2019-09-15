@@ -1,7 +1,2 @@
-﻿  ExOverlappedIO.cpp
-  IocpService.cpp
-  IocpThread.cpp
-  Session.cpp
-  SessionManager.cpp
-  코드를 생성하고 있습니다...
-  IocpNetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\Samples\EchoServer\x64\Debug\IocpNetLib.lib
+﻿  Session.cpp
+  IocpNetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\IocpChat\x64\Debug\IocpNetLib.lib

@@ -78,15 +78,22 @@ void IocpThread::DoIocpJob()
 		}
 	}
 
+
+
+
 	bool completionOk = false;
+
+
 	switch (context->mIoType)
 	{
 
 	case IO_ACCEPT:
 		completionOk = dynamic_cast<Session*>(remote)->AcceptCompletion();
+
 		// TODO: completionOk가 false인 경우 실패 이유가 설정 되어야 한다. remote->SetDisconnectReason
 		break;
-
+	default:
+		break;
 	}
 
 }

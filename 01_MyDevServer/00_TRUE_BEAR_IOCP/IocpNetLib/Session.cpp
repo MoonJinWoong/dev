@@ -7,13 +7,40 @@ Session::Session():
 					// mSendBufSize(CLIENT_BUFSIZE), mRecvBufSize(CLIENT_BUFSIZE),
 					 mConnected(0), mRefCount(0), mSendPendingCount(0)
 {
+	mRecvBuffer[BUFSIZE] = { 0, };
+	mSendBuffer[BUFSIZE] = { 0, };
+	
 	memset(&mClientAddr, 0, sizeof(SOCKADDR_IN));
 	mSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
 }
 
 Session::~Session()
 {
+}
+Session::Session(const Session& Other)
+{
+	mClientAddr = Other.mClientAddr;
+	mSendPendingCount = Other.mSendPendingCount;
+	mRefCount = Other.mRefCount;
+	mConnected = Other.mConnected;
+	mSocket = Other.mSocket;
 
+	memcpy(mRecvBuffer, Other.mRecvBuffer, sizeof(mRecvBuffer));
+	memcpy(mSendBuffer, Other.mSendBuffer, sizeof(mSendBuffer));
+}
+
+Session::Session(Session&& Other)
+{
+	mClientAddr = Other.mClientAddr;
+	mSendPendingCount = Other.mSendPendingCount;
+	mRefCount = Other.mRefCount;
+	mConnected = Other.mConnected;
+	mSocket = Other.mSocket;
+
+	memcpy(mRecvBuffer, Other.mRecvBuffer, sizeof(mRecvBuffer));
+	memcpy(mSendBuffer, Other.mSendBuffer, sizeof(mSendBuffer));
+
+	std::cout << "move semantic call" << std::endl;
 }
 
 void Session::SessionReset()
@@ -53,6 +80,8 @@ bool Session::PostAccept()
 
 bool Session::AcceptCompletion()
 {
+
+
 	if (1 == InterlockedExchange(&mConnected, 1))
 	{
 		/// already exists?
@@ -136,28 +165,20 @@ bool Session::AcceptCompletion()
 		return stateOpt;
 	}
 
+
 	char clientIP[32] = { 0, };
 	inet_ntop(AF_INET, &(mClientAddr.sin_addr), clientIP, 32 - 1);
 	printf_s("[DEBUG] Client Connected: IP=%s, PORT=%d\n", clientIP, ntohs(mClientAddr.sin_port));
 
-	if (false == PostRecv())
+	if (false == RealRecv())
 	{
 		printf_s("[DEBUG][%s] PreRecv error: %d\n", __FUNCTION__, GetLastError());
 		return false;
 	}
 
 
-
-
-
-
-
 	static int id = 101;
 	++id;
-
-
-
-
 
 	printf_s("[DEBUG][%s] Connectd New Session: %I64u\n", __FUNCTION__, mSocket);
 
@@ -191,7 +212,7 @@ void Session::ReleaseRef()
 
 
 
-bool Session::PostRecv()
+bool Session::RealRecv()
 {
 	if (!IsConnected()) 
 	{
@@ -203,14 +224,19 @@ bool Session::PostRecv()
 	DWORD recvbytes = 0;
 	DWORD flags = 0;
 	recvContext->mWsaBuf.len = BUFSIZE;
+	recvContext->mWsaBuf.buf = mRecvBuffer;
 	
-	memcpy(recvContext->mWsaBuf.buf, mRecvBuffer, sizeof(mRecvBuffer));
 
-
-	printf_s("[DEBUG] PostRecv  ... . .. \n");
-
-
-
-
+	/// start real recv
+	if (SOCKET_ERROR == WSARecv(mSocket, &recvContext->mWsaBuf, 1, &recvbytes, &flags, (LPWSAOVERLAPPED)recvContext, NULL))
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			DeleteIoContext(recvContext);
+			printf_s("Session::PostRecv Error : %d\n", GetLastError());
+			return false;
+		}
+	}
+	
 	return true;
 }

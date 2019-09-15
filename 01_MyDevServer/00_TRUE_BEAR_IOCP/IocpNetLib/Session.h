@@ -7,14 +7,15 @@ class Session
 public:
 	Session();
 	virtual ~Session();
-
+	Session(const Session& Other);
+	Session(Session&& other);
 
 	void SessionReset();
 
 	bool PostAccept();
 	bool AcceptCompletion();
 
-	bool PostRecv();
+	bool RealRecv();
 
 
 	virtual void OnReceive(size_t len) {}

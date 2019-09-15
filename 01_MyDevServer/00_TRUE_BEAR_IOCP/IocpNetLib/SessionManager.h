@@ -15,8 +15,8 @@ public:
 	int getMaxSessionCount() const { return m_MaxSessionCount; }
 
 private:
-	typedef std::list<Session*> ClientList;
-	ClientList	mFreeSessionList;
+	std::list<Session*> mFreeSessionList;
+	std::vector<Session*> m_SessionList;
 
 	FastSpinLock mSpinLock;
 
@@ -26,7 +26,6 @@ private:
 
 	int m_MaxSessionCount = 0;
 
-	std::vector<Session*> m_SessionList;
 };
 
 extern SessionManager* gSessionMgr;

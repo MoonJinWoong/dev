@@ -1,6 +1,8 @@
 #define _WINSOCKAPI_
 #include <windows.h>
+#include <Mmsystem.h>
 #include "FastSpinlock.h"
+
 
 
 FastSpinLock::FastSpinLock() : mLockFlag(0)
