@@ -17,6 +17,7 @@ public:
 	void ShutDownService();
 
 	SOCKET* GetListenSocket() { return &mListenSocket; }
+	HANDLE GetComletionPort() { return mCompletionPort; }
 
 
 public:

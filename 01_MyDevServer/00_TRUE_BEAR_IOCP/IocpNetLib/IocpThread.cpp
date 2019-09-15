@@ -19,7 +19,6 @@ DWORD IocpThread::Run()
 	while (true)
 	{
 		DoIocpJob();
-
 		DoSendJob(); ///< aggregated sends
 	}
 
@@ -49,13 +48,44 @@ void IocpThread::DoIocpJob()
 
 	int ret = GetQueuedCompletionStatus(mCompletionPort, &dwTransferred, (PULONG_PTR)& completionKey, &overlapped, 10);
 
+
+	ExOverlappedIO* context = reinterpret_cast<ExOverlappedIO*>(overlapped);
+
+	Session* remote = context ? context->mSessionObject : nullptr;
+
+
 	if (ret == 0 || dwTransferred == 0)
 	{
-		return;
+		/// check time out first 
+		if (context == nullptr && GetLastError() == WAIT_TIMEOUT) 
+		{
+			//std::cout << "34343434" << std::endl;
+
+			return;
+		}
+
+		if (context->mIoType == IO_RECV || context->mIoType == IO_SEND)
+		{
+			std::cout << "123123123" << std::endl;
+
+			//auto disconnectReason = static_cast<OverlappedDisconnectContext*>(context)->mDisconnectReason;
+			//DeleteIoContext(context);
+
+			///// In most cases in here: ERROR_NETNAME_DELETED(64)
+			//remote->DisconnectCompletion(disconnectReason);
+
+			return;
+		}
 	}
-	else
+
+	bool completionOk = false;
+	switch (context->mIoType)
 	{
-		std::cout << "key : " << completionKey << std::endl;
+
+	case IO_ACCEPT:
+		completionOk = dynamic_cast<Session*>(remote)->AcceptCompletion();
+		// TODO: completionOk가 false인 경우 실패 이유가 설정 되어야 한다. remote->SetDisconnectReason
+		break;
 
 	}
 
