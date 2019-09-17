@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-class Socket;
+class NetworkObject;
 class IocpEvents;
 
 // I/O Completion Port 객체.
@@ -14,7 +14,7 @@ public:
 	Iocp();
 	~Iocp();
 
-	void Add(Socket& socket, void* userPtr);
+	void ResisterIocp(NetworkObject& socket, void* userPtr);
 	
 	HANDLE m_hIocp;
 	int m_threadCount; // IOCP 생성시 및 소켓 추가시 계속 사용되는 값인지라...

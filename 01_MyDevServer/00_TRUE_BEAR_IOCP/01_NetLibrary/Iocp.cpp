@@ -1,24 +1,21 @@
 ﻿#include "stdafx.h"
 #include "Iocp.h"
-#include "Socket.h"
+#include "NetworkObject.h"
 #include "Exception.h"
 
 
 Iocp::Iocp()
 {
 	m_threadCount = IOCP_THREAD_COUNT;
-
 	m_hIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, IOCP_THREAD_COUNT);
 }
-
 
 Iocp::~Iocp()
 {
 	CloseHandle(m_hIocp);
 }
 
-// IOCP에 socket을 추가합니다.
-void Iocp::Add(Socket& socket, void* userPtr)
+void Iocp::ResisterIocp(NetworkObject& socket, void* userPtr)
 {
 	if (!CreateIoCompletionPort((HANDLE)socket.m_fd, m_hIocp, (ULONG_PTR)userPtr, m_threadCount))
 		throw Exception("IOCP add failed!");

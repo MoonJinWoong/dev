@@ -152,9 +152,7 @@
     <ClInclude Include="Exception.h" />
     <ClInclude Include="preComplie.h" />
     <ClInclude Include="Iocp.h" />
-    <ClInclude Include="Poll.h" />
-    <ClInclude Include="Semaphore.h" />
-    <ClInclude Include="Socket.h" />
+    <ClInclude Include="NetworkObject.h" />
     <ClInclude Include="SocketInit.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -163,8 +161,7 @@
     <ClCompile Include="Endpoint.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Iocp.cpp" />
-    <ClCompile Include="Poll.cpp" />
-    <ClCompile Include="Socket.cpp" />
+    <ClCompile Include="NetworkObject.cpp" />
     <ClCompile Include="SocketInit.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -19,15 +19,8 @@ typedef int SOCKET;
 
 class Endpoint;
 
-
-enum class SocketType
-{
-	Tcp,
-	Udp,
-};
-
 // 소켓 클래스
-class Socket
+class NetworkObject
 {
 public:
 	static const int MaxReceiveLength = 8192;
@@ -56,23 +49,20 @@ public:
 	DWORD m_readFlags = 0;
 #endif
 
-	Socket();
-	Socket(SOCKET fd);
-	Socket(SocketType socketType);
-	~Socket();
+	NetworkObject();
+	NetworkObject(SOCKET fd);
+	~NetworkObject();
 
-	void Bind(const Endpoint& endpoint);
-	void Connect(const Endpoint& endpoint);
+	void BindAndListen(const Endpoint& endpoint);
 	int Send(const char* data, int length);
 	void Close();
-	void Listen();
-	int Accept(Socket& acceptedSocket, std::string& errorText);
+	//int Accept(Socket& acceptedSocket, std::string& errorText);
 #ifdef _WIN32
-	bool AcceptOverlapped(Socket& acceptCandidateSocket, std::string& errorText);
-	int UpdateAcceptContext(Socket& listenSocket);
+	bool AcceptOverlapped(NetworkObject& acceptCandidateSocket, std::string& errorText);
+	int  FinishAcceptEx(NetworkObject& listenSocket);
 #endif
-	Endpoint GetPeerAddr();
-	int Receive();
+	//Endpoint GetPeerAddr();
+	//int Receive();
 #ifdef _WIN32
 	int ReceiveOverlapped();
 #endif
