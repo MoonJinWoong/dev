@@ -21,6 +21,8 @@ NetworkObject::NetworkObject()
 	g_socketInit.Touch();
 	m_fd = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	ZeroMemory(&m_readOverlappedStruct, sizeof(m_readOverlappedStruct));
+	ZeroMemory(&m_writeOverlappedStruct, sizeof(m_writeOverlappedStruct));
+
 }
 
 
@@ -30,7 +32,7 @@ NetworkObject::NetworkObject(SOCKET fd)
 	g_socketInit.Touch();
 	m_fd = fd;
 	ZeroMemory(&m_readOverlappedStruct, sizeof(m_readOverlappedStruct));
-
+	ZeroMemory(&m_writeOverlappedStruct, sizeof(m_writeOverlappedStruct));
 }
 
 NetworkObject::~NetworkObject()
@@ -61,7 +63,29 @@ void NetworkObject::BindAndListen(const Endpoint& endpoint)
 // TODO : 이거 비동기로 바꿔야함... ㅂㄷㅂㄷ
 int NetworkObject::Send(const char* data, int length)
 {
-	return ::send(m_fd, data, length, 0);
+	//memcpy_s(sendContext->mBuffer, BUFSIZE, buf, len);
+
+	ZeroMemory(&m_writeOverlappedStruct, sizeof(OVERLAPPED));
+
+	WSABUF b;
+	b.buf = (char*)data;
+	b.len = MaxSendLength;
+
+	m_writeFlag = 0;
+	DWORD sendByte = 0;
+
+	return WSASend(
+		m_fd,
+		&b,
+		1,
+		&b.len,
+		m_writeFlag,
+		&m_writeOverlappedStruct,
+		NULL
+	);
+
+
+//	return ::send(m_fd, data, length, 0);
 }
 
 void NetworkObject::Close()

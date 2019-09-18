@@ -83,7 +83,7 @@ void IocpService::IoThread()
 		mIocp.GQCS(readEvents, 100);
 
 
-		// 받은 이벤트 각각을 처리합니다.
+		// 받은 이벤트 각각을 처리
 		for (int i = 0; i < readEvents.m_eventCount; i++)
 		{
 			auto& readEvent = readEvents.m_events[i];
@@ -125,7 +125,6 @@ void IocpService::IoThread()
 						// 원칙대로라면 여기서 overlapped 송신을 해야 하지만 
 						// 독자의 이해를 위해서 그냥 블로킹 송신을 한다.
 						remoteClient->tcpConnection.Send(echoData, echoDataLength);
-
 						// 다시 수신을 받으려면 overlapped I/O를 걸어야 한다.
 						if (remoteClient->tcpConnection.ReceiveOverlapped() != 0
 							&& WSAGetLastError() != ERROR_IO_PENDING)
