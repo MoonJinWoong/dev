@@ -57,7 +57,7 @@ public:
 	~NetworkObject();
 
 	void BindAndListen(const Endpoint& endpoint);
-	int Send(const char* data, int length);
+	int EchoSend(const char* data, int length);
 	void Close();
 	bool AcceptOverlapped(NetworkObject& acceptCandidateSocket, std::string& errorText);
 	int  FinishAcceptEx(NetworkObject& listenSocket);

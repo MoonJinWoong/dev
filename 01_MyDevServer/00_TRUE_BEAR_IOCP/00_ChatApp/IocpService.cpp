@@ -74,7 +74,6 @@ bool IocpService::CreateThreads()
 
 void IocpService::IoThread()
 {
-	// 0917 
 	// 밑에 빨간줄부터 다시 .... 
 	while (true)
 	{
@@ -88,7 +87,9 @@ void IocpService::IoThread()
 		{
 			auto& readEvent = readEvents.m_events[i];
 
-			if (readEvent.lpCompletionKey == 0) // 리슨소켓이면
+
+			// accept면
+			if (readEvent.lpCompletionKey == 0) 
 			{		
 				ProcessAcceptSession();	
 			}
@@ -120,11 +121,8 @@ void IocpService::IoThread()
 						char* echoData = remoteClient->tcpConnection.m_receiveBuffer;
 						int echoDataLength = ec;
 
-						// 원칙대로라면 TCP 스트림 특성상 일부만 송신하고 리턴하는 경우도 고려해야 하나,
-						// 지금은 독자의 이해가 우선이므로, 생략하도록 한다.
-						// 원칙대로라면 여기서 overlapped 송신을 해야 하지만 
-						// 독자의 이해를 위해서 그냥 블로킹 송신을 한다.
-						remoteClient->tcpConnection.Send(echoData, echoDataLength);
+						auto tmp = remoteClient->tcpConnection.EchoSend(echoData, echoDataLength);
+
 						// 다시 수신을 받으려면 overlapped I/O를 걸어야 한다.
 						if (remoteClient->tcpConnection.ReceiveOverlapped() != 0
 							&& WSAGetLastError() != ERROR_IO_PENDING)
@@ -151,14 +149,13 @@ void IocpService::ProcessAcceptSession()
 	// accept 마무리까지 세팅해주어야 제대로 동작함
 	if (mRemoteClient->tcpConnection.FinishAcceptEx(mListenSocket) != 0)
 	{
-		// 리슨소켓을 못쓰게 만듬
 		mListenSocket.Close();
 	}
 	else // 잘 처리함
 	{
 		std::shared_ptr<Session> remoteClient = mRemoteClient;
 
-		// 새 TCP 소켓도 IOCP에 추가한다.
+		// 새 TCP 소켓도 IOCP에 추가
 		mIocp.ResisterIocp(remoteClient->tcpConnection, remoteClient.get());
 
 		// overlapped 수신을 받을 수 있어야 하므로 여기서 I/O 수신 요청을 걸어둔다.
