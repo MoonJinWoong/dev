@@ -1,0 +1,6 @@
+﻿  IocpService.cpp
+  NetObject.cpp
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Iocp.h(24,1): error C2027:  정의되지 않은 형식 'NetObject'을(를) 사용했습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Iocp.h(4): message :  'NetObject' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Iocp.h(29,1): error C3536:  'ret': 초기화되기 전에 사용할 수 없습니다.

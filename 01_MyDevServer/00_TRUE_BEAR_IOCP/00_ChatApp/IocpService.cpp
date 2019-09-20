@@ -74,7 +74,7 @@ bool IocpService::CreateThreads()
 
 void IocpService::IoThread()
 {
-	// 밑에 빨간줄부터 다시 .... 
+	
 	while (true)
 	{
 		// GetQueuesCompletionStatus를 해준다.
@@ -93,7 +93,7 @@ void IocpService::IoThread()
 			{		
 				ProcessAcceptSession();	
 			}
-			else  // TCP 연결 소켓이면
+			else  // 연결된 소켓이면
 			{
 				// 받은 데이터를 그대로 회신한다.
 				std::shared_ptr<Session> remoteClient = remoteClients[(Session*)readEvent.lpCompletionKey];
@@ -187,7 +187,6 @@ void IocpService::ProcessAcceptSession()
 		}
 		else
 		{
-			// 리슨소켓은 연결이 들어옴을 기다리는 상태가 되었다.
 			mListenSocket.m_isReadOverlapped = true;
 		}
 	}

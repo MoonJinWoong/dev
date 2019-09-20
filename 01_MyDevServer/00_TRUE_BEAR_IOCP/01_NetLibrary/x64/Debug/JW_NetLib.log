@@ -1,5 +1,7 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (ImaysNet.vcxproj, TB_NetLib.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Iocp.cpp
   NetworkObject.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\01_NetLibrary\NetworkObject.cpp(86,56): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\01_NetLibrary\NetworkObject.cpp(86,56): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\01_NetLibrary\NetworkObject.cpp(85,56): warning C4474:  'printf_s' : 서식 문자열에 전달된 인수가 너무 많습니다.
+  코드를 생성하고 있습니다...
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\01_NetLibrary\NetworkObject.cpp(85,56): message :  자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 1개가 제공되었습니다.
   JW_NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\00_ChatApp\x64\Debug\JW_NetLib.lib

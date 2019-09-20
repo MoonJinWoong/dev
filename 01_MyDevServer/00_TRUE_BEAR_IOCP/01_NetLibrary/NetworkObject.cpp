@@ -97,7 +97,7 @@ void NetworkObject::Close()
 
 #ifdef _WIN32
 
-// acceptCandidateSocket에는 이미 만들어진 소켓 핸들이 들어가며, accept이 되고 나면 이 소켓 핸들은 TCP 연결 객체로 변신합니다.
+// acceptCandidateSocket에는 이미 만들어진 소켓 핸들이 들어감
 bool NetworkObject::AcceptOverlapped(NetworkObject& acceptCandidateSocket, string& errorText)
 {
 	if (AcceptEx == NULL)
@@ -122,7 +122,7 @@ bool NetworkObject::AcceptOverlapped(NetworkObject& acceptCandidateSocket, strin
 	}
 
 
-	// 여기에는 accept된 소켓의 로컬주소와 리모트주소가 채워집니다만 본 예제에서 독자들에게 가르쳐줄 범위를 벗어나므로 그냥 버립니다.
+	// 소켓 로컬주소와 리모트주소
 	char ignored[200];
 	DWORD ignored2 = 0;
 
@@ -166,11 +166,6 @@ int NetworkObject::FinishAcceptEx(NetworkObject& listenSocket)
 
 
 
-#ifdef _WIN32
-
-// overlapeed 수신을 겁니다. 즉 백그라운드로 수신 처리를 합니다.
-// 수신되는 데이터는 m_receiveBuffer에 비동기로 채워집니다.
-// 리턴값: WSARecv의 리턴값 그대로입니다.
 int NetworkObject::ReceiveOverlapped()
 {
 	WSABUF b;
@@ -183,9 +178,7 @@ int NetworkObject::ReceiveOverlapped()
 	return WSARecv(m_fd, &b, 1, NULL, &m_readFlags, &m_readOverlappedStruct, NULL);
 }
 
-#endif
-
-// 넌블럭 소켓으로 모드를 설정합니다.
+// 넌블럭 소켓으로 모드를 설정
 void NetworkObject::SetNonblocking()
 {
 	u_long val = 1;
