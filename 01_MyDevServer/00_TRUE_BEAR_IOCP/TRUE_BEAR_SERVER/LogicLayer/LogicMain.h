@@ -10,11 +10,12 @@ public:
 	void Init();
 	void Start();
 	void ShutDown();
+	void Run();
 
 private:
 	bool mThreadState;
 
 	// net object 
-	std::unique_ptr<IocpService> mNetworkService;
+	std::unique_ptr<IocpService> mIocpService;
 
 };

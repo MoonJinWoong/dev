@@ -1,2 +1,9 @@
 ﻿  LogicMain.cpp
-  LogicLayer.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\x64\Debug\LogicLayer.lib
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(23,23): error C2065:  'MaxPacketSize': 선언되지 않은 식별자입니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(24,2): error C2065:  'MaxPacketSize': 선언되지 않은 식별자입니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(24,2): error C2660:  'memset': 함수는 2개의 매개 변수를 사용하지 않습니다.
+C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Tools\MSVC\14.22.27905\include\vcruntime_string.h(60,15): message :  'memset' 선언을 참조하십시오.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(48,19): error C2065:  'MessageType': 선언되지 않은 식별자입니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(48,31): error C2146:  구문 오류: ';'이(가) 'operationType' 식별자 앞에 없습니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(51,3): error C2050:  switch 식이 정수 계열이 아닙니다.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\LogicLayer\LogicMain.cpp(53,3): warning C4060:  switch문에 'case' 또는 'default' 레이블이 없습니다.

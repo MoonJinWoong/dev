@@ -9,6 +9,7 @@
 #include <thread>
 #include <string>
 
+#include "Defines.h"
 #include "EndAddress.h"
 #include "NetObject.h"  // 통신 모음
 #include "Iocp.h"       // iocp 함수 모음
