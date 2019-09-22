@@ -12,33 +12,35 @@ IocpService::~IocpService()
 
 void IocpService::StartIocpService()
 {
+	m_Iocp = std::make_unique<Iocp>();
+	m_ListenSock = std::make_unique<CustomSocket>();
+	
+	
 	// 리슨 소켓 생성 
-	m_ListenSock.CreateSocket();
+	m_ListenSock->CreateSocket();
 
 	// bind and listen
-	m_ListenSock.BindAndListenSocket();
+	m_ListenSock->BindAndListenSocket();
 
 	// 메세지 풀 생성
 
 
 	// 리슨 소켓을 iocp에 등록 
-	m_Iocp.ResisterIocp(m_ListenSock.m_sock, nullptr);
+	m_Iocp->ResisterIocp(m_ListenSock->m_sock, nullptr);
 
 	// 세션 풀 생성
 	CreateSessionList();
 
 	// 워커 스레드 생성 
 	CreateWorkThread();
-
-
 }
 
 void IocpService::StopIocpService()
 {
-	if (m_Iocp.m_hIocp != INVALID_HANDLE_VALUE)
+	if (m_Iocp->m_workIocp != INVALID_HANDLE_VALUE)
 	{
 		m_IsRunWorkThread = false;
-		CloseHandle(m_Iocp.m_hIocp);
+		CloseHandle(m_Iocp->m_workIocp);
 
 		for (int i = 0; i < m_WorkerThreads.size(); ++i)
 		{
@@ -49,10 +51,10 @@ void IocpService::StopIocpService()
 		}
 	}
 
-	if (m_ListenSock.m_sock != INVALID_SOCKET)
+	if (m_ListenSock->m_sock != INVALID_SOCKET)
 	{
-		closesocket(m_ListenSock.m_sock);
-		m_ListenSock.m_sock = INVALID_SOCKET;
+		closesocket(m_ListenSock->m_sock);
+		m_ListenSock->m_sock = INVALID_SOCKET;
 	}
 
 	WSACleanup();
@@ -65,7 +67,7 @@ bool IocpService::getNetworkMessage(INT8& msgType , INT32&  sessionIdx,char* pBu
 	DWORD ioSize = 0;
 
 
-	if (!m_Iocp.GQCS(pMsg, pSession, ioSize))
+	if (!m_Iocp->GQCS(pMsg, pSession, ioSize))
 	{
 		return false;
 	}
@@ -95,7 +97,7 @@ bool IocpService::CreateSessionList()
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
 		auto pSession = new Session();
-		pSession->Init(m_ListenSock.m_sock, i);
+		pSession->Init(m_ListenSock->m_sock, i);
 		pSession->DoAcceptOverlapped();
 		
 		// 왜 벡터로 하면 터질까? 
@@ -106,11 +108,11 @@ bool IocpService::CreateSessionList()
 	return true;
 }
 
-void IocpService::DestoryConnections()
+void IocpService::DestorySessionList()
 {
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
-		//delete m_SessionList[i];
+		m_SessionList.erase(i);
 	}
 }
 
@@ -134,7 +136,7 @@ void IocpService::WorkThread()
 
 
 		auto result = GetQueuedCompletionStatus(
-			m_Iocp.m_hIocp,
+			m_Iocp->m_workIocp,
 			&ioSize,
 			reinterpret_cast<PULONG_PTR>(&pSession),
 			reinterpret_cast<LPOVERLAPPED*>(&pOver),
@@ -160,10 +162,10 @@ void IocpService::WorkThread()
 		switch (pOver->type)
 		{
 		case OPType::Accept:
-			DoAccept(pOver);
+			DoAcceptEx(pOver);
 			break;
 		case OPType::Recv:
-			//DoRecv(pOverlappedEx, ioSize);
+			DoRecv(pOver, ioSize);
 			break;
 		case OPType::Send:
 			//DoSend(pOverlappedEx, ioSize);
@@ -172,7 +174,7 @@ void IocpService::WorkThread()
 	}
 }
 
-Session* IocpService::GetSession(const INT32 sessionIdx)
+Session* IocpService::GetSession(const int sessionIdx)
 {
 	if (sessionIdx < 0 || sessionIdx >= MAX_SESSION_COUNT)
 	{
@@ -182,15 +184,98 @@ Session* IocpService::GetSession(const INT32 sessionIdx)
 	return iter->second;
 }
 
-void IocpService::DoAccept(const CustomOverlapped* pOverlappedEx)
+void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 {
-	auto pConnection = GetSession(pOverlappedEx->SessionIdx);
-	if (pConnection == nullptr)
+	auto pSession = GetSession(pOverlappedEx->SessionIdx);
+	if (pSession == nullptr)
 	{
 		return;
 	}
 
-	pConnection->DecrementAcceptIORefCount();
+	pSession->DecrementAcceptIORefCount();
 
-	
+
+	// AcceptEx 마무리 작업
+	if (pSession->SetNetAddressInfo() == false)
+	{
+		std::cout << "SetNetAddressInfo is failed..." << std::endl;
+		if (pSession->CloseComplete())
+		{
+			//HandleExceptionCloseConnection(pConnection);
+		}
+		return;
+	}
+
+	// 해당 소켓을 등록
+	if (!pSession->BindIOCP(m_Iocp->m_workIocp))
+	{
+		if (pSession->CloseComplete())
+		{
+			//HandleExceptionCloseConnection(pConnection);
+		}
+		return;
+	}
+
+	// 세션 상태 갱신
+	pSession->UpdateSessionState();
+
+
+	if (!pSession->PostRecv(pSession->RecvBufferBeginPos(), 0))
+	{
+		std::cout << "PostRecv Error" << std::endl;
+		//HandleExceptionCloseConnection(pConnection);
+	}
+
+	// PCQS 도 던져준다.
+	// 다른 세션들도 메세지 받게
+
+
+
+	// 출력 확인용
+	std::cout << "Session Join ["<<pSession->GetIndex()<<"]" << std::endl;
+}
+
+void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
+{
+	Session* pSession = GetSession(pOver->SessionIdx);
+	if (pSession == nullptr)
+	{
+		return;
+	}
+
+	pSession->DecrementRecvIORefCount();
+
+	pOver->OverlappedExWsaBuf.buf = pOver->pOverlappedExSocketMessage;
+	pOver->OverlappedExRemainByte += ioSize;
+
+	auto remainByte = pOver->OverlappedExRemainByte;
+	auto pNext = pOver->OverlappedExWsaBuf.buf;
+
+	//PacketForwardingLoop(pConnection, remainByte, pNext);
+
+	if (!pSession->PostRecv(pNext, remainByte))
+	{
+		if (pSession->CloseComplete())
+		{
+			//HandleExceptionCloseConnection(pConnection);
+		}
+	}
+
+
+	// echo send  임시 코드 나중에 지워주자 . 지금은 동작 잘함 
+	WSABUF b;
+	b.buf = pOver->pOverlappedExSocketMessage;
+	b.len = ioSize;
+	int m_writeFlag = 0;
+	DWORD sendByte = 0;
+
+	auto ret = WSASend(
+		pSession->GetClientSocket(),
+		&b,
+		1,
+		&sendByte,
+		m_writeFlag,
+		NULL,
+		NULL
+	);
 }

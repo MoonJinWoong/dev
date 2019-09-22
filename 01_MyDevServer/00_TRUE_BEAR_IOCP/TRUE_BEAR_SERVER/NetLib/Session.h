@@ -25,6 +25,17 @@ public:
 	void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
 	void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
 
+	bool SetNetAddressInfo();
+	void SetRemoteIP(const char* szIP) { CopyMemory(m_szIP, szIP, MAX_IP_LENGTH); }
+	bool CloseComplete();
+
+	SOCKET GetClientSocket() { return m_ClientSocket; }
+	bool BindIOCP(const HANDLE hWorkIOCP);
+	void UpdateSessionState();
+
+	bool PostRecv(const char* pNextBuf, const DWORD remainByte);
+	char* RecvBufferBeginPos() { return m_RingRecvBuffer.GetBeginMark(); }
+
 private:
 	void InnerInit();
 private:

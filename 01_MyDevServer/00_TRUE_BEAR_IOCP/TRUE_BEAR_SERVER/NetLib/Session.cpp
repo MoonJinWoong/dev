@@ -81,3 +81,110 @@ void Session::DoAcceptOverlapped()
 		std::cout << "AcceptEX fail" << std::endl;
 	}
 }
+
+bool Session::SetNetAddressInfo()
+{
+	SOCKADDR* pLocalSockAddr = nullptr;
+	SOCKADDR* pRemoteSockAddr = nullptr;
+
+	int	localSockaddrLen = 0;
+	int	remoteSockaddrLen = 0;
+
+	GetAcceptExSockaddrs(m_AddrBuf, 0,
+		sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
+		&pLocalSockAddr, &localSockaddrLen,
+		&pRemoteSockAddr, &remoteSockaddrLen);
+
+	if (remoteSockaddrLen != 0)
+	{
+		SOCKADDR_IN* pRemoteSockAddrIn = reinterpret_cast<SOCKADDR_IN*>(pRemoteSockAddr);
+		if (pRemoteSockAddrIn != nullptr)
+		{
+			char szIP[MAX_IP_LENGTH] = { 0, };
+			inet_ntop(AF_INET, &pRemoteSockAddrIn->sin_addr, szIP, sizeof(szIP));
+			SetRemoteIP(szIP);
+		}
+		return true;
+	}
+
+	return false;
+}
+
+bool Session::CloseComplete()
+{
+	// 구현해야함.
+	return true;
+}
+
+bool Session::BindIOCP(const HANDLE hWorkIOCP)
+{
+	std::lock_guard<std::mutex> Lock(m_MUTEX);
+
+	//즉시 접속 종료하기 위한 소켓 옵션 추가
+	linger li = { 0, 0 };
+	li.l_onoff = 1;
+	setsockopt(m_ClientSocket, SOL_SOCKET, SO_LINGER, reinterpret_cast<char*>(&li), sizeof(li));
+
+	auto hIOCPHandle = CreateIoCompletionPort(
+		reinterpret_cast<HANDLE>(m_ClientSocket),
+		hWorkIOCP,
+		reinterpret_cast<ULONG_PTR>(this),
+		0);
+
+	if (hIOCPHandle == INVALID_HANDLE_VALUE || hWorkIOCP != hIOCPHandle)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+void Session::UpdateSessionState()
+{
+	InterlockedExchange(reinterpret_cast<LPLONG>(&m_IsConnect), TRUE);
+}
+
+bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
+{
+	if (m_IsConnect == FALSE || m_pRecvOverlappedEx == nullptr)
+	{
+		return false;
+	}
+
+	m_pRecvOverlappedEx->type = OPType::Recv;
+	m_pRecvOverlappedEx->OverlappedExRemainByte = remainByte;
+
+	auto moveMark = static_cast<int>(remainByte - (m_RingRecvBuffer.GetCurMark() - pNextBuf));
+	m_pRecvOverlappedEx->OverlappedExWsaBuf.len = m_RecvBufSize;
+	m_pRecvOverlappedEx->OverlappedExWsaBuf.buf = m_RingRecvBuffer.ForwardMark(moveMark, m_RecvBufSize, remainByte);
+
+	if (m_pRecvOverlappedEx->OverlappedExWsaBuf.buf == nullptr)
+	{
+		return false;;
+	}
+
+	m_pRecvOverlappedEx->pOverlappedExSocketMessage = m_pRecvOverlappedEx->OverlappedExWsaBuf.buf - remainByte;
+
+	ZeroMemory(&m_pRecvOverlappedEx->Overlapped, sizeof(OVERLAPPED));
+
+	IncrementRecvIORefCount();
+
+	DWORD flag = 0;
+	DWORD recvByte = 0;
+	auto result = WSARecv(
+		m_ClientSocket,
+		&m_pRecvOverlappedEx->OverlappedExWsaBuf,
+		1,
+		&recvByte,
+		&flag,
+		&m_pRecvOverlappedEx->Overlapped,
+		NULL);
+
+	if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
+	{
+		DecrementRecvIORefCount();
+		return false;
+	}
+
+	return true;
+}
