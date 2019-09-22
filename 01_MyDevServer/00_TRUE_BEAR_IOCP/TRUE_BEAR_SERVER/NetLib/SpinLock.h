@@ -1,7 +1,6 @@
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN 
-#include <Windows.h>
 
 
 const int SPINLOCK_COUNT = 1000;

@@ -4,15 +4,15 @@
     <ClInclude Include="NetPreCompile.h" />
     <ClInclude Include="Iocp.h" />
     <ClInclude Include="IocpService.h" />
-    <ClInclude Include="NetObject.h" />
-    <ClInclude Include="EndAddress.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="CircleBuffer.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="MessagePool.h" />
+    <ClInclude Include="CustomSocket.h" />
+    <ClInclude Include="Session.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpService.cpp" />
-    <ClCompile Include="NetObject.cpp" />
-    <ClCompile Include="Iocp.cpp" />
+    <ClCompile Include="Session.cpp" />
   </ItemGroup>
 </Project>

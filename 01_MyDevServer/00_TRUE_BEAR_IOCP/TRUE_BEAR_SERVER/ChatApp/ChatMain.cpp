@@ -11,7 +11,7 @@ int main()
 	logic_main.Init();
 
 	std::thread logicThread([&]() {
-		logic_main.Start(); }
+		logic_main.onStart(); }
 	);
 
 
@@ -31,7 +31,7 @@ int main()
 	}
 
 
-	logic_main.ShutDown();
+	logic_main.onShutDown();
 	logicThread.join();
 
 	return 0;

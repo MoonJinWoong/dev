@@ -144,18 +144,18 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CircleBuffer.h" />
+    <ClInclude Include="CustomSocket.h" />
     <ClInclude Include="Defines.h" />
-    <ClInclude Include="EndAddress.h" />
     <ClInclude Include="Iocp.h" />
-    <ClInclude Include="NetObject.h" />
+    <ClInclude Include="MessagePool.h" />
     <ClInclude Include="NetPreCompile.h" />
     <ClInclude Include="IocpService.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="SpinLock.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Iocp.cpp" />
     <ClCompile Include="IocpService.cpp" />
-    <ClCompile Include="NetObject.cpp" />
+    <ClCompile Include="Session.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

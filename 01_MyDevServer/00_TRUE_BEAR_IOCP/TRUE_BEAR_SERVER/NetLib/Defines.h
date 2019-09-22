@@ -4,7 +4,7 @@
 enum class MsgType : INT8
 {
 	None = 0,
-	Connection,
+	Session,
 	Close,
 	OnRecv
 };
@@ -37,3 +37,39 @@ struct CustomOverlapped
 		SessionIdx = connectionIndex;
 	}
 };
+
+
+struct Message
+{
+	MsgType Type = MsgType::None;
+	char* pContents = nullptr;
+
+	void Clear()
+	{
+		Type = MsgType::None;
+		pContents = nullptr;
+	}
+
+	void SetMessage(MsgType msgType, char* pSetContents)
+	{
+		Type = msgType;
+		pContents = pSetContents;
+	}
+};
+
+
+
+const int MAX_IP_LENGTH = 20;
+const int MAX_ADDR_LENGTH = 64;
+
+
+const int SESSION_MAX_SEND_BUFF_SIZE = 1024;
+const int SESSION_MAX_RECV_BUFF_SIZE = 1024;
+const int MAX_RECV_OVERLAPPED_BUFF_SIZE = 512;
+const int MAX_SEND_OVERLAPPED_BUFF_SIZE = 512;
+
+const int MAX_SESSION_COUNT = 1000;
+const int MAX_MESSAGE_POOL_COUNT = 1000;
+
+// CPU에 따라 조절해야함. 나중에 테스트해볼 때 건드리자
+const int WORKER_THREAD_COUNT = 4;

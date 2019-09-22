@@ -8,9 +8,11 @@ public:
 	LogicMain();
 	~LogicMain();
 	void Init();
-	void Start();
-	void ShutDown();
-	void Run();
+	void onStart();
+	void onShutDown();
+
+
+	IocpService* GetIOCPServer() { return  mIocpService.get(); }
 
 private:
 	bool mThreadState;

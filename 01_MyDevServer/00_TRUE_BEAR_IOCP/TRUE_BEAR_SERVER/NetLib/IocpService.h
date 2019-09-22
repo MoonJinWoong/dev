@@ -2,18 +2,37 @@
 #include "NetPreCompile.h"
 
 
-
-class NetworkObject;
+class Session;
 class IocpService
 {
 public:
 	IocpService();
 	~IocpService();
-	void Ready();
-	bool ProcessMsg(OUT INT8& msgType, OUT INT32& sessionIdx,
-		char* buf, OUT INT16& copySize, const INT32 waitTime);
+	void StartIocpService();
+	void StopIocpService();
+
+	bool getNetworkMessage(
+			INT8& msgType,
+			INT32& sessionIdx,
+			char* pBuf,
+			INT16& copySize
+		 );
+
+	bool CreateSessionList();
+	void DestoryConnections();
+
+	bool CreateWorkThread();
+	void WorkThread();
+
+	void DoAccept(const CustomOverlapped* pOverlappedEx);
+	Session* GetSession(const int sessionIdx);
+
 
 private:
-	NetObject mNetObject;
-	Iocp mIocp;
+	Iocp m_Iocp;
+	CustomSocket m_ListenSock;
+	std::unordered_map<int , Session*> m_SessionList;
+
+	bool m_IsRunWorkThread = true;
+	std::vector<std::unique_ptr<std::thread>> m_WorkerThreads;
 };

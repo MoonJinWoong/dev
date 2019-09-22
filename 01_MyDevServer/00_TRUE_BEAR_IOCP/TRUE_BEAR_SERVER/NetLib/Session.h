@@ -1,0 +1,63 @@
+#pragma once
+#include <mutex>
+#include <atomic>
+
+#define WIN32_LEAN_AND_MEAN 
+#include <WinSock2.h>
+#include <mswsock.h>
+
+#include "CircleBuffer.h"
+#include "Defines.h"
+
+class Session
+{
+public:
+	Session();
+	~Session();
+	void Init(SOCKET sock, int index);
+	void DoAcceptOverlapped();
+
+	int GetIndex() { return m_Index; }
+	void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	void IncrementSendIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
+	void IncrementAcceptIORefCount() { ++m_AcceptIORefCount; }
+	void DecrementRecvIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
+	void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
+
+private:
+	void InnerInit();
+private:
+	int m_Index = -1;
+
+	SOCKET m_ClientSocket = INVALID_SOCKET;
+	SOCKET m_ListenSocket = INVALID_SOCKET;
+
+	std::mutex m_MUTEX;
+
+	CustomOverlapped* m_pRecvOverlappedEx = nullptr;
+	CustomOverlapped* m_pSendOverlappedEx = nullptr;
+
+	CircleBuffer m_RingRecvBuffer;
+	CircleBuffer m_RingSendBuffer;
+
+	char m_AddrBuf[MAX_ADDR_LENGTH] = { 0, };
+
+	BOOL m_IsClosed = FALSE;
+	BOOL m_IsConnect = FALSE;
+	BOOL m_IsSendable = TRUE;
+
+	int	m_RecvBufSize = -1;
+	int	m_SendBufSize = -1;
+
+	char m_szIP[MAX_IP_LENGTH] = { 0, };
+
+	DWORD m_SendIORefCount = 0;
+	DWORD m_RecvIORefCount = 0;
+	std::atomic<short> m_AcceptIORefCount = 0;
+
+	Message m_ConnectionMsg;
+	Message m_CloseMsg;
+	
+};
+
