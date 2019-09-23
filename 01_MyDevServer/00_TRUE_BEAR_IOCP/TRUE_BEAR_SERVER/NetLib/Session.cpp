@@ -188,3 +188,17 @@ bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
 
 	return true;
 }
+
+void Session::DisconnectSession()
+{
+
+	InterlockedExchange(reinterpret_cast<LPLONG>(&m_IsConnect), FALSE);
+	
+	std::lock_guard<std::mutex> Lock(m_MUTEX);
+
+	if (m_ClientSocket != INVALID_SOCKET)
+	{
+		closesocket(m_ClientSocket);
+		m_ClientSocket = INVALID_SOCKET;
+	}
+}

@@ -5,6 +5,7 @@ IocpService::IocpService()
 	WSADATA w;
 	WSAStartup(MAKEWORD(2, 2), &w);
 }
+
 IocpService::~IocpService() 
 {
 	WSACleanup();
@@ -14,7 +15,6 @@ void IocpService::StartIocpService()
 {
 	m_Iocp = std::make_unique<Iocp>();
 	m_ListenSock = std::make_unique<CustomSocket>();
-	
 	
 	// 리슨 소켓 생성 
 	m_ListenSock->CreateSocket();
@@ -91,7 +91,6 @@ bool IocpService::getNetworkMessage(INT8& msgType , INT32&  sessionIdx,char* pBu
 	return true;
 }
 
-
 bool IocpService::CreateSessionList()
 {
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
@@ -122,7 +121,6 @@ bool IocpService::CreateWorkThread()
 	{
 		m_WorkerThreads.push_back(std::make_unique<std::thread>([&]() {WorkThread(); }));
 	}
-
 	return true;
 }
 
@@ -130,46 +128,38 @@ void IocpService::WorkThread()
 {
 	while (m_IsRunWorkThread)
 	{
-		DWORD ioSize = 0;
-		CustomOverlapped* pOver = nullptr;
-		Session* pSession = nullptr;
+		IocpEvents events;
+		m_Iocp->GQCSInWorker(events, 100);
 
-
-		auto result = GetQueuedCompletionStatus(
-			m_Iocp->m_workIocp,
-			&ioSize,
-			reinterpret_cast<PULONG_PTR>(&pSession),
-			reinterpret_cast<LPOVERLAPPED*>(&pOver),
-			INFINITE);
-
-
-		if (pOver == nullptr)
+		for (int i = 0; i < events.m_eventCount; i++)
 		{
-			if (WSAGetLastError() != 0 && WSAGetLastError() != WSA_IO_PENDING)
+			auto& readEvent = events.m_IoArray[i];
+
+			// AcceptEx
+			if (readEvent.lpCompletionKey == 0) 
 			{
-				std::cout << "GQCS in Worker fail..." <<WSAGetLastError()<< std::endl;
+				DoAcceptEx((CustomOverlapped*)readEvent.lpOverlapped);
 			}
-			continue;
-		}
-
-		if (!result || (0 == ioSize && OPType::Accept != pOver->type))
-		{
-			// 킥할 세션들 처리해주어야함
-			//HandleExceptionWorkThread(pConnection, pOverlappedEx);
-			continue;
-		}
-
-		switch (pOver->type)
-		{
-		case OPType::Accept:
-			DoAcceptEx(pOver);
-			break;
-		case OPType::Recv:
-			DoRecv(pOver, ioSize);
-			break;
-		case OPType::Send:
-			//DoSend(pOverlappedEx, ioSize);
-			break;
+			// Send , Recv 
+			else
+			{
+				auto Over = reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped);
+				if (readEvent.dwNumberOfBytesTransferred <= 0)
+				{
+					// 세션 끊어주어야 하는데 구조를 바꿔야 한다.
+					// TODO 생각해볼 것
+				}
+				
+				switch (Over->type)
+				{
+					case OPType::Recv:
+						DoRecv(Over,readEvent.dwNumberOfBytesTransferred);
+						break;
+					case OPType::Send:
+						DoRecv(Over, readEvent.dwNumberOfBytesTransferred);
+						break;
+				}
+			}
 		}
 	}
 }
@@ -201,7 +191,7 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 		std::cout << "SetNetAddressInfo is failed..." << std::endl;
 		if (pSession->CloseComplete())
 		{
-			//HandleExceptionCloseConnection(pConnection);
+			KickSession(pSession);
 		}
 		return;
 	}
@@ -211,7 +201,7 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 	{
 		if (pSession->CloseComplete())
 		{
-			//HandleExceptionCloseConnection(pConnection);
+			KickSession(pSession);
 		}
 		return;
 	}
@@ -223,12 +213,11 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 	if (!pSession->PostRecv(pSession->RecvBufferBeginPos(), 0))
 	{
 		std::cout << "PostRecv Error" << std::endl;
-		//HandleExceptionCloseConnection(pConnection);
+		KickSession(pSession);
 	}
 
 	// PCQS 도 던져준다.
 	// 다른 세션들도 메세지 받게
-
 
 
 	// 출력 확인용
@@ -257,7 +246,7 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 	{
 		if (pSession->CloseComplete())
 		{
-			//HandleExceptionCloseConnection(pConnection);
+			KickSession(pSession);
 		}
 	}
 
@@ -278,4 +267,53 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 		NULL,
 		NULL
 	);
+}
+
+void IocpService::KickSession(Session* pSession)
+{
+
+	if (pSession == nullptr)
+	{
+		return;
+	}
+	int idx = pSession->GetIndex();
+	pSession->DisconnectSession();
+
+
+	// 다른 유저들에게 메세지를 던져주어야 함.
+	//if (!PostNetMessage(pConnection, pConnection->GetCloseMsg()))
+	//{
+	//	pConnection->ResetConnection();
+	//}
+	std::cout << "Leave Session [" << idx << "]" << std::endl;
+
+}
+
+void IocpService::DisConnectSession(Session* pSession, const CustomOverlapped* pOver)
+{
+	if (pOver == nullptr)
+	{
+		return;
+	}
+	int idx = pSession->GetIndex();
+
+	//Connection 접속 종료 시 남은 IO 처리
+	switch (pOver->type)
+	{
+	case OPType::Accept:
+		pSession->DecrementAcceptIORefCount();
+		break;
+	case OPType::Recv:
+		pSession->DecrementRecvIORefCount();
+		break;
+	case OPType::Send:
+		pSession->DecrementSendIORefCount();
+		break;
+	}
+
+	if (pSession->CloseComplete())
+	{
+		KickSession(pSession);
+	}
+	return;
 }

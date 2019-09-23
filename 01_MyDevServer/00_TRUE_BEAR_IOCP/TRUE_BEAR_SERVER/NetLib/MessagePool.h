@@ -13,7 +13,6 @@ public:
 		CreateMessagePool();
 	}
 
-
 	~MessagePool()
 	{
 		DestroyMessagePool();

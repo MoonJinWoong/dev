@@ -73,3 +73,5 @@ const int MAX_MESSAGE_POOL_COUNT = 1000;
 
 // CPU에 따라 조절해야함. 나중에 테스트해볼 때 건드리자
 const int WORKER_THREAD_COUNT = 4;
+
+static const int MAX_EVENT_COUNT = 1000;  // GQCSEx에서 한번에 몇개 가져올거냐

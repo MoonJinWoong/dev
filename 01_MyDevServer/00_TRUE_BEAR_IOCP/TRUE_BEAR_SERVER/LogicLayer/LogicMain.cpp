@@ -14,7 +14,6 @@ LogicMain::~LogicMain()
 void LogicMain::Init()
 {
 	mIocpService = std::make_unique<IocpService>();
-
 	mIocpService->StartIocpService();
 }
 
@@ -28,6 +27,7 @@ void LogicMain::onStart()
 	INT32 waitTimeMillisec = 1;
 
 
+	// 로직 처리 
 	// 루프 돌면서 메세지를 계속 가져옴 
 	while (mThreadState)
 	{
@@ -35,34 +35,9 @@ void LogicMain::onStart()
 		INT32 connectionIndex = 0;
 		INT16 copySize = 0;
 
-		//여기 함수 개선하기(위의 동적할당 계속 되어서)
-
-		//WorkThread의 함수들을 불러와서 처리한다.
-		//if (!mIocpService->getNetworkMessage(operationType,
-		//	connectionIndex,
-		//	pBuf,
-		//	copySize
-		//	))
-		//{
-		//	continue;
-		//}
-
-		//auto msgType = (MsgType)operationType;
-
-		//switch (msgType)
-		//{
-		//case MsgType::Session:
-		//	std::cout<<"Accept Session :" <<connectionIndex<<std::endl;
-		//	break;
-		//case MsgType::Close:
-		//	//m_pPacketManager->ClearConnectionInfo(connectionIndex);
-		//	break;
-		//case MsgType::OnRecv:
-		//	//m_pPacketManager->ProcessRecvPacket(connectionIndex, pBuf, copySize);
-		//	break;
-		//}
-
-
+		// TODO : 09.24 ~ 09.27 이번주 할 일 
+		// logicIOCP 핸들로 PQCS 에서 던져진 메세지를 GQCS 로 가져온다
+		// 그걸 분해해서 처리함
 	}
 }
 

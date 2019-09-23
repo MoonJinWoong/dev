@@ -4,8 +4,7 @@
 
 int main()
 {
-	// network 옵션 넣어주자
-
+	// TODO : 옵션들 한군데로 몰아넣기
 	// 로직 호출
 	LogicMain logic_main;
 	logic_main.Init();

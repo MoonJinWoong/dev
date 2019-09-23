@@ -9,6 +9,7 @@ public:
 
 	void CreateSocket()
 	{
+		// TODO : UDP 용 소켓도 만들어보자.
 		m_sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	}
 	void CreateSocket(SOCKET sock)
@@ -29,13 +30,13 @@ public:
 		if (::bind(m_sock, reinterpret_cast<SOCKADDR*>(&addr), sizeof(addr)) == SOCKET_ERROR)
 		{
 			std::cout<<"fail bind "<<std::endl;
-			//return false;
+			return;
 		}
 
 		if (::listen(m_sock, SOMAXCONN) == SOCKET_ERROR)
 		{
 			std::cout << "fail listen " << std::endl;
-			//return false;
+			return;
 		}
 	}
 

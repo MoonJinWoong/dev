@@ -3,6 +3,10 @@
 
 
 class Session;
+class IocpEvents;
+class Iocp;
+
+
 class IocpService
 {
 public:
@@ -17,6 +21,7 @@ public:
 			char* pBuf,
 			INT16& copySize
 		 );
+	void PostNetMessage();
 
 	bool CreateSessionList();
 	void DestorySessionList();
@@ -29,6 +34,11 @@ public:
 
 	Session* GetSession(const int sessionIdx);
 
+	// 서버가 보내버림
+	void KickSession(Session* pSession);
+
+	// 클라가 접속 끊음
+	void DisConnectSession(Session* pSession, const CustomOverlapped* pOver);
 
 private:
 	// iocp 핸들을 두개 가지고 있음

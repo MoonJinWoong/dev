@@ -36,6 +36,9 @@ public:
 	bool PostRecv(const char* pNextBuf, const DWORD remainByte);
 	char* RecvBufferBeginPos() { return m_RingRecvBuffer.GetBeginMark(); }
 
+
+	void DisconnectSession();
+
 private:
 	void InnerInit();
 private:
