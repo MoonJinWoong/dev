@@ -61,7 +61,7 @@ void Session::DoAcceptOverlapped()
 		std::cout << "WSASocket fail in DoAcceptOverlapped" << std::endl;
 	}
 
-	IncrementAcceptIORefCount();
+	//IncrementAcceptIORefCount();
 
 	DWORD acceptByte = 0;
 	auto result = AcceptEx(
@@ -76,8 +76,10 @@ void Session::DoAcceptOverlapped()
 
 	if (!result && WSAGetLastError() != WSA_IO_PENDING)
 	{
-		DecrementAcceptIORefCount();
-
+		// 에러 났으면 그냥 리슨 소켓을 닫는다.
+		closesocket(m_ListenSocket);
+		
+		//DecrementAcceptIORefCount();
 		std::cout << "AcceptEX fail" << std::endl;
 	}
 }
@@ -106,7 +108,6 @@ bool Session::SetNetAddressInfo()
 		}
 		return true;
 	}
-
 	return false;
 }
 
@@ -167,7 +168,7 @@ bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
 
 	ZeroMemory(&m_pRecvOverlappedEx->Overlapped, sizeof(OVERLAPPED));
 
-	IncrementRecvIORefCount();
+	//IncrementRecvIORefCount();
 
 	DWORD flag = 0;
 	DWORD recvByte = 0;
@@ -182,7 +183,8 @@ bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
 
 	if (result == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
 	{
-		DecrementRecvIORefCount();
+		// 유저가 접속을 끊었다.
+		//DecrementRecvIORefCount();
 		return false;
 	}
 
@@ -192,9 +194,12 @@ bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
 void Session::DisconnectSession()
 {
 
-	InterlockedExchange(reinterpret_cast<LPLONG>(&m_IsConnect), FALSE);
-	
 	std::lock_guard<std::mutex> Lock(m_MUTEX);
+
+	if (m_IsConnect == TRUE)
+	{
+		m_IsConnect = FALSE;
+	}
 
 	if (m_ClientSocket != INVALID_SOCKET)
 	{

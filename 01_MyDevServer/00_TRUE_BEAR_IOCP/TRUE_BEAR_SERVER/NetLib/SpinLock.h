@@ -11,7 +11,10 @@ struct CustomSpinLockCriticalSection
 
 	CustomSpinLockCriticalSection()
 	{
-		(void)InitializeCriticalSectionAndSpinCount(&m_CS, SPINLOCK_COUNT);
+		if (!InitializeCriticalSectionAndSpinCount(&m_CS, SPINLOCK_COUNT))
+		{
+			std::cout << "InitializeCriticalSectionAndSpinCount fail" << std::endl;
+		}
 	}
 
 	~CustomSpinLockCriticalSection()

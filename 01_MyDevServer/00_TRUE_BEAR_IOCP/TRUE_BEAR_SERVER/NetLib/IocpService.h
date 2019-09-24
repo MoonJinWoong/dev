@@ -15,7 +15,7 @@ public:
 	void StartIocpService();
 	void StopIocpService();
 
-	bool getNetworkMessage(
+	bool GetNetworkMessage(
 			INT8& msgType,
 			INT32& sessionIdx,
 			char* pBuf,
@@ -50,5 +50,5 @@ private:
 	std::unordered_map<int , Session*> m_SessionList;
 
 	bool m_IsRunWorkThread = true;
-	std::vector<std::unique_ptr<std::thread>> m_WorkerThreads;
+	std::vector<std::thread> m_WorkerThreads;
 };

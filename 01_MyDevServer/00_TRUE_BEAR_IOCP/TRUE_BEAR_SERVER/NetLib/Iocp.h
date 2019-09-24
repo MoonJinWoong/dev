@@ -50,7 +50,7 @@ public:
 
 	void GQCSInWorker(IocpEvents& IoEvent ,DWORD timeOut)
 	{
-		// Ex 버젼!
+		// Ex 버젼
 		bool ret = GetQueuedCompletionStatusEx(
 			m_workIocp, 
 			IoEvent.m_IoArray,

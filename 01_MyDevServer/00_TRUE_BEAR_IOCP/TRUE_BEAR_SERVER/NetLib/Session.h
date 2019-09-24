@@ -18,12 +18,12 @@ public:
 	void DoAcceptOverlapped();
 
 	int GetIndex() { return m_Index; }
-	void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
-	void IncrementSendIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
-	void IncrementAcceptIORefCount() { ++m_AcceptIORefCount; }
-	void DecrementRecvIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
-	void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
-	void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
+	//void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	//void IncrementSendIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
+	//void IncrementAcceptIORefCount() { ++m_AcceptIORefCount; }
+	//void DecrementRecvIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	//void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
+	//void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
 
 	bool SetNetAddressInfo();
 	void SetRemoteIP(const char* szIP) { CopyMemory(m_szIP, szIP, MAX_IP_LENGTH); }
@@ -61,6 +61,7 @@ private:
 	BOOL m_IsConnect = FALSE;
 	BOOL m_IsSendable = TRUE;
 
+
 	int	m_RecvBufSize = -1;
 	int	m_SendBufSize = -1;
 
@@ -68,6 +69,8 @@ private:
 
 	DWORD m_SendIORefCount = 0;
 	DWORD m_RecvIORefCount = 0;
+
+
 	std::atomic<short> m_AcceptIORefCount = 0;
 
 	Message m_ConnectionMsg;

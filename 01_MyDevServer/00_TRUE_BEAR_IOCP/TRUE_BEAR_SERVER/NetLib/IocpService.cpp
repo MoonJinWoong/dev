@@ -44,9 +44,10 @@ void IocpService::StopIocpService()
 
 		for (int i = 0; i < m_WorkerThreads.size(); ++i)
 		{
-			if (m_WorkerThreads[i].get()->joinable())
+			
+			if (m_WorkerThreads[i].joinable())
 			{
-				m_WorkerThreads[i].get()->join();
+				m_WorkerThreads[i].join();
 			}
 		}
 	}
@@ -60,34 +61,8 @@ void IocpService::StopIocpService()
 	WSACleanup();
 }
 
-bool IocpService::getNetworkMessage(INT8& msgType , INT32&  sessionIdx,char* pBuf , INT16& copySize )
+bool IocpService::GetNetworkMessage(INT8& msgType , INT32&  sessionIdx,char* pBuf , INT16& copySize )
 {
-	Message* pMsg = nullptr;
-	Session* pSession = nullptr;
-	DWORD ioSize = 0;
-
-
-	if (!m_Iocp->GQCS(pMsg, pSession, ioSize))
-	{
-		return false;
-	}
-
-	switch (pMsg->Type)
-	{
-	case MsgType::Session:
-		//DoPostConnection(pConnection, pMsg, msgOperationType, connectionIndex);
-		break;
-	case MsgType::Close:
-		//TODO 재 사용에 딜레이를 주도록 한다. 이유는 재 사용으로 가능 도중 IOCP 워크 스레드에서 이 세션이 호출될 수도 있다. 
-	//	DoPostClose(pConnection, pMsg, msgOperationType, connectionIndex);
-		break;
-	case MsgType::OnRecv:
-		//DoPostRecvPacket(pConnection, pMsg, msgOperationType, connectionIndex, pBuf, copySize, ioSize);
-	//	m_pMsgPool->DeallocMsg(pMsg);
-		break;
-	}
-
-
 	return true;
 }
 
@@ -99,8 +74,6 @@ bool IocpService::CreateSessionList()
 		pSession->Init(m_ListenSock->m_sock, i);
 		pSession->DoAcceptOverlapped();
 		
-		// 왜 벡터로 하면 터질까? 
-		//m_SessionList.push_back(pSession);
 		m_SessionList.insert({ i, pSession });
 	}
 
@@ -119,7 +92,7 @@ bool IocpService::CreateWorkThread()
 {
 	for (int i = 0; i < WORKER_THREAD_COUNT; ++i)
 	{
-		m_WorkerThreads.push_back(std::make_unique<std::thread>([&]() {WorkThread(); }));
+		m_WorkerThreads.push_back(std::thread([&]() {WorkThread(); }));
 	}
 	return true;
 }
@@ -138,7 +111,7 @@ void IocpService::WorkThread()
 			// AcceptEx
 			if (readEvent.lpCompletionKey == 0) 
 			{
-				DoAcceptEx((CustomOverlapped*)readEvent.lpOverlapped);
+				DoAcceptEx(reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped));
 			}
 			// Send , Recv 
 			else
@@ -156,7 +129,7 @@ void IocpService::WorkThread()
 						DoRecv(Over,readEvent.dwNumberOfBytesTransferred);
 						break;
 					case OPType::Send:
-						DoRecv(Over, readEvent.dwNumberOfBytesTransferred);
+						//DoSend(Over, readEvent.dwNumberOfBytesTransferred);
 						break;
 				}
 			}
@@ -166,11 +139,13 @@ void IocpService::WorkThread()
 
 Session* IocpService::GetSession(const int sessionIdx)
 {
-	if (sessionIdx < 0 || sessionIdx >= MAX_SESSION_COUNT)
+	auto iter = m_SessionList.find(sessionIdx);
+	
+	if (iter == m_SessionList.end())
 	{
 		return nullptr;
 	}
-	auto iter = m_SessionList.find(sessionIdx);
+
 	return iter->second;
 }
 
@@ -182,7 +157,7 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 		return;
 	}
 
-	pSession->DecrementAcceptIORefCount();
+	//pSession->DecrementAcceptIORefCount();
 
 
 	// AcceptEx 마무리 작업
@@ -216,8 +191,10 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 		KickSession(pSession);
 	}
 
-	// PCQS 도 던져준다.
-	// 다른 세션들도 메세지 받게
+	// TODO 여기에서 PCQS 도 던져준다.
+	// 다른 세션들도 메세지 받게 
+
+
 
 
 	// 출력 확인용
@@ -232,7 +209,7 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 		return;
 	}
 
-	pSession->DecrementRecvIORefCount();
+	//pSession->DecrementRecvIORefCount();
 
 	pOver->OverlappedExWsaBuf.buf = pOver->pOverlappedExSocketMessage;
 	pOver->OverlappedExRemainByte += ioSize;
@@ -301,13 +278,13 @@ void IocpService::DisConnectSession(Session* pSession, const CustomOverlapped* p
 	switch (pOver->type)
 	{
 	case OPType::Accept:
-		pSession->DecrementAcceptIORefCount();
+		//pSession->DecrementAcceptIORefCount();
 		break;
 	case OPType::Recv:
-		pSession->DecrementRecvIORefCount();
+		//pSession->DecrementRecvIORefCount();
 		break;
 	case OPType::Send:
-		pSession->DecrementSendIORefCount();
+		//pSession->DecrementSendIORefCount();
 		break;
 	}
 

@@ -1,4 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (tcp_many_server_iocp.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  IocpService.cpp
-C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (x64\Debug\) contains files shared from another project (ImaysNet.vcxproj, TB_NetLib.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  tcp_many_server_iocp.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\00_ChatApp\x64\Debug\ChatApp.exe

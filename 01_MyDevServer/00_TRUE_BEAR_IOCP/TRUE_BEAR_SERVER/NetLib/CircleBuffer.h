@@ -151,7 +151,6 @@ public:
 	char* GetBeginMark() { return m_pBeginMark; }
 	char* GetCurMark() { return m_pCurMark; }
 
-
 private:
 	CustomSpinLockCriticalSection m_CS;
 

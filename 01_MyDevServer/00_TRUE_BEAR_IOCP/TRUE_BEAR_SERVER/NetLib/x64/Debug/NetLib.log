@@ -1,4 +1,8 @@
 ﻿  IocpService.cpp
 C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Iocp.h(5,14): warning C4099:  'Message': 처음에는 'struct'을(를) 사용하여 형식 이름을 표시했는데 이제는 'class'을(를) 사용하여 표시합니다.
+  Session.cpp
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Defines.h(42): message :  'Message' 선언을 참조하십시오.
+C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Iocp.h(5,14): warning C4099:  'Message': 처음에는 'struct'을(를) 사용하여 형식 이름을 표시했는데 이제는 'class'을(를) 사용하여 표시합니다.
+  코드를 생성하고 있습니다...
 C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\NetLib\Defines.h(42): message :  'Message' 선언을 참조하십시오.
   NetLib.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\00_TRUE_BEAR_IOCP\TRUE_BEAR_SERVER\x64\Debug\NetLib.lib

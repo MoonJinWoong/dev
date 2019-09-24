@@ -93,6 +93,7 @@ private:
 			}
 
 			delete pData;
+			pData = nullptr;
 		}
 	}
 
