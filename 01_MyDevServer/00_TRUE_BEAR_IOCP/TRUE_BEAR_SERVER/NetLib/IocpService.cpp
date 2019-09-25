@@ -4,6 +4,11 @@ IocpService::IocpService()
 {
 	WSADATA w;
 	WSAStartup(MAKEWORD(2, 2), &w);
+
+	m_Iocp = std::make_unique<Iocp>();
+	m_ListenSock = std::make_unique<CustomSocket>();
+	m_MsgPool = std::make_unique<MessagePool>(MAX_MSG_POOL_COUNT, EXTRA_MSG_POOL_COUNT);
+
 }
 
 IocpService::~IocpService() 
@@ -13,25 +18,16 @@ IocpService::~IocpService()
 
 void IocpService::StartIocpService()
 {
-	m_Iocp = std::make_unique<Iocp>();
-	m_ListenSock = std::make_unique<CustomSocket>();
-	
-	// 리슨 소켓 생성 
 	m_ListenSock->CreateSocket();
 
-	// bind and listen
 	m_ListenSock->BindAndListenSocket();
 
-	// 메세지 풀 생성
+	//m_MsgPool->CheckCreate();
 
-
-	// 리슨 소켓을 iocp에 등록 
 	m_Iocp->ResisterIocp(m_ListenSock->m_sock, nullptr);
 
-	// 세션 풀 생성
 	CreateSessionList();
 
-	// 워커 스레드 생성 
 	CreateWorkThread();
 }
 
@@ -44,7 +40,6 @@ void IocpService::StopIocpService()
 
 		for (int i = 0; i < m_WorkerThreads.size(); ++i)
 		{
-			
 			if (m_WorkerThreads[i].joinable())
 			{
 				m_WorkerThreads[i].join();
@@ -57,12 +52,59 @@ void IocpService::StopIocpService()
 		closesocket(m_ListenSock->m_sock);
 		m_ListenSock->m_sock = INVALID_SOCKET;
 	}
-
 	WSACleanup();
 }
 
-bool IocpService::GetNetworkMessage(INT8& msgType , INT32&  sessionIdx,char* pBuf , INT16& copySize )
+bool IocpService::GetNetworkMsg( INT32&  sessionIdx,char* pBuf , INT16& copySize )
 {
+	Message* pMsg = nullptr;
+	Session* pSession = nullptr;
+	DWORD ioSize = 0;
+
+	bool ret = m_Iocp->GQCS_InLogic(pSession, pMsg);
+	if (!ret)
+	{
+		std::cout << "in logic .. GQCS fail" << std::endl;
+		return false;
+	}
+
+	switch (pMsg->Type)
+	{
+	case MsgType::Session:
+		std::cout << "Session input Success" << std::endl;
+		//DoPostConnection(pConnection, pMsg, msgOperationType, connectionIndex);
+		break;
+	case MsgType::Close:
+		//TODO 재 사용에 딜레이를 주도록 한다. 이유는 재 사용으로 가능 도중 IOCP 워크 스레드에서 이 세션이 호출될 수도 있다. 
+		//DoPostClose(pConnection, pMsg, msgOperationType, connectionIndex);
+		break;
+	case MsgType::OnRecv:
+		//	DoPostRecvPacket(pConnection, pMsg, msgOperationType, connectionIndex, pBuf, copySize, ioSize);
+		break;
+	}
+
+	// 메세지큐에 집어넣는다. 
+	m_MsgPool->PushMsg(pMsg);
+
+	return true;
+}
+
+
+bool IocpService::PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize)
+{
+	if (m_Iocp->m_logicIocp == INVALID_HANDLE_VALUE || pMsg == nullptr)
+	{
+		std::cout << "PostNetworkMsg fail" << std::endl;
+		return false;
+	}
+
+	auto ret = m_Iocp->PQCSWorker(pSession, pMsg, packetSize);
+
+	if (!ret)
+	{
+		std::cout << "PostQueuedCompletionStatus fail" << std::endl;
+		return false;
+	}
 	return true;
 }
 
@@ -102,7 +144,7 @@ void IocpService::WorkThread()
 	while (m_IsRunWorkThread)
 	{
 		IocpEvents events;
-		m_Iocp->GQCSInWorker(events, 100);
+		m_Iocp->GQCS_InWork(events, 100);
 
 		for (int i = 0; i < events.m_eventCount; i++)
 		{
@@ -217,7 +259,9 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 	auto remainByte = pOver->OverlappedExRemainByte;
 	auto pNext = pOver->OverlappedExWsaBuf.buf;
 
-	//PacketForwardingLoop(pConnection, remainByte, pNext);
+
+	ProcessPacket(pSession, remainByte, pNext);
+
 
 	if (!pSession->PostRecv(pNext, remainByte))
 	{
@@ -228,7 +272,7 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 	}
 
 
-	// echo send  임시 코드 나중에 지워주자 . 지금은 동작 잘함 
+	// echo send
 	WSABUF b;
 	b.buf = pOver->pOverlappedExSocketMessage;
 	b.len = ioSize;
@@ -244,6 +288,59 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 		NULL,
 		NULL
 	);
+}
+
+void IocpService::ProcessPacket(Session* pSession, DWORD& remainByte, char* pBuffer)
+{
+	short packetSize = 0;
+
+	while (true)
+	{
+		if (remainByte < PACKET_HEADER_LENGTH)
+		{
+			break;
+		}
+
+
+		// 여기가 문제 여기부터 다시 
+		CopyMemory(&packetSize, pBuffer, remainByte);
+		auto currentSize = packetSize;
+
+		
+		if (0 >= packetSize || packetSize > pSession->RecvBufferSize())
+		{
+			std::cout<<"IOCPServer::DoRecv.Arrived Wrong Packet"<<std::endl;
+
+			if (pSession->CloseComplete())
+			{
+				KickSession(pSession);
+			}
+			return;
+		}
+
+		if (remainByte >= (DWORD)currentSize)
+		{
+			auto pMsg = m_MsgPool->PopMsg();
+			if (pMsg == nullptr)
+			{
+				return;
+			}
+
+			pMsg->SetMessage(MsgType::OnRecv, pBuffer);
+			if (!PostNetworkMsg(pSession, pMsg, currentSize))
+			{
+				m_MsgPool->PushMsg(pMsg);
+				return;
+			}
+
+			remainByte -= currentSize;
+			pBuffer += currentSize;
+		}
+		else
+		{
+			break;
+		}
+	}
 }
 
 void IocpService::KickSession(Session* pSession)

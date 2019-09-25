@@ -5,6 +5,7 @@
 class MessagePool
 {
 public:
+	MessagePool() {}
 	explicit MessagePool(const int maxMsgPoolCount, const int extraMsgPoolCount)
 	{
 		m_MaxMessagePoolCount = maxMsgPoolCount;
@@ -19,22 +20,19 @@ public:
 	}
 
 public:
-	bool CheckCreate()
+	void CheckCreate()
 	{
 		if (m_MaxMessagePoolCount == -1)
 		{
 			std::cout << "Messge Pool err in CheckCreate 1" << std::endl;
-			return false;
 		}
 		if (m_ExtraMessagePoolCount == -1)
 		{
 			std::cout << "Messge Pool err in CheckCreate 2" << std::endl;
-			return false;
 		}
-		return true;
 	}
 
-	bool DeallocMsg(Message* pMsg)
+	bool PushMsg(Message* pMsg)
 	{
 		if (pMsg == nullptr)
 		{
@@ -47,7 +45,7 @@ public:
 		return true;
 	}
 
-	Message* AllocMsg()
+	Message* PopMsg()
 	{
 		Message* pMsg = nullptr;
 		if (!m_MessagePool.try_pop(pMsg))
@@ -85,13 +83,12 @@ private:
 
 	void DestroyMessagePool()
 	{
-		while (auto pData = AllocMsg())
+		while (auto pData = PopMsg())
 		{
 			if (pData == nullptr)
 			{
 				break;
 			}
-
 			delete pData;
 			pData = nullptr;
 		}
@@ -99,7 +96,6 @@ private:
 
 private:
 	concurrency::concurrent_queue<Message*> m_MessagePool;
-
-	int m_MaxMessagePoolCount = -1;
-	int m_ExtraMessagePoolCount = -1;
+	int m_MaxMessagePoolCount = 0;
+	int m_ExtraMessagePoolCount = 0;
 };

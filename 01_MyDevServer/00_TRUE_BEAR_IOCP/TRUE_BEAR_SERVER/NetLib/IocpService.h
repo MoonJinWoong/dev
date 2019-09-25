@@ -3,6 +3,7 @@
 
 
 class Session;
+class MessagePool;
 class IocpEvents;
 class Iocp;
 
@@ -15,13 +16,11 @@ public:
 	void StartIocpService();
 	void StopIocpService();
 
-	bool GetNetworkMessage(
-			INT8& msgType,
-			INT32& sessionIdx,
-			char* pBuf,
-			INT16& copySize
-		 );
-	void PostNetMessage();
+	bool GetNetworkMsg(INT32& sessionIdx,char* pBuf,INT16& copySize);
+	bool PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize = 0);
+	void ProcessPacket(Session* pSession, DWORD& remainByte, char* pBuffer);
+
+
 
 	bool CreateSessionList();
 	void DestorySessionList();
@@ -51,4 +50,6 @@ private:
 
 	bool m_IsRunWorkThread = true;
 	std::vector<std::thread> m_WorkerThreads;
+
+	std::unique_ptr<MessagePool> m_MsgPool;
 };

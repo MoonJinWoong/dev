@@ -25,6 +25,8 @@ public:
 	//void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
 	//void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
 
+	int RecvBufferSize() { return m_RingRecvBuffer.GetBufferSize(); }
+
 	bool SetNetAddressInfo();
 	void SetRemoteIP(const char* szIP) { CopyMemory(m_szIP, szIP, MAX_IP_LENGTH); }
 	bool CloseComplete();

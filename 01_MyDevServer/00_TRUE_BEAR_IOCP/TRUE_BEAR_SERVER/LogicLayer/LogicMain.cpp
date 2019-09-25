@@ -35,9 +35,11 @@ void LogicMain::onStart()
 		INT32 connectionIndex = 0;
 		INT16 copySize = 0;
 
-		// TODO : 09.24 ~ 09.27 이번주 할 일 
-		// logicIOCP 핸들로 PQCS 에서 던져진 메세지를 GQCS 로 가져온다
-		// 그걸 분해해서 처리함
+		auto ret = mIocpService->GetNetworkMsg(connectionIndex, pBuf, copySize);
+		if (!ret)
+		{
+			continue;
+		}
 	}
 }
 

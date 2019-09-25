@@ -6,8 +6,6 @@ class Message;
 class IocpEvents;
 
 
-
-// IOCP의 GetQueuedCompletionStatus로 받은 I/O 완료신호들
 class IocpEvents
 {
 public:
@@ -42,13 +40,41 @@ public:
 		}
 	}
 
-	bool GQCS(Message* msg, Session* session, DWORD& ioSize)
+
+	bool PQCSWorker(Session *pSession, Message *pMsg , DWORD packetSize)
 	{
-		// 안씀
+		auto result = PostQueuedCompletionStatus(
+			m_logicIocp,
+			packetSize,
+			reinterpret_cast<ULONG_PTR>(pSession),
+			reinterpret_cast<LPOVERLAPPED>(pMsg));
+
+		if (!result)
+		{
+			return false;
+		}
 		return true;
 	}
 
-	void GQCSInWorker(IocpEvents& IoEvent ,DWORD timeOut)
+	bool GQCS_InLogic(Session* pSession, Message* pMsg)
+	{
+
+		DWORD ioSize = 0;
+		auto result = GetQueuedCompletionStatus(
+			m_logicIocp,
+			&ioSize,
+			reinterpret_cast<PULONG_PTR>(&pSession),
+			reinterpret_cast<LPOVERLAPPED*>(&pMsg),
+			INFINITE);
+
+		if (!result)
+		{
+			return false;
+		}
+		return true;
+	}
+
+	void GQCS_InWork(IocpEvents& IoEvent ,DWORD timeOut)
 	{
 		// Ex 버젼
 		bool ret = GetQueuedCompletionStatusEx(

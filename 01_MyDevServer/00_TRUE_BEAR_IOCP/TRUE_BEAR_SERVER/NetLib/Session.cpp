@@ -114,6 +114,7 @@ bool Session::SetNetAddressInfo()
 bool Session::CloseComplete()
 {
 	// 구현해야함.
+
 	return true;
 }
 
