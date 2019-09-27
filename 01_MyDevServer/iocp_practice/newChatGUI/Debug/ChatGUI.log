@@ -1,3 +1,0 @@
-﻿  main.cpp
-C:\Users\dndsu\Desktop\dev\01_MyDevServer\SelectModel\ChatGUI\main.cpp(20): warning C4101: 'msgboxID' :참조되지 않은 지역 변수입니다.
-  ChatGUI.vcxproj -> C:\Users\dndsu\Desktop\dev\01_MyDevServer\SelectModel\ChatGUI\Debug\ChatGUI.exe

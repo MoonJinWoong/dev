@@ -169,7 +169,7 @@ bool Session::PostRecv(const char* pNextBuf, const DWORD remainByte)
 
 	ZeroMemory(&m_pRecvOverlappedEx->Overlapped, sizeof(OVERLAPPED));
 
-	//IncrementRecvIORefCount();
+	IncrementRecvIORefCount();
 
 	DWORD flag = 0;
 	DWORD recvByte = 0;
@@ -208,3 +208,4 @@ void Session::DisconnectSession()
 		m_ClientSocket = INVALID_SOCKET;
 	}
 }
+

@@ -18,7 +18,6 @@ public:
 
 	bool GetNetworkMsg(INT32& sessionIdx,char* pBuf,INT16& copySize);
 	bool PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize = 0);
-	void ProcessPacket(Session* pSession, DWORD& remainByte, char* pBuffer);
 
 
 
@@ -29,7 +28,10 @@ public:
 	void WorkThread();
 
 	void DoAcceptEx(const CustomOverlapped* pOver);
-	void DoRecv(CustomOverlapped* pOver, const DWORD ioSize);
+	
+	
+	void DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize);
+	void RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer);
 
 	Session* GetSession(const int sessionIdx);
 

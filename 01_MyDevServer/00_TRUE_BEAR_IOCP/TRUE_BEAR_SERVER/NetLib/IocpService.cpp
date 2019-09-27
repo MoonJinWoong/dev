@@ -168,7 +168,7 @@ void IocpService::WorkThread()
 				switch (Over->type)
 				{
 					case OPType::Recv:
-						DoRecv(Over,readEvent.dwNumberOfBytesTransferred);
+						DoRecvProcess(Over,readEvent.dwNumberOfBytesTransferred);
 						break;
 					case OPType::Send:
 						//DoSend(Over, readEvent.dwNumberOfBytesTransferred);
@@ -243,7 +243,7 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 	std::cout << "Session Join ["<<pSession->GetIndex()<<"]" << std::endl;
 }
 
-void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
+void IocpService::DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize)
 {
 	Session* pSession = GetSession(pOver->SessionIdx);
 	if (pSession == nullptr)
@@ -251,16 +251,20 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 		return;
 	}
 
-	//pSession->DecrementRecvIORefCount();
+	pSession->DecrementRecvIORefCount();
 
 	pOver->OverlappedExWsaBuf.buf = pOver->pOverlappedExSocketMessage;
 	pOver->OverlappedExRemainByte += ioSize;
-
+	
+	
+	
 	auto remainByte = pOver->OverlappedExRemainByte;
-	auto pNext = pOver->OverlappedExWsaBuf.buf;
+	char* pNext = NULL;
+	pNext = pOver->OverlappedExWsaBuf.buf;
 
 
-	ProcessPacket(pSession, remainByte, pNext);
+
+	RecvFinish(pSession, remainByte, pNext);
 
 
 	if (!pSession->PostRecv(pNext, remainByte))
@@ -290,57 +294,56 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const DWORD ioSize)
 	);
 }
 
-void IocpService::ProcessPacket(Session* pSession, DWORD& remainByte, char* pBuffer)
+void IocpService::RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer)
 {
-	short packetSize = 0;
 
-	while (true)
-	{
-		if (remainByte < PACKET_HEADER_LENGTH)
+		const int PACKET_HEADER_LENGTH = 5;
+		const int PACKET_SIZE_LENGTH = 2;
+		const int PACKET_TYPE_LENGTH = 2;
+		short packetSize = 0;
+
+
+		while (true)
 		{
-			break;
-		}
-
-
-		// 여기가 문제 여기부터 다시 
-		CopyMemory(&packetSize, pBuffer, remainByte);
-		auto currentSize = packetSize;
-
-		
-		if (0 >= packetSize || packetSize > pSession->RecvBufferSize())
-		{
-			std::cout<<"IOCPServer::DoRecv.Arrived Wrong Packet"<<std::endl;
-
-			if (pSession->CloseComplete())
+			if (remainByte < PACKET_HEADER_LENGTH)
 			{
-				KickSession(pSession);
+				break;
 			}
-			return;
-		}
 
-		if (remainByte >= (DWORD)currentSize)
-		{
-			auto pMsg = m_MsgPool->PopMsg();
-			if (pMsg == nullptr)
+			//memcpy(&packetSize, &pBuffer, 2);
+			CopyMemory(&packetSize, pBuffer, PACKET_SIZE_LENGTH);
+			auto currentSize = packetSize;
+
+			if (0 >= packetSize || packetSize > pSession->RecvBufferSize())
 			{
+				std::cout << "IOCPServer::DoRecv. Arrived Wrong Packet."<< std::endl;
+
+				//pSession->DisConnectAsync();
 				return;
 			}
 
-			pMsg->SetMessage(MsgType::OnRecv, pBuffer);
-			if (!PostNetworkMsg(pSession, pMsg, currentSize))
+			if (remainByte >= (DWORD)currentSize)
 			{
-				m_MsgPool->PushMsg(pMsg);
-				return;
-			}
+				auto pMsg = m_MsgPool->PopMsg();
+				if (pMsg == nullptr)
+				{
+					return;
+				}
 
-			remainByte -= currentSize;
-			pBuffer += currentSize;
+				pMsg->SetMessage(MsgType::OnRecv, pBuffer);
+				if (!m_Iocp->PQCSWorker(pSession, pMsg, currentSize))
+				{
+					m_MsgPool->PushMsg(pMsg);
+					return;
+				}
+				remainByte -= currentSize;
+				pBuffer += currentSize;
+			}
+			else
+			{
+				break;
+			}
 		}
-		else
-		{
-			break;
-		}
-	}
 }
 
 void IocpService::KickSession(Session* pSession)

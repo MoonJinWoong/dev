@@ -44,7 +44,7 @@ public:
 	bool PQCSWorker(Session *pSession, Message *pMsg , DWORD packetSize)
 	{
 		auto result = PostQueuedCompletionStatus(
-			m_logicIocp,
+			m_workIocp,
 			packetSize,
 			reinterpret_cast<ULONG_PTR>(pSession),
 			reinterpret_cast<LPOVERLAPPED>(pMsg));

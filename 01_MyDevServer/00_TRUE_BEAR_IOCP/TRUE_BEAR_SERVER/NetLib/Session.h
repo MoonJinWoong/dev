@@ -18,12 +18,14 @@ public:
 	void DoAcceptOverlapped();
 
 	int GetIndex() { return m_Index; }
-	//void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
 	//void IncrementSendIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
 	//void IncrementAcceptIORefCount() { ++m_AcceptIORefCount; }
-	//void DecrementRecvIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
+	void DecrementRecvIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
 	//void DecrementSendIORefCount() { InterlockedDecrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
 	//void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
+
+	bool SetNetStateDisConnection() { return InterlockedCompareExchange(reinterpret_cast<LPLONG>(&m_IsConnect), FALSE, TRUE); }
 
 	int RecvBufferSize() { return m_RingRecvBuffer.GetBufferSize(); }
 
@@ -38,9 +40,13 @@ public:
 	bool PostRecv(const char* pNextBuf, const DWORD remainByte);
 	char* RecvBufferBeginPos() { return m_RingRecvBuffer.GetBeginMark(); }
 
-
 	void DisconnectSession();
 
+public:
+	CircleBuffer m_RingRecvBuffer;
+	CircleBuffer m_RingSendBuffer;
+	CustomOverlapped* m_pRecvOverlappedEx = nullptr;
+	CustomOverlapped* m_pSendOverlappedEx = nullptr;
 private:
 	void InnerInit();
 private:
@@ -51,11 +57,9 @@ private:
 
 	std::mutex m_MUTEX;
 
-	CustomOverlapped* m_pRecvOverlappedEx = nullptr;
-	CustomOverlapped* m_pSendOverlappedEx = nullptr;
 
-	CircleBuffer m_RingRecvBuffer;
-	CircleBuffer m_RingSendBuffer;
+
+
 
 	char m_AddrBuf[MAX_ADDR_LENGTH] = { 0, };
 
