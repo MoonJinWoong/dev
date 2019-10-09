@@ -5,6 +5,7 @@
 class Session;
 class IocpEvents;
 class Iocp;
+class CustomOverlapped;
 
 
 class IocpService
@@ -26,13 +27,14 @@ public:
 	bool CreateWorkThread();
 	void WorkThread();
 
-	//void DoAcceptEx(const CustomOverlapped* pOver);
+	void DoAcceptFinish(CustomOverlapped* pOver);
 	//
 	//
 	//void DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize);
 	//void RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer);
 
 	Session* GetSession(const int sessionIdx);
+
 
 	//// 서버가 보내버림
 	//void KickSession(Session* pSession);

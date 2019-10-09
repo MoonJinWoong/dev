@@ -24,12 +24,10 @@ public:
 	{
 		m_threadCount = IOCP_THREAD_COUNT;
 		m_workIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, IOCP_THREAD_COUNT);
-		m_logicIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 1);
 	}
 	~Iocp()
 	{
 		CloseHandle(m_workIocp);
-		CloseHandle(m_logicIocp);
 	}
 
 	void ResisterIocp(SOCKET& socket , void* pUser)
@@ -48,24 +46,6 @@ public:
 			packetSize,
 			reinterpret_cast<ULONG_PTR>(pSession),
 			reinterpret_cast<LPOVERLAPPED>(pMsg));
-
-		if (!result)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	bool GQCS_InLogic(Session* pSession, Message* pMsg)
-	{
-
-		DWORD ioSize = 0;
-		auto result = GetQueuedCompletionStatus(
-			m_logicIocp,
-			&ioSize,
-			reinterpret_cast<PULONG_PTR>(&pSession),
-			reinterpret_cast<LPOVERLAPPED*>(&pMsg),
-			INFINITE);
 
 		if (!result)
 		{
@@ -95,5 +75,4 @@ public:
 public:
 	int m_threadCount;
 	HANDLE m_workIocp;
-	HANDLE m_logicIocp;
 };

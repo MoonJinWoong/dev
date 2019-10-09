@@ -60,11 +60,17 @@ bool IocpService::CreateSessionList()
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
 		// 소켓 만들고
-		auto pSession = new Session();
+	//	CustomOverlapped pCustomOverlapped = new CustomOverlapped()
+		auto pSession = new Session(i);
 		
 		// accpet overlapped 걸어주고 
 		pSession->AcceptOverlapped(m_ListenSock.m_sock , mAcceptAddr);
-		
+
+
+		std::cout << "create User  "
+			<< "socket num : " << pSession->mSocket << std::endl;
+
+
 		m_SessionList.insert({ i, pSession });
 	}
 
@@ -102,14 +108,14 @@ void IocpService::WorkThread()
 			// AcceptEx
 			if (readEvent.lpCompletionKey == 0) 
 			{
-				printf_s("WorkThread AcceptEx  : %d\n", GetLastError());
-
-				// 10 - 08 여기부터 하면 된다.
-				//DoAcceptEx(reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped));
+				// 여기 다시 
 			}
+
 			// Send , Recv 
 			else
 			{
+				std::cout << "asdfasdf" << std::endl;
+
 				//auto Over = reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped);
 				//if (readEvent.dwNumberOfBytesTransferred <= 0)
 				//{
@@ -117,13 +123,14 @@ void IocpService::WorkThread()
 				//	// TODO 생각해볼 것
 				//}
 				//
-				//switch (Over->type)
+				//switch (Over->mIoType)
 				//{
-				//	case OPType::Recv:
-				//		DoRecvProcess(Over,readEvent.dwNumberOfBytesTransferred);
+				//	case IOType::IO_RECV:
+				//		std::cout << "recv call" << std::endl;
+				//		//DoRecvProcess(Over,readEvent.dwNumberOfBytesTransferred);
 				//		break;
-				//	case OPType::Send:
-				//		//DoSend(Over, readEvent.dwNumberOfBytesTransferred);
+				//	case IOType::IO_SEND:
+				//		////DoSend(Over, readEvent.dwNumberOfBytesTransferred);
 				//		break;
 				//}
 			}
@@ -141,5 +148,11 @@ Session* IocpService::GetSession(const int sessionIdx)
 	}
 
 	return iter->second;
+}
+
+
+void IocpService::DoAcceptFinish(CustomOverlapped* pOver)
+{
+//	pOver->mSession
 }
 

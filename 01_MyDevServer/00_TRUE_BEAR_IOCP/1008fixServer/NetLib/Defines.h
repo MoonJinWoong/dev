@@ -14,7 +14,9 @@ const int SESSION_MAX_RECV_BUFF = 65536;
 const int MAX_RECV_OVERLAPPED_BUFF_SIZE = 512;
 const int MAX_SEND_OVERLAPPED_BUFF_SIZE = 512;
 
-const int MAX_SESSION_COUNT = 1000;
+
+// 원활한 디버깅 위해 일단 10개만 추후 증가 시킬 예정
+const int MAX_SESSION_COUNT = 10;
 const int MAX_MESSAGE_POOL_COUNT = 1000;
 
 // CPU에 따라 조절해야함. 나중에 테스트해볼 때 건드리자

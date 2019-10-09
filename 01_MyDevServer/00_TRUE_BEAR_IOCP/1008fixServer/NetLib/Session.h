@@ -15,19 +15,20 @@
 class Session
 {
 public:
-	Session();
+	Session(unsigned int UID);
 	~Session();
 	void AddCount();
 	void Init();
 
 	bool AcceptOverlapped(SOCKET& listenSocket, char* addr);
-	void AcceptFinish();
-
+	void AcceptFinish(SOCKET& listenSocket,HANDLE &hIocp);
 	
 public:
 	
 	SOCKET			mSocket;
 	SOCKADDR_IN		mClientAddr;
+	LPFN_ACCEPTEX	mAcceptEx = NULL;
+
 
 	CircleBuffer	mRecvBuffer;
 	CircleBuffer	mSendBuffer;
@@ -57,13 +58,13 @@ public:
 	CustomOverlapped(Session* pSession, IOType ioType)
 		: mSession(pSession), mIoType(ioType)
 	{
-		memset(&mOverlapped, 0, sizeof(OVERLAPPED));
+		memset(&mOverlapped, 0, sizeof(WSAOVERLAPPED));
 		memset(&mWsaBuf, 0, sizeof(WSABUF));
 		mSession->AddCount();
 	}
 
 public:
-	OVERLAPPED	mOverlapped;
+	WSAOVERLAPPED	mOverlapped;
 	Session* mSession;
 	IOType		mIoType;
 	WSABUF		mWsaBuf;
