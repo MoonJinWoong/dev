@@ -4,7 +4,7 @@
 class Session;
 class Message;
 class IocpEvents;
-
+class CustomException;
 
 class IocpEvents
 {
@@ -28,21 +28,26 @@ public:
 	{
 		CloseHandle(m_workIocp);
 	}
-	void CreateIocp()
+	void CreateNewIocp()
 	{
 		m_workIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, IOCP_THREAD_COUNT);
+		if (!m_workIocp)
+		{
+			throw CustomException("CreateNewIocp fail : ");
+		}
 	}
 
 	void AddDeviceIocp(SOCKET& socket , void* pUser)
 	{
-		if (!CreateIoCompletionPort((HANDLE)socket, m_workIocp, (ULONG_PTR)pUser, m_threadCount))
+		auto ret = CreateIoCompletionPort((HANDLE)socket, m_workIocp, (ULONG_PTR)pUser, 0);
+		if(ret != m_workIocp)
 		{
-			std::cout << "CreateCompletionPort fail" << std::endl;
+			throw CustomException("Add Device Iocp fail : ");
 		}
 	}
 
 
-	bool PQCSWorker(Session *pSession, Message *pMsg , DWORD packetSize)
+	bool PostCompletionEvent(Session *pSession, Message *pMsg , DWORD packetSize)
 	{
 		auto result = PostQueuedCompletionStatus(
 			m_workIocp,

@@ -17,17 +17,30 @@ IocpService::~IocpService()
 
 void IocpService::StartIocpService()
 {
-	m_Iocp->CreateIocp();
+	try 
+	{
+		// iocp port create
+		m_Iocp->CreateNewIocp();
 
-	m_ListenSock->CreateSocket();
+		// listen socket 
+		m_ListenSock->CreateSocket();
 
-	m_ListenSock->BindAndListenSocket();
+		// bind and listen
+		m_ListenSock->BindAndListenSocket();
 
-	m_Iocp->AddDeviceIocp(m_ListenSock->m_sock, nullptr);
+		// add device to iocp 
+		m_Iocp->AddDeviceIocp(m_ListenSock->m_sock, nullptr);
 
-	CreateSessionList();
+		// map container
+		CreateSessionList();
 
-	CreateWorkThread();
+		// thread 
+		CreateWorkThread();
+	}
+	catch (CustomException & e)
+	{
+		std::cout << "Exception! " << e.what() << std::endl;
+	}
 }
 
 void IocpService::StopIocpService()
@@ -148,10 +161,9 @@ void IocpService::DoAcceptFinish(const CustomOverlapped* pOverlappedEx)
 	//pSession->DecrementAcceptIORefCount();
 
 
-	// AcceptEx 마무리 작업
-	if (pSession->SetNetAddressInfo() == false)
+	// remote 주소 세팅
+	if (!pSession->SetNetAddressInfo())
 	{
-		std::cout << "SetNetAddressInfo is failed..." << std::endl;
 		if (pSession->CloseComplete())
 		{
 			KickSession(pSession);
@@ -159,15 +171,9 @@ void IocpService::DoAcceptFinish(const CustomOverlapped* pOverlappedEx)
 		return;
 	}
 
-	// 해당 소켓을 등록
-	if (!pSession->BindIOCP(m_Iocp->m_workIocp))
-	{
-		if (pSession->CloseComplete())
-		{
-			KickSession(pSession);
-		}
-		return;
-	}
+	// TODO : 같은걸 굳이 두개로 넘겨줌. 구조 바꿀 것
+	m_Iocp->AddDeviceIocp(pSession->m_ClientSocket,pSession);
+
 
 	// 세션 상태 갱신
 	pSession->UpdateSessionState();
@@ -263,7 +269,7 @@ void IocpService::RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer
 				}
 
 				pMsg->SetMessage(MsgType::OnRecv, pBuffer);
-				if (!m_Iocp->PQCSWorker(pSession, pMsg, currentSize))
+				if (!m_Iocp->PostCompletionEvent(pSession, pMsg, currentSize))
 				{
 					m_MsgPool->PushMsg(pMsg);
 					return;
@@ -348,6 +354,6 @@ void IocpService::EchoSend(Session *pSession, const DWORD ioSize)
 
 	if (sendret == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
 	{
-		printf_s("err WSASend fail : ", WSAGetLastError());
+		throw CustomException("echo send fail : ",WSAGetLastError());
 	}
 }

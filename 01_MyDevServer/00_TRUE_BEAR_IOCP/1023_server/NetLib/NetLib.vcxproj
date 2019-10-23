@@ -148,6 +148,7 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Iocp.h" />
     <ClInclude Include="MessagePool.h" />
+    <ClInclude Include="CustomException.h" />
     <ClInclude Include="NetPreCompile.h" />
     <ClInclude Include="IocpService.h" />
     <ClInclude Include="Session.h" />

@@ -10,6 +10,7 @@
     <ClInclude Include="MessagePool.h" />
     <ClInclude Include="CustomSocket.h" />
     <ClInclude Include="Session.h" />
+    <ClInclude Include="CustomException.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpService.cpp" />

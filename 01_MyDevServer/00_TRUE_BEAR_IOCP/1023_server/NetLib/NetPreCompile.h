@@ -14,11 +14,12 @@
 #include <unordered_map>
 #include <atomic>
 #include <concurrent_queue.h>
-
+#include <exception>
 
 
 
 // 순서 생각해서 선언해야함
+#include "CustomException.h"
 #include "SpinLock.h"
 #include "CircleBuffer.h"		// 버퍼풀
 #include "Defines.h"			// 구조체 정의들
