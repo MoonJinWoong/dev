@@ -23,14 +23,17 @@ public:
 	Iocp()
 	{
 		m_threadCount = IOCP_THREAD_COUNT;
-		m_workIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, IOCP_THREAD_COUNT);
 	}
 	~Iocp()
 	{
 		CloseHandle(m_workIocp);
 	}
+	void CreateIocp()
+	{
+		m_workIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, IOCP_THREAD_COUNT);
+	}
 
-	void ResisterIocp(SOCKET& socket , void* pUser)
+	void AddDeviceIocp(SOCKET& socket , void* pUser)
 	{
 		if (!CreateIoCompletionPort((HANDLE)socket, m_workIocp, (ULONG_PTR)pUser, m_threadCount))
 		{
@@ -54,7 +57,9 @@ public:
 		return true;
 	}
 
-	void GQCS_InWork(IocpEvents& IoEvent ,DWORD timeOut)
+
+
+	void GetCompletionEvents(IocpEvents& IoEvent ,DWORD timeOut)
 	{
 		// Ex ¹öÁ¯
 		bool ret = GetQueuedCompletionStatusEx(

@@ -22,9 +22,8 @@
 #include "SpinLock.h"
 #include "CircleBuffer.h"		// 버퍼풀
 #include "Defines.h"			// 구조체 정의들
+#include "MessagePool.h"
 #include "CustomSocket.h"
-#include "CustomOverlapped.h"
 #include "Session.h"			// 통신 모음
-
 #include "Iocp.h"				// iocp 함수 모음
 #include "IocpService.h"

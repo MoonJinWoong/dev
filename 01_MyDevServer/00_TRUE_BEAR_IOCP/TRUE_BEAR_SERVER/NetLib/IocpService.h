@@ -16,8 +16,8 @@ public:
 	void StartIocpService();
 	void StopIocpService();
 
-	bool GetNetworkMsg(INT32& sessionIdx,char* pBuf,INT16& copySize);
-	bool PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize = 0);
+	//bool GetNetworkMsg(INT32& sessionIdx,char* pBuf,INT16& copySize);
+	//bool PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize = 0);
 
 
 
@@ -27,7 +27,7 @@ public:
 	bool CreateWorkThread();
 	void WorkThread();
 
-	void DoAcceptEx(const CustomOverlapped* pOver);
+	void DoAcceptFinish(const CustomOverlapped* pOver);
 	
 	
 	void DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize);

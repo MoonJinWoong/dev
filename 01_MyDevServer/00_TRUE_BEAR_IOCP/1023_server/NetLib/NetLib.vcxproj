@@ -144,10 +144,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CircleBuffer.h" />
-    <ClInclude Include="CustomOverlapped.h" />
     <ClInclude Include="CustomSocket.h" />
     <ClInclude Include="Defines.h" />
     <ClInclude Include="Iocp.h" />
+    <ClInclude Include="MessagePool.h" />
     <ClInclude Include="NetPreCompile.h" />
     <ClInclude Include="IocpService.h" />
     <ClInclude Include="Session.h" />

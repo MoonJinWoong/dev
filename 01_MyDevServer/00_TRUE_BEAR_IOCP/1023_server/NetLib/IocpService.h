@@ -3,9 +3,9 @@
 
 
 class Session;
+class MessagePool;
 class IocpEvents;
 class Iocp;
-class CustomOverlapped;
 
 
 class IocpService
@@ -27,36 +27,32 @@ public:
 	bool CreateWorkThread();
 	void WorkThread();
 
-	void DoAcceptFinish(CustomOverlapped* pOver);
-	//
-	//
-	//void DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize);
-	//void RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer);
+	void DoAcceptFinish(const CustomOverlapped* pOver);
+	
+	
+	void DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize);
+	void RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer);
 
 	Session* GetSession(const int sessionIdx);
 
+	// 서버가 보내버림
+	void KickSession(Session* pSession);
 
-	//// 서버가 보내버림
-	//void KickSession(Session* pSession);
+	// 클라가 접속 끊음
+	void DisConnectSession(Session* pSession, const CustomOverlapped* pOver);
 
-	//// 클라가 접속 끊음
-	//void DisConnectSession(Session* pSession, const CustomOverlapped* pOver);
-
+	void EchoSend(Session* pSession, const DWORD ioSize);
 private:
 	// iocp 핸들을 두개 가지고 있음
-	Iocp mIocp;
+	std::unique_ptr<Iocp> m_Iocp;
 
-
+	// 소켓 , 바인드 , 리슨 
+	std::unique_ptr<CustomSocket> m_ListenSock;
 	
 	std::unordered_map<int , Session*> m_SessionList;
 
 	bool m_IsRunWorkThread = true;
 	std::vector<std::thread> m_WorkerThreads;
 
-
-public:
-	// 소켓 , 바인드 , 리슨 
-	CustomSocket m_ListenSock;
-	// accept Ex remote 주소 
-	static char mAcceptAddr[64] ;
+	std::unique_ptr<MessagePool> m_MsgPool;
 };

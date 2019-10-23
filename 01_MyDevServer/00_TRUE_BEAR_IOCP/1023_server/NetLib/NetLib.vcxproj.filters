@@ -7,9 +7,9 @@
     <ClInclude Include="Defines.h" />
     <ClInclude Include="CircleBuffer.h" />
     <ClInclude Include="SpinLock.h" />
+    <ClInclude Include="MessagePool.h" />
     <ClInclude Include="CustomSocket.h" />
     <ClInclude Include="Session.h" />
-    <ClInclude Include="CustomOverlapped.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="IocpService.cpp" />

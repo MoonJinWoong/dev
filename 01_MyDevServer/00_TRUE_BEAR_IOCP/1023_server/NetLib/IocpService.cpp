@@ -8,7 +8,6 @@ IocpService::IocpService()
 	m_Iocp = std::make_unique<Iocp>();
 	m_ListenSock = std::make_unique<CustomSocket>();
 	m_MsgPool = std::make_unique<MessagePool>(MAX_MSG_POOL_COUNT, EXTRA_MSG_POOL_COUNT);
-
 }
 
 IocpService::~IocpService() 
@@ -23,8 +22,6 @@ void IocpService::StartIocpService()
 	m_ListenSock->CreateSocket();
 
 	m_ListenSock->BindAndListenSocket();
-
-	//m_MsgPool->CheckCreate();
 
 	m_Iocp->AddDeviceIocp(m_ListenSock->m_sock, nullptr);
 
@@ -57,66 +54,13 @@ void IocpService::StopIocpService()
 	WSACleanup();
 }
 
-bool IocpService::GetNetworkMsg( INT32&  sessionIdx,char* pBuf , INT16& copySize )
-{
-	Message* pMsg = nullptr;
-	Session* pSession = nullptr;
-	DWORD ioSize = 0;
-
-	bool ret = m_Iocp->GQCS_InLogic(pSession, pMsg);
-	if (!ret)
-	{
-		std::cout << "in logic .. GQCS fail" << std::endl;
-		return false;
-	}
-
-	switch (pMsg->Type)
-	{
-	case MsgType::Session:
-		std::cout << "Session input Success" << std::endl;
-		//DoPostConnection(pConnection, pMsg, msgOperationType, connectionIndex);
-		break;
-	case MsgType::Close:
-		//TODO 재 사용에 딜레이를 주도록 한다. 이유는 재 사용으로 가능 도중 IOCP 워크 스레드에서 이 세션이 호출될 수도 있다. 
-		//DoPostClose(pConnection, pMsg, msgOperationType, connectionIndex);
-		break;
-	case MsgType::OnRecv:
-		//	DoPostRecvPacket(pConnection, pMsg, msgOperationType, connectionIndex, pBuf, copySize, ioSize);
-		break;
-	}
-
-	// 메세지큐에 집어넣는다. 
-	m_MsgPool->PushMsg(pMsg);
-
-	return true;
-}
-
-
-bool IocpService::PostNetworkMsg(Session* pSession, Message* pMsg, const DWORD packetSize)
-{
-	if (m_Iocp->m_logicIocp == INVALID_HANDLE_VALUE || pMsg == nullptr)
-	{
-		std::cout << "PostNetworkMsg fail" << std::endl;
-		return false;
-	}
-
-	auto ret = m_Iocp->PQCSWorker(pSession, pMsg, packetSize);
-
-	if (!ret)
-	{
-		std::cout << "PostQueuedCompletionStatus fail" << std::endl;
-		return false;
-	}
-	return true;
-}
-
 bool IocpService::CreateSessionList()
 {
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
 		auto pSession = new Session();
 		pSession->Init(m_ListenSock->m_sock, i);
-		pSession->DoAcceptOverlapped();
+		pSession->AcceptOverlapped();
 		
 		m_SessionList.insert({ i, pSession });
 	}
@@ -146,7 +90,7 @@ void IocpService::WorkThread()
 	while (m_IsRunWorkThread)
 	{
 		IocpEvents events;
-		m_Iocp->GQCS_InWork(events, 100);
+		m_Iocp->GetCompletionEvents(events, 100);
 
 		for (int i = 0; i < events.m_eventCount; i++)
 		{
@@ -155,7 +99,7 @@ void IocpService::WorkThread()
 			// AcceptEx
 			if (readEvent.lpCompletionKey == 0) 
 			{
-				DoAcceptEx(reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped));
+				DoAcceptFinish(reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped));
 			}
 			// Send , Recv 
 			else
@@ -193,7 +137,7 @@ Session* IocpService::GetSession(const int sessionIdx)
 	return iter->second;
 }
 
-void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
+void IocpService::DoAcceptFinish(const CustomOverlapped* pOverlappedEx)
 {
 	auto pSession = GetSession(pOverlappedEx->SessionIdx);
 	if (pSession == nullptr)
@@ -236,8 +180,6 @@ void IocpService::DoAcceptEx(const CustomOverlapped* pOverlappedEx)
 	}
 
 	// TODO 여기에서 PCQS 도 던져준다.
-	// 다른 세션들도 메세지 받게 
-
 
 
 
@@ -255,16 +197,21 @@ void IocpService::DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize)
 
 	pSession->DecrementRecvIORefCount();
 
+
+	// echo 
+	EchoSend(pSession, ioSize);
+
+
+
+
 	pOver->OverlappedExWsaBuf.buf = pOver->pOverlappedExSocketMessage;
+	pOver->OverlappedExWsaBuf.len = ioSize;
 	pOver->OverlappedExRemainByte += ioSize;
-	
 	
 	
 	auto remainByte = pOver->OverlappedExRemainByte;
 	char* pNext = NULL;
 	pNext = pOver->OverlappedExWsaBuf.buf;
-
-
 
 	RecvFinish(pSession, remainByte, pNext);
 
@@ -277,28 +224,11 @@ void IocpService::DoRecvProcess(CustomOverlapped* pOver, const DWORD ioSize)
 		}
 	}
 
-
-	// echo send
-	WSABUF b;
-	b.buf = pOver->pOverlappedExSocketMessage;
-	b.len = ioSize;
-	int m_writeFlag = 0;
-	DWORD sendByte = 0;
-
-	auto ret = WSASend(
-		pSession->GetClientSocket(),
-		&b,
-		1,
-		&sendByte,
-		m_writeFlag,
-		NULL,
-		NULL
-	);
 }
 
 void IocpService::RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer)
 {
-
+	
 		const int PACKET_HEADER_LENGTH = 5;
 		const int PACKET_SIZE_LENGTH = 2;
 		const int PACKET_TYPE_LENGTH = 2;
@@ -346,6 +276,8 @@ void IocpService::RecvFinish(Session* pSession, DWORD& remainByte, char* pBuffer
 				break;
 			}
 		}
+
+
 }
 
 void IocpService::KickSession(Session* pSession)
@@ -395,4 +327,27 @@ void IocpService::DisConnectSession(Session* pSession, const CustomOverlapped* p
 		KickSession(pSession);
 	}
 	return;
+}
+
+void IocpService::EchoSend(Session *pSession, const DWORD ioSize)
+{
+	WSABUF b;
+	b.buf = pSession->m_pRecvOverlappedEx->OverlappedExWsaBuf.buf;
+	b.len = ioSize;
+	DWORD	sendBytes = 0;
+	auto sendret = WSASend
+	(
+		pSession->m_ClientSocket,
+		&b,
+		1,
+		&sendBytes,
+		0,
+		NULL,
+		NULL
+	);
+
+	if (sendret == SOCKET_ERROR && WSAGetLastError() != WSA_IO_PENDING)
+	{
+		printf_s("err WSASend fail : ", WSAGetLastError());
+	}
 }
