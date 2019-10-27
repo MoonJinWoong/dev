@@ -6,5 +6,6 @@
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="LogicPreCompile.h" />
+    <ClInclude Include="PacketFrame.h" />
   </ItemGroup>
 </Project>

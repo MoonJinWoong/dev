@@ -10,14 +10,11 @@ Session::Session(SOCKET listenSock , int index) :
 		m_RecvBufSize(MAX_RECV_OVERLAPPED_BUFF_SIZE),
 		m_SendBufSize(MAX_SEND_OVERLAPPED_BUFF_SIZE),
 		m_IsConnect(false),
-		m_IsClosed(false),
 		m_IsSendable(true),
 		m_SendIORefCount(0),
 		m_RecvIORefCount(0),
 		m_AcceptIORefCount(0)
-{
-	//ZeroMemory(m_szIP, MAX_IP_LENGTH);
-	
+{	
 	m_pRecvOverlappedEx = new CustomOverlapped(index);
 	m_pSendOverlappedEx = new CustomOverlapped(index);
 
@@ -25,7 +22,6 @@ Session::Session(SOCKET listenSock , int index) :
 	m_ConnectionMsg.pContents = nullptr;
 	m_CloseMsg.Type = MsgType::Close;
 	m_CloseMsg.pContents = nullptr;
-
 
 	m_CircleRecvBuffer.Create(SESSION_MAX_RECV_BUFF_SIZE);
 	m_CircleSendBuffer.Create(SESSION_MAX_SEND_BUFF_SIZE);
@@ -172,9 +168,9 @@ void Session::DisconnectSession()
 	//TODO 유니크하게 호출되기 때문에. 락 안걸어도 된다.
 	//std::lock_guard<std::mutex> Lock(m_MUTEX);
 
-	if (m_IsConnect == TRUE)
+	if (m_IsConnect == true)
 	{
-		m_IsConnect = FALSE;
+		m_IsConnect = false;
 	}
 
 	if (mRemoteSock != INVALID_SOCKET)

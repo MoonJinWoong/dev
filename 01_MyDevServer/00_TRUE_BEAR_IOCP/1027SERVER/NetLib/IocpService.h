@@ -3,7 +3,6 @@
 #include <vector>
 #include <thread>
 #include <mutex>
-#include <unordered_map>
 #include <iostream>
 
 #define WIN32_LEAN_AND_MEAN 
@@ -62,7 +61,7 @@ private:
 	// 소켓 , 바인드 , 리슨 
 	std::unique_ptr<CustomSocket> m_ListenSock;
 	
-	std::unordered_map<int , Session*> m_SessionList;
+	std::vector<Session*> m_SessionList;
 
 	bool m_IsRunWorkThread = true;
 	std::vector<std::thread> m_WorkerThreads;

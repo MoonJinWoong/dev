@@ -1,7 +1,10 @@
 #include "..//LogicLayer/LogicMain.h"
 #include <string>
-int main()
+
+
+int main(int argc, char* argv[])
 {
+
 	// TODO : 옵션들 한군데로 몰아넣기
 	// 로직 호출
 	LogicMain logic_main;

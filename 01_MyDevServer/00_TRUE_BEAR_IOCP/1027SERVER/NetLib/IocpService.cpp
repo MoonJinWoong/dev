@@ -72,7 +72,7 @@ bool IocpService::CreateSessionList()
 		pSession->AcceptOverlapped();
 		
 		//TODO index로 할거니까 맵으로 굳이 할 필요없다. 
-		m_SessionList.insert({ i, pSession });
+		m_SessionList.push_back(pSession);
 	}
 
 	return true;
@@ -82,7 +82,7 @@ void IocpService::DestorySessionList()
 {
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
-		m_SessionList.erase(i);
+		delete m_SessionList[i];
 	}
 }
 
@@ -137,14 +137,11 @@ void IocpService::WorkThread()
 
 Session* IocpService::GetSession(const int sessionIdx)
 {
-	auto iter = m_SessionList.find(sessionIdx);
-	
-	if (iter == m_SessionList.end())
+	if (sessionIdx < 0 || sessionIdx >= MAX_SESSION_COUNT)
 	{
 		return nullptr;
 	}
-
-	return iter->second;
+	return m_SessionList[sessionIdx];
 }
 
 void IocpService::DoAccept(const CustomOverlapped* pOverlappedEx)
@@ -156,7 +153,6 @@ void IocpService::DoAccept(const CustomOverlapped* pOverlappedEx)
 	}
 
 	//pSession->DecrementAcceptIORefCount();
-
 
 	// remote 주소 세팅
 	if (!pSession->SetNetAddressInfo())

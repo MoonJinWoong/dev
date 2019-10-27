@@ -73,9 +73,8 @@ private:
 
 	//TODO 아래 두개 변수는 같이 가도 됨
 	//TODO BOOL -> bool 로 변경
-	bool m_IsClosed = FALSE;
-	bool m_IsConnect = FALSE;
-	bool m_IsSendable = TRUE;
+	bool m_IsConnect;
+	bool m_IsSendable;
 
 
 	int	m_RecvBufSize = -1;

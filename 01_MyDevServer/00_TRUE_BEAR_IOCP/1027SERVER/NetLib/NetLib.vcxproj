@@ -150,7 +150,6 @@
     <ClInclude Include="MessagePool.h" />
     <ClInclude Include="NetPreCompile.h" />
     <ClInclude Include="IocpService.h" />
-    <ClInclude Include="PacketFrame.h" />
     <ClInclude Include="Session.h" />
     <ClInclude Include="SpinLock.h" />
   </ItemGroup>

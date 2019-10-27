@@ -154,6 +154,7 @@
   <ItemGroup>
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="LogicPreCompile.h" />
+    <ClInclude Include="PacketFrame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
