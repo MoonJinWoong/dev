@@ -6,7 +6,7 @@
 #include <WS2tcpip.h>
 #include <iostream>
 
-
+//TODO Áö¿ï °Í
 class CustomSocket
 {
 public:

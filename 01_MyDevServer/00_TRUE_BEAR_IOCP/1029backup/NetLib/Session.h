@@ -1,3 +1,4 @@
+
 #pragma once
 #include <mutex>
 #include <atomic>
@@ -14,17 +15,19 @@
 class Session
 {
 public:
-	Session();
+	//Session();
 	Session(SOCKET listenSock, int index);
 	~Session();
 
 	SOCKET& GetRemoteSocket() { return mRemoteSock; }
+	
 	int GetIndex() { return mIndex; }
+	
 	CustomOverlapped* getRecvOverlappedEx() { return m_pRecvOverlappedEx; }
 	CustomOverlapped* getSendOverlappedEx() { return m_pSendOverlappedEx; }
 
 
-
+	//TODO 쓸거면 쓰고 안쓸거면 날려자. 코드 정리
 	void IncrementRecvIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_RecvIORefCount)); }
 	//void IncrementSendIORefCount() { InterlockedIncrement(reinterpret_cast<LPLONG>(&m_SendIORefCount)); }
 	//void IncrementAcceptIORefCount() { ++m_AcceptIORefCount; }
@@ -33,21 +36,23 @@ public:
 	//void DecrementAcceptIORefCount() { --m_AcceptIORefCount; }
 
 	bool SetNetStateDisConnection() { return InterlockedCompareExchange(reinterpret_cast<LPLONG>(&m_IsConnect), FALSE, TRUE); }
+	
 	bool CloseComplete();
+	
 	void DisconnectSession();
-
 
 	bool GetLocalAndRemoteAddr();
 	void SetRemoteIP(const char* szIP) { mIPAddr = szIP; }
+	
 	void  UpdateSessionState();
+	
 	void  AcceptOverlapped();
-	void* GetSockExAPI(GUID guidFn);
-
-
+	
 	bool PostRecv(const char* pNextBuf, const unsigned long remainByte);
+	
 	char* RecvBufferBeginPos() { return m_CircleRecvBuffer.GetBeginMark(); }
+	
 	int RecvBufferSize() { return m_CircleRecvBuffer.GetBufferSize(); }
-
 
 private:
 	CircleBuffer m_CircleRecvBuffer;
@@ -69,12 +74,12 @@ private:
 
 	char m_AddrBuf[MAX_ADDR_LENGTH] = { 0, };
 
-	bool m_IsConnect;
-	bool m_IsSendable;
+	bool m_IsConnect = false;
+	bool m_IsSendable = true;
 
 
-	int	m_RecvBufSize = -1;
-	int	m_SendBufSize = -1;
+	int	m_RecvBufSize = MAX_RECV_OVERLAPPED_BUFF_SIZE;
+	int	m_SendBufSize = MAX_SEND_OVERLAPPED_BUFF_SIZE;
 
 	std::string mIPAddr;
 

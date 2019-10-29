@@ -24,10 +24,17 @@ struct CustomOverlapped
 	OVERLAPPED Overlapped;
 	WSABUF OverlappedExWsaBuf;
 
+	//TODO 파스칼 형식으로 변수명 통일
 	OPType type;
 
+	// 아래도 일관성있게 통일
 	int	totalByte;
+
+	// 이거는 packet을 다 못만들었을때  사용하는건데 SESSION에 있는게 낫다. 
+	// 링버퍼를 사용하는데 이게 의미가 있나. 다시 생각해보고 지워주자.
 	unsigned long OverlappedExRemainByte;
+	
+	//TODO 활용 잘하고 해제 잘하는지 다시 한번 확인
 	char* pOverlappedExSocketMessage;
 
 	INT32 SessionIdx = 0;
@@ -66,7 +73,7 @@ struct Message
 	}
 };
 
-#pragma once
+
 
 
 // CS -> 클라에서 서버로 
@@ -101,7 +108,7 @@ enum class PACKET_ID : short
 
 
 
-
+//TODO 이거 CONFIG로 옮기기
 const int MAX_IP_LENGTH = 20;
 const int MAX_ADDR_LENGTH = 64;
 

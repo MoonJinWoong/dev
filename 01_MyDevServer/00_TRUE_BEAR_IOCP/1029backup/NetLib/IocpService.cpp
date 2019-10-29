@@ -5,6 +5,8 @@ IocpService::IocpService()
 	WSADATA w;
 	WSAStartup(MAKEWORD(2, 2), &w);
 
+	//TODO 동적 할당 할 필요없는거 하지말자
+	// 동적 할당 할거면 
 	m_ListenSock = std::make_unique<CustomSocket>();
 	m_MsgPool = std::make_unique<MessagePool>(MAX_MSG_POOL_COUNT, EXTRA_MSG_POOL_COUNT);
 }
@@ -15,8 +17,10 @@ IocpService::~IocpService()
 	DestorySessionList();
 }
 
+//TODO 에러 코드 반환하자
 void IocpService::StartIocpService()
 {
+	//TODO 에러 나면 멈춰야 하니까 무조건 반환을 해주자
 		// iocp port create
 		mIOCP.CreateNewIocp();
 
@@ -68,10 +72,11 @@ bool IocpService::CreateSessionList()
 	//TODO 옵션값으로 받을 수 있게 바꾸자.
 	for (int i = 0; i < MAX_SESSION_COUNT; ++i)
 	{
-		Session* pSession = new Session(m_ListenSock->mSock,i);
-		pSession->AcceptOverlapped();
+		//Session* pSession = new Session(m_ListenSock->mSock,i);
+		//pSession->AcceptOverlapped();
 		
 		//TODO 디버깅 찍으면 여기서 벡터쪽 초기화 오류 남
+		auto pSession = new Session();
 		m_SessionList.push_back(pSession);
 	}
 
@@ -100,13 +105,15 @@ void IocpService::WorkThread()
 	while (m_IsRunWorkThread)
 	{
 		IocpEvents events;
+		//TODO 두번째 인자를 변수로 만들어주자.
 		mIOCP.GetCompletionEvents(events, 100);
 
-		for (int i = 0; i < events.m_eventCount; i++)
+		for (int i = 0; i < events.m_eventCount; ++i)
 		{
 			auto& readEvent = events.m_IoArray[i];
 
-			// AcceptEx
+			// AcceptEx 
+			//TODO 아래의 형변환을 여기서 해주자.
 			if (readEvent.lpCompletionKey == 0) 
 			{
 				DoAccept(reinterpret_cast<CustomOverlapped*>(readEvent.lpOverlapped));
@@ -192,6 +199,7 @@ void IocpService::DoRecv(CustomOverlapped* pOver, const unsigned long ioSize)
 
 	pSession->DecrementRecvIORefCount();
 
+	//TODO 메세지풀 사용할 것.
 
 	// echo 
 	EchoSend(pSession, ioSize);

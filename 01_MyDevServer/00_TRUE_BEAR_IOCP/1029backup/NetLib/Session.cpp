@@ -1,32 +1,32 @@
 #include "Session.h"
 
-Session::Session()
+Session::Session() 
 {
 	std::cout << "this construct not intended" << std::endl;
 }
-Session::Session(SOCKET listenSock , int index) :
-	mListenSock(listenSock),					// listen socket set 
-	mIndex(index),								// unique id 
-	m_RecvBufSize(MAX_RECV_OVERLAPPED_BUFF_SIZE),
-	m_SendBufSize(MAX_SEND_OVERLAPPED_BUFF_SIZE),
-	m_IsConnect(false),
-	m_IsSendable(true),
-	m_SendIORefCount(0),
-	m_RecvIORefCount(0)
-{	
-	m_pRecvOverlappedEx = new CustomOverlapped(index);
-	m_pSendOverlappedEx = new CustomOverlapped(index);
+//Session::Session(SOCKET listenSock , int index) 
+	//mListenSock(listenSock),					// listen socket set 
+	//mIndex(index),								// unique id 
+	//m_RecvBufSize(MAX_RECV_OVERLAPPED_BUFF_SIZE),
+	//m_SendBufSize(MAX_SEND_OVERLAPPED_BUFF_SIZE),
+	//m_IsConnect(false),
+	//m_IsSendable(true),
+	//m_SendIORefCount(0),
+	//m_RecvIORefCount(0)
+//{	
+	//m_pRecvOverlappedEx = new CustomOverlapped(index);
+	//m_pSendOverlappedEx = new CustomOverlapped(index);
 
-	m_ConnectionMsg.Type = MsgType::Session;
-	m_ConnectionMsg.pContents = nullptr;
-	m_CloseMsg.Type = MsgType::Close;
-	m_CloseMsg.pContents = nullptr;
+	//m_ConnectionMsg.Type = MsgType::Session;
+	//m_ConnectionMsg.pContents = nullptr;
+	//m_CloseMsg.Type = MsgType::Close;
+	//m_CloseMsg.pContents = nullptr;
 
-	m_CircleRecvBuffer.Create(SESSION_MAX_RECV_BUFF_SIZE);
-	m_CircleSendBuffer.Create(SESSION_MAX_SEND_BUFF_SIZE);
-	m_CircleRecvBuffer.Init();
-	m_CircleSendBuffer.Init();
-}
+	//m_CircleRecvBuffer.Create(SESSION_MAX_RECV_BUFF_SIZE);
+	//m_CircleSendBuffer.Create(SESSION_MAX_SEND_BUFF_SIZE);
+	//m_CircleRecvBuffer.Init();
+	//m_CircleSendBuffer.Init();
+//}
 
 Session::~Session()
 {
