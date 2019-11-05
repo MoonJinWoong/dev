@@ -76,7 +76,7 @@ bool IocpService::CreateSessionList()
 		//pSession->AcceptOverlapped();
 		
 		//TODO 디버깅 찍으면 여기서 벡터쪽 초기화 오류 남
-		auto pSession = new Session();
+		auto pSession = new Session(m_ListenSock->mSock , i);
 		m_SessionList.push_back(pSession);
 	}
 
