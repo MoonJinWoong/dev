@@ -18,7 +18,7 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void OnConnect(const unsigned int index) {}
+	virtual void OnAccept(const unsigned int index) {}
 	virtual void OnClose(const unsigned int index) {}
 	virtual void OnRecv(const unsigned int index, const unsigned int size_, char* pData_) {}
 
@@ -34,7 +34,7 @@ public:
 	bool BindandListen(int nBindPort);
 
 	//접속 요청을 수락하고 메세지를 받아서 처리하는 함수
-	bool StartServer(const unsigned int maxClientCount);
+	bool StartNetService(const unsigned int maxClientCount);
 
 	//생성되어있는 쓰레드를 파괴한다.
 	void DestroyThread();
@@ -56,10 +56,10 @@ public:
 	bool BindIOCompletionPort(RemoteClient* pClientInfo);
 
 	//WSARecv Overlapped I/O 작업을 시킨다.
-	bool BindRecv(RemoteClient* pClientInfo);
+	bool DoRecv(RemoteClient* pClientInfo);
 
 	//WSASend Overlapped I/O작업을 시킨다.
-	bool SendMsg(RemoteClient* pClientInfo, char* pMsg, int nLen);
+	bool DoSend(RemoteClient* pClientInfo, char* pMsg, int nLen);
 
 	//Overlapped I/O작업에 대한 완료 통보를 받아 
 	//그에 해당하는 처리를 하는 함수

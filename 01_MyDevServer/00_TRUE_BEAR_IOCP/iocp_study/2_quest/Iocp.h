@@ -58,7 +58,7 @@ public:
 	bool AddDeviceRemoteSocket(RemoteClient* remoteClient)
 	{
 		auto ret = CreateIoCompletionPort(
-			(HANDLE)remoteClient->stRemoteSock,
+			(HANDLE)remoteClient->GetSock(),
 			m_workIocp,
 			(ULONG_PTR)remoteClient,
 			0

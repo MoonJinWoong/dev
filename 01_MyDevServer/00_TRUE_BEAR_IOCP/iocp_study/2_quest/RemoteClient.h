@@ -1,4 +1,9 @@
 #pragma once
+#include <winsock2.h>
+#include <Ws2tcpip.h>
+#include <mswsock.h>
+#include <iostream>
+
 const int MAX_SOCKBUF = 1024;	//패킷 크기
 const int MAX_WORKERTHREAD = 4;  //쓰레드 풀에 넣을 쓰레드 수
 
@@ -8,7 +13,7 @@ enum class IOOperation
 	SEND
 };
 
-//WSAOVERLAPPED구조체를 확장 시켜서 필요한 정보를 더 넣었다.
+//WSAOVERLAPPED구조체를 확장
 struct CustomOverEx
 {
 	WSAOVERLAPPED m_wsaOverlapped;		//Overlapped I/O구조체
@@ -20,18 +25,24 @@ struct CustomOverEx
 	IOOperation m_eOperation;			//작업 동작 종류
 };
 
-//클라이언트 정보를 담기위한 구조체
+// 원격 세션
 class RemoteClient
 {
 public:
-	SOCKET			stRemoteSock;			//Cliet와 연결되는 소켓
-	CustomOverEx	stRecvOver;	//RECV Overlapped I/O작업을 위한 변수
-	CustomOverEx	stSendOver;	//SEND Overlapped I/O작업을 위한 변수
+	RemoteClient();
 
-	RemoteClient()
-	{
-		ZeroMemory(&stRecvOver, sizeof(CustomOverEx));
-		ZeroMemory(&stSendOver, sizeof(CustomOverEx));
-		stRemoteSock = INVALID_SOCKET;
-	}
+	SOCKET& GetSock() { return mRemoteSock; }
+
+	bool SendMsg(const unsigned int size, char* msg);
+	bool RecvMsg();
+
+	void SetUniqueId(const unsigned int& id) { unique_id = id; }
+	unsigned int GetUniqueId() const { return unique_id; }
+
+private:
+	SOCKET			mRemoteSock;			//Cliet와 연결되는 소켓
+public:
+	CustomOverEx	mRecvOver;	//RECV Overlapped I/O작업을 위한 변수
+	CustomOverEx	mSendOver;	//SEND Overlapped I/O작업을 위한 변수
+	unsigned int unique_id = -1;
 };

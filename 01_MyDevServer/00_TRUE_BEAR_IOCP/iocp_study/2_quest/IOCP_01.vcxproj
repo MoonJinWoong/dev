@@ -87,12 +87,15 @@
     <ClCompile Include="ChatServer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetService.cpp" />
+    <ClCompile Include="PacketMgr.cpp" />
+    <ClCompile Include="RemoteClient.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="Iocp.h" />
     <ClInclude Include="NetService.h" />
     <ClInclude Include="Packet.h" />
+    <ClInclude Include="PacketMgr.h" />
     <ClInclude Include="RemoteClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
