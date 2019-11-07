@@ -33,27 +33,17 @@ public:
 	//소켓을 등록하는 함수
 	bool BindandListen(int nBindPort);
 
-	//접속 요청을 수락하고 메세지를 받아서 처리하는 함수
 	bool StartNetService(const unsigned int maxClientCount);
 
-	//생성되어있는 쓰레드를 파괴한다.
 	void DestroyThread();
-
 
 	void CreateClient(const unsigned int maxClientCount);
 
-	//WaitingThread Queue에서 대기할 쓰레드들을 생성
 	bool CreateWokerThread();
 
-	//accept요청을 처리하는 쓰레드 생성
 	bool CreateAccepterThread();
 
-	//사용하지 않는 클라이언트 정보 구조체를 반환한다.
 	RemoteSession* GetEmptyClientInfo();
-
-	//CompletionPort객체와 소켓과 CompletionKey를
-	//연결시키는 역할을 한다.
-	bool BindIOCompletionPort(RemoteSession* pSession);
 
 	//WSARecv Overlapped I/O 작업을 시킨다.
 	bool DoRecv(RemoteSession* pSession);

@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <queue>
 #include "Packet.h"
-
+#include "ClientManager.h"
 //TODO: 타입 재정의 한군데에 몰아넣기
 typedef const unsigned int c_u_Int;
 typedef std::lock_guard<std::mutex> auto_lock;
@@ -28,11 +28,10 @@ public:
 	PacketFrame GetConnectPkt();
 	void		PutConnectPkt(PacketFrame packet);
 
-	PacketFrame GetUserIdx();
+	PacketFrame GetUserPkt();
 	void		PutUserIdx(c_u_Int unique_id);
 
 	void ProcRecv(PacketFrame& packet);
-
 
 private:
 	bool isRun = false;
@@ -40,5 +39,8 @@ private:
 	std::mutex mLock;
 	std::queue<unsigned int> mUserIdQueue;
 	std::queue<PacketFrame> mConnectQueue;
+
+	ClientManager* mClMgr;
+
 
 };

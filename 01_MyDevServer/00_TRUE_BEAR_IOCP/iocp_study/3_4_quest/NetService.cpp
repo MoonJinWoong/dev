@@ -4,11 +4,10 @@
 bool NetService::InitSocket()
 {
 	WSADATA wsaData;
-
 	int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (0 != nRet)
 	{
-		printf("[에러] WSAStartup()함수 실패 : %d\n", WSAGetLastError());
+		std::cout << "[err] WSAStartUP() fail..." << WSAGetLastError();
 		return false;
 	}
 
@@ -17,11 +16,11 @@ bool NetService::InitSocket()
 
 	if (INVALID_SOCKET == mListenSocket)
 	{
-		printf("[에러] socket()함수 실패 : %d\n", WSAGetLastError());
+		std::cout << "[err] WSASocket() fail..." << WSAGetLastError();
 		return false;
 	}
 
-	printf("소켓 초기화 성공\n");
+	std::cout << "[Success] InitSocket() "<<std::endl;
 	return true;
 }
 
@@ -36,23 +35,23 @@ bool NetService::BindandListen(int nBindPort)
 	stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	//위에서 지정한 서버 주소 정보와 cIOCompletionPort 소켓을 연결한다.
-	int nRet = bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
+	int nRet = ::bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
 	if (0 != nRet)
 	{
-		printf("[에러] bind()함수 실패 : %d\n", WSAGetLastError());
+		std::cout << "[err] bind() fail..." << WSAGetLastError();
 		return false;
 	}
 
 	//접속 요청을 받아들이기 위해 cIOCompletionPort소켓을 등록하고 
 	//접속대기큐를 5개로 설정 한다.
-	nRet = listen(mListenSocket, 5);
+	nRet = ::listen(mListenSocket, 5);
 	if (0 != nRet)
 	{
-		printf("[에러] listen()함수 실패 : %d\n", WSAGetLastError());
+		std::cout << "[err] listen() fail..." << WSAGetLastError();
 		return false;
 	}
 
-	printf("서버 등록 성공..\n");
+	std::cout << "[Success] BindandListen() " << std::endl;
 	return true;
 }
 
@@ -76,7 +75,7 @@ bool NetService::StartNetService(const unsigned int maxClientCount)
 		return false;
 	}
 
-	printf("서버 시작\n");
+	std::cout << "[Success] StartNetService() " << std::endl;
 	return true;
 }
 
@@ -122,7 +121,7 @@ bool NetService::CreateWokerThread()
 		mIOWorkerThreads.emplace_back([this]() { WokerThread(); });
 	}
 
-	printf("WokerThread 시작..\n");
+	std::cout << "[Success] WokerThread() " << std::endl;
 	return true;
 }
 
@@ -130,7 +129,7 @@ bool NetService::CreateAccepterThread()
 {
 	mAccepterThread = std::thread([this]() { AccepterThread(); });
 
-	printf("AccepterThread 시작..\n");
+	std::cout << "[Success] AccepterThread() " << std::endl;
 	return true;
 }
 
@@ -146,17 +145,6 @@ RemoteSession* NetService::GetEmptyClientInfo()
 	return nullptr;
 }
 
-bool NetService::BindIOCompletionPort(RemoteSession* pClientInfo)
-{
-	//socket과 pClientInfo를 CompletionPort객체와 연결시킨다.
-
-	auto ret = mIocp.AddDeviceRemoteSocket(pClientInfo);
-	if (!ret)
-	{
-		return false;
-	}
-	return true;
-}
 
 bool NetService::DoRecv(RemoteSession* pClientInfo)
 {
@@ -246,7 +234,7 @@ void NetService::AccepterThread()
 		RemoteSession* pClientInfo = GetEmptyClientInfo();
 		if (NULL == pClientInfo)
 		{
-			printf("[에러] Client Full\n");
+			std::cout << "[Err] Client Pull... UU " << std::endl;
 			return;
 		}
 

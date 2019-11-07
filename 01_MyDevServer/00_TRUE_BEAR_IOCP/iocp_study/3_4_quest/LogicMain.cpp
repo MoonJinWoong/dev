@@ -3,6 +3,8 @@
 
 void LogicMain::Init(c_u_Int maxClient)
 {
+	mClMgr = new ClientManager;
+	mClMgr->Init(maxClient);
 }
 
 bool LogicMain::Start()
@@ -23,7 +25,10 @@ void LogicMain::Stop()
 
 void LogicMain::RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg)
 {
-
+	// manager 에서 client 가져와서 큐에 집어넣음
+	auto pClient = mClMgr->GetClient(unique_id);
+	pClient->SetPacketAssemble(len, msg);
+	PutUserIdx(unique_id);
 }
 
 void LogicMain::LogicThread()
@@ -37,8 +42,8 @@ void LogicMain::LogicThread()
 			ProcRecv(packet);
 		}
 
-		// 어떤 유저가 보냈는지 큐에서 인덱스를 뽑아와서 처리한다.
-		auto packet2 = GetUserIdx();
+		// 어떤 유저가 보냈는지 큐에서 인덱스 검사.
+		auto packet2 = GetUserPkt();
 		if (packet2.packet_type >= (unsigned short)PACKET_TYPE::SC_LOGIN)
 		{
 			ProcRecv(packet2);
@@ -48,7 +53,7 @@ void LogicMain::LogicThread()
 
 void LogicMain::ProcRecv(PacketFrame& packet)
 {
-
+	std::cout << "ProcRecv******" << std::endl;
 }
 
 PacketFrame LogicMain::GetConnectPkt()
@@ -73,9 +78,9 @@ void LogicMain::PutConnectPkt(PacketFrame packet)
 	mConnectQueue.push(packet);
 }
 
-PacketFrame LogicMain::GetUserIdx()
+PacketFrame LogicMain::GetUserPkt()
 {
-	// 뺄때는 락 필요 없을거 같다. 로직은 하나
+	// 뺄때는 락 필요 없을거 같다. 로직은 스레드 한개
 	//auto_lock guard(mLock);
 	if (mUserIdQueue.empty())
 	{
@@ -86,10 +91,10 @@ PacketFrame LogicMain::GetUserIdx()
 	mUserIdQueue.pop();
 
 
-	//auto pUser = mUserManager->GetUserByConnIdx(user_id);
-	//auto packetData = pUser->GetPacket();
-	//packetData.unique_id = user_id;
-	//return packetData;
+	auto cl = mClMgr->GetClient(user_id);
+	auto packet = cl->GetPacketAssemble();
+	packet.unique_id = user_id;
+	return packet;
 }
 
 void LogicMain::PutUserIdx(c_u_Int unique_id)
