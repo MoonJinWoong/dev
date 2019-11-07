@@ -19,7 +19,7 @@ int main()
 	printf("show me the money...\n");
 	getchar();
 
-	server.DestroyThread();
+	server.Stop();
 	return 0;
 }
 

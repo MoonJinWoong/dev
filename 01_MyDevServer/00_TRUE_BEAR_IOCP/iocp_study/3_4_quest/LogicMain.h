@@ -7,6 +7,7 @@
 
 //TODO: 타입 재정의 한군데에 몰아넣기
 typedef const unsigned int c_u_Int;
+typedef std::lock_guard<std::mutex> auto_lock;
 
 class LogicMain
 {
@@ -26,6 +27,12 @@ public:
 
 	PacketFrame GetConnectPkt();
 	void		PutConnectPkt(PacketFrame packet);
+
+	PacketFrame GetUserIdx();
+	void		PutUserIdx(c_u_Int unique_id);
+
+	void ProcRecv(PacketFrame& packet);
+
 
 private:
 	bool isRun = false;

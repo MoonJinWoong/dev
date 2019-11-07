@@ -11,7 +11,7 @@ void ChatServer::OnAccept(const unsigned int unique_id)
 
 void ChatServer::OnClose(const unsigned int unique_id)
 {
-	// 접속끊을때마다 큐에 밀어넣는다.
+	// 세션이 접속끊을때마다 큐에 밀어넣는다.
 	PacketFrame packet{ unique_id ,(unsigned short)PACKET_TYPE::DISCONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
 	std::cout << "[OnClose] UniqueID : " << unique_id << std::endl;
@@ -26,10 +26,15 @@ void ChatServer::OnRecv(const unsigned int unique_id, const unsigned int len, ch
 
 void ChatServer::Run(unsigned int maxClient)
 {
-
 	mLogicProc = std::make_unique<LogicMain>();
 	mLogicProc->Init(maxClient);
+	
 	mLogicProc->Start();
-
 	StartNetService(maxClient);
+}
+
+void ChatServer::Stop()
+{
+	mLogicProc->Stop();
+	DestroyThread();
 }

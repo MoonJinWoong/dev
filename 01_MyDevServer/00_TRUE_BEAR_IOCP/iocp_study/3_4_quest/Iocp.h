@@ -3,7 +3,7 @@
 #include <windows.h>
 #include <mswsock.h>
 #include <iostream>
-#include "RemoteClient.h"
+#include "RemoteSession.h"
 
 
 //TODO GQCSEx 할때 활성화 할 것
@@ -55,12 +55,12 @@ public:
 		}
 		return true;
 	}
-	bool AddDeviceRemoteSocket(RemoteClient* remoteClient)
+	bool AddDeviceRemoteSocket(RemoteSession* RemoteSession)
 	{
 		auto ret = CreateIoCompletionPort(
-			(HANDLE)remoteClient->GetSock(),
+			(HANDLE)RemoteSession->GetSock(),
 			m_workIocp,
-			(ULONG_PTR)remoteClient,
+			(ULONG_PTR)RemoteSession,
 			0
 		);
 		if (ret != m_workIocp)

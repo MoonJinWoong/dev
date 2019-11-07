@@ -1,7 +1,7 @@
-#include "RemoteClient.h"
+#include "RemoteSession.h"
 
 
-RemoteClient::RemoteClient()
+RemoteSession::RemoteSession()
 {
 	ZeroMemory(&mRecvOver, sizeof(CustomOverEx));
 	ZeroMemory(&mSendOver, sizeof(CustomOverEx));
@@ -9,7 +9,7 @@ RemoteClient::RemoteClient()
 }
 
 
-bool RemoteClient::SendMsg(const unsigned int size, char* pMsg)
+bool RemoteSession::SendMsg(const unsigned int size, char* pMsg)
 {
 	DWORD dwRecvNumBytes = 0;
 	//전송될 메세지를 복사
@@ -38,7 +38,7 @@ bool RemoteClient::SendMsg(const unsigned int size, char* pMsg)
 	return true;
 }
 
-bool RemoteClient::RecvMsg()
+bool RemoteSession::RecvMsg()
 {
 	DWORD dwFlag = 0;
 	DWORD dwRecvNumBytes = 0;

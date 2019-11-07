@@ -15,7 +15,7 @@ public:
 	virtual void OnRecv(const unsigned int unique_id, const unsigned int size_, char* pData_) override;
 
 	void Run(unsigned int maxClient);
-
+	void Stop();
 private:
 	std::unique_ptr<LogicMain> mLogicProc;
 };

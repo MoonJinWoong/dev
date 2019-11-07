@@ -26,10 +26,10 @@ struct CustomOverEx
 };
 
 // 원격 세션
-class RemoteClient
+class RemoteSession
 {
 public:
-	RemoteClient();
+	RemoteSession();
 
 	SOCKET& GetSock() { return mRemoteSock; }
 

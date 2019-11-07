@@ -6,7 +6,7 @@
 #include <thread>
 #include <vector>
 
-#include "RemoteClient.h"
+#include "RemoteSession.h"
 #include "Iocp.h"
 
 
@@ -49,17 +49,17 @@ public:
 	bool CreateAccepterThread();
 
 	//사용하지 않는 클라이언트 정보 구조체를 반환한다.
-	RemoteClient* GetEmptyClientInfo();
+	RemoteSession* GetEmptyClientInfo();
 
 	//CompletionPort객체와 소켓과 CompletionKey를
 	//연결시키는 역할을 한다.
-	bool BindIOCompletionPort(RemoteClient* pClientInfo);
+	bool BindIOCompletionPort(RemoteSession* pSession);
 
 	//WSARecv Overlapped I/O 작업을 시킨다.
-	bool DoRecv(RemoteClient* pClientInfo);
+	bool DoRecv(RemoteSession* pSession);
 
 	//WSASend Overlapped I/O작업을 시킨다.
-	bool DoSend(RemoteClient* pClientInfo, char* pMsg, int nLen);
+	bool DoSend(RemoteSession* pSession, char* pMsg, int nLen);
 
 	//Overlapped I/O작업에 대한 완료 통보를 받아 
 	//그에 해당하는 처리를 하는 함수
@@ -69,15 +69,15 @@ public:
 	void AccepterThread();
 
 	//소켓의 연결을 종료 시킨다.
-	void CloseSocket(RemoteClient* pClientInfo, bool bIsForce = false);
+	void CloseSocket(RemoteSession* pSession, bool bIsForce = false);
 
 
 private:
 	//IOCP 관련 함수들 모음 객체
 	Iocp mIocp;
 
-	//클라이언트 정보 저장 구조체
-	std::vector<RemoteClient> mClientInfos;
+	//세션 정보 저장 구조체
+	std::vector<RemoteSession> mVecSessions;
 
 	//클라이언트의 접속을 받기위한 리슨 소켓
 	SOCKET		mListenSocket = INVALID_SOCKET;

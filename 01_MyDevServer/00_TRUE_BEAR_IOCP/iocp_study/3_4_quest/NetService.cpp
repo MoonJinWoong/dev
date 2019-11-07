@@ -107,9 +107,9 @@ void NetService::CreateClient(const unsigned int maxClientCount)
 {
 	for (int i = 0; i < maxClientCount; ++i)
 	{
-		RemoteClient remote;
-		remote.SetUniqueId(i);
-		mClientInfos.emplace_back(remote);
+		RemoteSession pSession;
+		pSession.SetUniqueId(i);
+		mVecSessions.emplace_back(pSession);
 	}
 }
 
@@ -134,9 +134,9 @@ bool NetService::CreateAccepterThread()
 	return true;
 }
 
-RemoteClient* NetService::GetEmptyClientInfo()
+RemoteSession* NetService::GetEmptyClientInfo()
 {
-	for (auto& client : mClientInfos)
+	for (auto& client : mVecSessions)
 	{
 		if (INVALID_SOCKET == client.GetSock())
 		{
@@ -146,7 +146,7 @@ RemoteClient* NetService::GetEmptyClientInfo()
 	return nullptr;
 }
 
-bool NetService::BindIOCompletionPort(RemoteClient* pClientInfo)
+bool NetService::BindIOCompletionPort(RemoteSession* pClientInfo)
 {
 	//socket과 pClientInfo를 CompletionPort객체와 연결시킨다.
 
@@ -158,12 +158,12 @@ bool NetService::BindIOCompletionPort(RemoteClient* pClientInfo)
 	return true;
 }
 
-bool NetService::DoRecv(RemoteClient* pClientInfo)
+bool NetService::DoRecv(RemoteSession* pClientInfo)
 {
 	return pClientInfo->RecvMsg();
 }
 
-bool NetService::DoSend(RemoteClient* pClientInfo, char* pMsg, int nLen)
+bool NetService::DoSend(RemoteSession* pClientInfo, char* pMsg, int nLen)
 {
 	return pClientInfo->SendMsg(nLen, pMsg);
 }
@@ -171,7 +171,7 @@ bool NetService::DoSend(RemoteClient* pClientInfo, char* pMsg, int nLen)
 void NetService::WokerThread()
 {
 	//CompletionKey를 받을 포인터 변수
-	RemoteClient* pClientInfo = NULL;
+	RemoteSession* pSession = NULL;
 	//함수 호출 성공 여부
 	bool bSuccess = true;
 	//Overlapped I/O작업에서 전송된 데이터 크기
@@ -183,7 +183,7 @@ void NetService::WokerThread()
 	{
 		bSuccess = GetQueuedCompletionStatus(mIocp.m_workIocp,
 			&dwIoSize,					// 실제로 전송된 바이트
-			(PULONG_PTR)&pClientInfo,		// CompletionKey
+			(PULONG_PTR)&pSession,		// CompletionKey
 			&lpOverlapped,				// Overlapped IO 객체
 			INFINITE);					// 대기할 시간
 
@@ -202,8 +202,8 @@ void NetService::WokerThread()
 		//client가 접속을 끊었을때..			
 		if (FALSE == bSuccess || (0 == dwIoSize && true == bSuccess))
 		{
-			OnClose(pClientInfo->GetUniqueId());
-			CloseSocket(pClientInfo);
+			OnClose(pSession->GetUniqueId());
+			CloseSocket(pSession);
 			continue;
 		}
 
@@ -214,13 +214,13 @@ void NetService::WokerThread()
 		if (IOOperation::RECV == pOverlappedEx->m_eOperation)
 		{
 			pOverlappedEx->m_RecvBuf[dwIoSize] = NULL;			
-			OnRecv(pClientInfo->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
+			OnRecv(pSession->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
 
 			// echo
-			DoSend(pClientInfo, pOverlappedEx->m_RecvBuf, dwIoSize);
+			DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
 			
 			//recv
-			DoRecv(pClientInfo);
+			DoRecv(pSession);
 		}
 		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
@@ -230,7 +230,7 @@ void NetService::WokerThread()
 		//예외 상황
 		else
 		{
-			std::cout << "[Err] SocketFd : " << (int)pClientInfo->GetSock() << std::endl;
+			std::cout << "[Err] SocketFd : " << (int)pSession->GetSock() << std::endl;
 		}
 	}
 }
@@ -243,7 +243,7 @@ void NetService::AccepterThread()
 	while (mIsAccepterRun)
 	{
 		//접속을 받을 구조체의 인덱스를 얻어온다.
-		RemoteClient* pClientInfo = GetEmptyClientInfo();
+		RemoteSession* pClientInfo = GetEmptyClientInfo();
 		if (NULL == pClientInfo)
 		{
 			printf("[에러] Client Full\n");
@@ -278,7 +278,7 @@ void NetService::AccepterThread()
 	}
 }
 
-void NetService::CloseSocket(RemoteClient* pClientInfo, bool bIsForce)
+void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 {
 	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER로 설정
 
@@ -289,13 +289,13 @@ void NetService::CloseSocket(RemoteClient* pClientInfo, bool bIsForce)
 	}
 
 	//socketClose소켓의 데이터 송수신을 모두 중단 시킨다.
-	shutdown(pClientInfo->GetSock(), SD_BOTH);
+	shutdown(pSession->GetSock(), SD_BOTH);
 
 	//소켓 옵션을 설정한다.
-	setsockopt(pClientInfo->GetSock(), SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
+	setsockopt(pSession->GetSock(), SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
 
 	//소켓 연결을 종료 시킨다. 
-	closesocket(pClientInfo->GetSock());
+	closesocket(pSession->GetSock());
 
-	pClientInfo->GetSock() = INVALID_SOCKET;
+	pSession->GetSock() = INVALID_SOCKET;
 }

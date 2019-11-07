@@ -85,18 +85,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ChatServer.cpp" />
+    <ClCompile Include="Client.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetService.cpp" />
     <ClCompile Include="LogicMain.cpp" />
-    <ClCompile Include="RemoteClient.cpp" />
+    <ClCompile Include="RemoteSession.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
+    <ClInclude Include="Client.h" />
     <ClInclude Include="Iocp.h" />
     <ClInclude Include="NetService.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="LogicMain.h" />
-    <ClInclude Include="RemoteClient.h" />
+    <ClInclude Include="RemoteSession.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
