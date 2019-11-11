@@ -17,7 +17,6 @@
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientManager.h" />
-    <ClInclude Include="Packet.h" />
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="NetService.h">
       <Filter>Network</Filter>
@@ -29,6 +28,7 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="LogicProcess.h" />
+    <ClInclude Include="Packet.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Network">

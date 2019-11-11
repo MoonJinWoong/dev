@@ -26,8 +26,7 @@ void ChatServer::OnRecv(const unsigned int unique_id, const unsigned int len, ch
 
 void ChatServer::Run(unsigned int maxClient)
 {
-	auto SendFunc = [&](unsigned int index,
-		unsigned short size, char* pPacket)
+	auto SendFunc = [&](unsigned int index, unsigned short size, char* pPacket)
 	{
 		SendMsg(index, size, pPacket);
 	};

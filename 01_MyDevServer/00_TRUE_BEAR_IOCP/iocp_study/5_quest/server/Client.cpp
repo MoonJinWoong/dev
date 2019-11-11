@@ -52,12 +52,12 @@ PacketFrame Client::GetPacketAssemble()
 	u_int remainByte = mWritePos - mReadPos;
 
 	// while ∑Á«¡ 
-	if (remainByte < PACKET_HEADER_LENGTH)
+	if (remainByte < PKT_HEADER_LENGTH)
 	{
 		return PacketFrame();
 	}
 
-	auto pHeader = (PACKET_HEADER*)&pBuffer[mReadPos];
+	auto pHeader = (PKT_HEADER*)&pBuffer[mReadPos];
 
 	if (pHeader->packet_len > remainByte)
 	{

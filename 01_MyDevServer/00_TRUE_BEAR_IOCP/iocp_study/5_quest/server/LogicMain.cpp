@@ -41,6 +41,7 @@ void LogicMain::RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg)
 	auto pClient = mClMgr->GetClient(unique_id);
 	pClient->SetPacketAssemble(len, msg);
 	PutUserIdx(unique_id);
+
 }
 
 void LogicMain::LogicThread()
@@ -56,7 +57,7 @@ void LogicMain::LogicThread()
 
 		// 어떤 유저가 보냈는지 큐에서 인덱스 검사.
 		auto packet2 = GetUserPkt();
-		if (packet2.packet_type >= (unsigned short)PACKET_TYPE::SC_LOGIN)
+		if (packet2.packet_type >= (unsigned short)PACKET_TYPE::CS_LOGIN)
 		{
 			ProcRecv(packet2);
 		}
@@ -68,6 +69,7 @@ void LogicMain::ProcRecv(PacketFrame& packet)
 	auto iter = mRecvFuncDic.find(packet.packet_type);
 	if (iter != mRecvFuncDic.end())
 	{
+		//std::cout << "123123 : " << packet.pData << std::endl;
 		(this->*(iter->second))(packet.unique_id, packet.size, packet.pData);
 	}
 

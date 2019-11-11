@@ -13,28 +13,37 @@ enum class  PACKET_TYPE : unsigned short
 {
 	NONE = 0,
 	CONNECTION = 1,
-	DISCONNECTION = 2,  // 기준
+	DISCONNECTION = 2,
 
 	/* SC -> server to client */
 	/* CS -> client to server */
-	SC_LOGIN = 100,
-	CS_LOGIN = 101,
+	CS_LOGIN = 100,
+	SC_LOGIN = 101,
 };
 
 
 
 /* Client class가 사용 */
 #pragma pack(push,1)
-struct PACKET_HEADER
+struct PKT_HEADER
 {
 	unsigned short packet_len;
 	unsigned short packet_type;
 };
 
-const unsigned int PACKET_HEADER_LENGTH = sizeof(PACKET_HEADER);
+const unsigned int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
 
 
-
+// 로그인 관련 구조체
+const int MAX_USER_ID_SIZE = 16;
+struct CS_LOGIN_PKT : public PKT_HEADER
+{
+	char szID[MAX_USER_ID_SIZE + 1] = { 0, };
+};
+struct SC_LOGIN_PKT : public PKT_HEADER
+{
+	char msg[50] = { 0, };
+};
 
 
 #pragma pack(pop) //위에 설정된 패킹설정이 사라짐
