@@ -146,14 +146,14 @@ RemoteSession* NetService::GetEmptyClientInfo()
 }
 
 
-bool NetService::DoRecv(RemoteSession* pClientInfo)
+bool NetService::DoRecv(RemoteSession* pSession)
 {
-	return pClientInfo->RecvMsg();
+	return pSession->RecvMsg();
 }
 
-bool NetService::DoSend(RemoteSession* pClientInfo, char* pMsg, c_Int nLen)
+void NetService::DoSend(RemoteSession* pSessoin , c_Int nLen)
 {
-	return pClientInfo->SendMsg(nLen, pMsg);
+	pSessoin->SendPop(nLen);
 }
 
 void NetService::WokerThread()
@@ -205,7 +205,7 @@ void NetService::WokerThread()
 			OnRecv(pSession->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
 
 			// echo
-			//DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
+			//DoSend(pSession, dwIoSize);
 			
 			//recv
 			DoRecv(pSession);
@@ -213,7 +213,7 @@ void NetService::WokerThread()
 		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
+			DoSend(pSession,dwIoSize);
 			std::cout << "[Send] Byte : " << dwIoSize << ", Msg :" << pOverlappedEx->m_SendBuf << std::endl;
 		}
 		//예외 상황
@@ -240,7 +240,8 @@ void NetService::AccepterThread()
 		}
 
 		//클라이언트 접속 요청이 들어올 때까지 기다린다.
-		pClientInfo->GetSock() = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
+		pClientInfo->mRemoteSock = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
+		
 		if (INVALID_SOCKET == pClientInfo->GetSock())
 		{
 			continue;
@@ -259,8 +260,8 @@ void NetService::AccepterThread()
 		}
 
 
-
-		OnAccept(pClientInfo->GetUniqueId());
+		auto id = pClientInfo->GetUniqueId();
+		OnAccept(id);
 
 		//클라이언트 갯수 증가
 		++mClientCnt;
@@ -293,5 +294,5 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 bool NetService::SendMsg(c_u_Int uniqueId, c_u_Int size, char* pData)
 {
 	auto pSession = GetSessionByIdx(uniqueId);
-	return pSession->SendMsg(size, pData);
+	return pSession->SendPushInLogic(size, pData);
 }

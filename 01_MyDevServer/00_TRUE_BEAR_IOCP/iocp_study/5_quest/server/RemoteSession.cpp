@@ -4,7 +4,7 @@
 RemoteSession::RemoteSession()
 {
 	ZeroMemory(&mRecvOver, sizeof(CustomOverEx));
-	ZeroMemory(&mSendOver, sizeof(CustomOverEx));
+	//ZeroMemory(&mSendOver, sizeof(CustomOverEx));
 	mRemoteSock = INVALID_SOCKET;
 }
 
@@ -12,18 +12,6 @@ RemoteSession::RemoteSession()
 bool RemoteSession::SendPushInLogic(c_u_Int size, char* pMsg)
 {
 	// 무조건 로직스레드 에서만 콜해야 된다. 
-	DWORD dwRecvNumBytes = 0;
-	CopyMemory(mSendOver.m_SendBuf, pMsg, size);
-
-	//Overlapped I/O을 위해 각 정보를 셋팅해 준다.
-	mSendOver.m_wsaBuf.len = size;
-	mSendOver.m_wsaBuf.buf = mSendOver.m_SendBuf;
-	mSendOver.m_eOperation = IOOperation::SEND;
-	mSendOver.m_SendBuf[size] = NULL;
-
-
-
-	// 여기서부터 다시.
 	auto sendOver = new CustomOverEx;
 	ZeroMemory(sendOver, sizeof(CustomOverEx));
 	sendOver->m_wsaBuf.len = size;
@@ -31,47 +19,54 @@ bool RemoteSession::SendPushInLogic(c_u_Int size, char* pMsg)
 	CopyMemory(sendOver->m_wsaBuf.buf, pMsg, size);
 	sendOver->m_eOperation = IOOperation::SEND;
 
+	auto_lock guard(mSendLock);
 
-	std::lock_guard<std::mutex> guard(mSendLock);
+	mSendQ.push(sendOver);
 
+	if (mSendQ.size() == 1)
+	{
+		SendMsg();
+	}
 
-
+	return true;
 }
 
 void RemoteSession::SendPop(c_u_Int size)
 {
-	printf("[송신 완료] bytes : %d\n", size);
+	printf("[송신 완료] \n");
 
 	auto_lock guard(mSendLock);
 
-	delete[] mSendDataqueue.front()->m_wsaBuf.buf;
-	delete mSendDataqueue.front();
+	delete[] mSendQ.front()->m_wsaBuf.buf;
+	delete mSendQ.front();
 
-	mSendDataqueue.pop();
+	mSendQ.pop();
 
-	if (!mSendDataqueue.empty())
+	if (!mSendQ.empty())
 	{
 		SendMsg();
 	}
 }
 
-bool RemoteSession::SendMsg()
+void RemoteSession::SendMsg()
 {
+
+	auto sendOver = mSendQ.front();
+	DWORD byte = 0;
+
 	int nRet = WSASend(mRemoteSock,
-		&(mSendOver.m_wsaBuf),
+		&(sendOver->m_wsaBuf),
 		1,
-		&dwRecvNumBytes,
+		&byte,
 		0,
-		(LPWSAOVERLAPPED) & (mSendOver),
+		(LPWSAOVERLAPPED)sendOver,    // 여기에 & 하나 잘못 넣어서 3시간 삽질.... 하....
 		NULL);
 
 	//socket_error이면 client socket이 끊어진걸로 처리한다.
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		printf("[에러] WSASend()함수 실패 : %d\n", WSAGetLastError());
-		return false;
+		std::cout << " Err WSASend() code: " << WSAGetLastError() << std::endl;
 	}
-	return true;
 }
 
 bool RemoteSession::RecvMsg()

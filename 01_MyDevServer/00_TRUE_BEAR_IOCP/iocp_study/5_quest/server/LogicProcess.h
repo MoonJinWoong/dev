@@ -5,12 +5,12 @@
 
 void LogicMain::ProcConnect(u_Int uniqueId, u_Short size, char* pData)
 {
-	std::cout << "ProcConnect call" << std::endl;
+	std::cout << "LogicMain ProcConnect" << std::endl;
 }
 
 void LogicMain::ProcDisConnect(u_Int uniqueId, u_Short size, char* pData)
 {
-	std::cout << "ProcDisConnect call" << std::endl;
+	std::cout << "LogicMain ProcDisConnect" << std::endl;
 }
 
 void LogicMain::ProcLogin(u_Int uniqueId, u_Short size, char* pData)

@@ -52,28 +52,29 @@ void LogicMain::LogicThread()
 		auto packet = GetConnectPkt();
 		if (packet.packet_type != (u_Short)PACKET_TYPE::NONE)
 		{
-			ProcRecv(packet);
+			ProcRecv(packet.unique_id,packet.packet_type,packet.size,packet.pData);
 		}
 
 		// 어떤 유저가 보냈는지 큐에서 인덱스 검사.
 		auto packet2 = GetUserPkt();
 		if (packet2.packet_type >= (u_Short)PACKET_TYPE::CS_LOGIN)
 		{
-			ProcRecv(packet2);
+			ProcRecv(packet2.unique_id, packet2.packet_type, packet2.size, packet2.pData);
 		}
 	}
 }
+//void PacketManager::ProcessRecvPacket(const unsigned int clientIndex_, const unsigned short packetId_, const unsigned short packetSize_, char* pPacket_)
 
-void LogicMain::ProcRecv(PacketFrame& packet)
+void LogicMain::ProcRecv(c_u_Int uniqueId , c_u_Short pktType , c_u_Int size , char* pData)
 {
-	auto iter = mRecvFuncDic.find(packet.packet_type);
+
+	auto iter = mRecvFuncDic.find(pktType);
 	if (iter != mRecvFuncDic.end())
 	{
-		//std::cout << "123123 : " << packet.pData << std::endl;
-		(this->*(iter->second))(packet.unique_id, packet.size, packet.pData);
+		(this->*(iter->second))(uniqueId, size, pData);
 	}
 
-	//std::cout << "ProcRecv******" << std::endl;
+	std::cout << "ProcRecv******" << std::endl;
 }
 
 PacketFrame LogicMain::GetConnectPkt()

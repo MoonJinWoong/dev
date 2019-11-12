@@ -11,7 +11,7 @@ public:
 	ChatServer() = default;
 	virtual ~ChatServer() = default;
 
-	virtual void OnAccept(c_u_Int unique_id) override;
+	virtual void OnAccept(u_Int unique_id) override;
 	virtual void OnClose(c_u_Int unique_id) override;
 	virtual void OnRecv(c_u_Int unique_id, c_u_Int size_, char* pData_) override;
 

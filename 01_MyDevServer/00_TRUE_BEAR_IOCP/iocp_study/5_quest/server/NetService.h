@@ -17,7 +17,7 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void OnAccept(c_u_Int index) {}
+	virtual void OnAccept(u_Int index) {}
 	virtual void OnClose(c_u_Int index) {}
 	virtual void OnRecv(c_u_Int index, c_u_Int size_, char* pData_) {}
 
@@ -45,7 +45,7 @@ public:
 	bool DoRecv(RemoteSession* pSession);
 
 	//WSASend Overlapped I/O
-	bool DoSend(RemoteSession* pSession, char* pMsg, c_Int nLen);
+	void DoSend(RemoteSession* pSessoin, c_Int nLen);
 
 	void WokerThread();
 	void AccepterThread();

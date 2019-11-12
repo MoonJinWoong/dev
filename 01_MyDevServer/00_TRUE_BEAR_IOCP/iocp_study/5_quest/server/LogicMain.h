@@ -29,7 +29,7 @@ public:
 	PacketFrame GetUserPkt();
 	void		PutUserIdx(c_u_Int unique_id);
 
-	void ProcRecv(PacketFrame& packet);
+	void ProcRecv(c_u_Int uniqueId, c_u_Short pktType, c_u_Int size, char* pData);
 
 	// 로직함수들이 이걸로 param 넣어서 태워 보낸다. 
 	std::function<void(u_Int, u_Int, char*)> SendPacketFunc;
