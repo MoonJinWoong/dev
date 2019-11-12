@@ -29,6 +29,7 @@
     </ClInclude>
     <ClInclude Include="LogicProcess.h" />
     <ClInclude Include="Packet.h" />
+    <ClInclude Include="TypeDefine.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Network">

@@ -1,7 +1,7 @@
 #include "Client.h"
 
 
-void Client::Init(c_u_int index)
+void Client::Init(c_u_Int index)
 {
 	mRemoteIdx = index;
 	pBuffer = new char[PACKET_DATA_BUFFER_SIZE];
@@ -25,7 +25,7 @@ int Client::SetLogin(std::string& nickname)
 	return 0;
 }
 
-void Client::SetPacketAssemble(c_u_int input_size, char* input_data)
+void Client::SetPacketAssemble(c_u_Int input_size, char* input_data)
 {
 	// 버퍼사이즈보다 over
 	if ((mReadPos + input_size) >= PACKET_DATA_BUFFER_SIZE)

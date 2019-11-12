@@ -1,15 +1,17 @@
 #pragma once
 #include <Windows.h>
+#include "TypeDefine.h"
+
 
 struct PacketFrame
 {
-	unsigned int unique_id = 0;
-	unsigned short packet_type = 0;
-	unsigned short size = 0;
+	u_Int unique_id = 0;
+	u_Short packet_type = 0;
+	u_Short size = 0;
 	char* pData = nullptr;
 };
 
-enum class  PACKET_TYPE : unsigned short
+enum class  PACKET_TYPE : u_Short
 {
 	NONE = 0,
 	CONNECTION = 1,
@@ -27,15 +29,16 @@ enum class  PACKET_TYPE : unsigned short
 #pragma pack(push,1)
 struct PKT_HEADER
 {
-	unsigned short packet_len;
-	unsigned short packet_type;
+	u_Short packet_len;
+	u_Short packet_type;
 };
 
-const unsigned int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
+c_u_Int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
 
 
 // 로그인 관련 구조체
-const int MAX_USER_ID_SIZE = 16;
+c_Int MAX_USER_ID_SIZE = 16;
+
 struct CS_LOGIN_PKT : public PKT_HEADER
 {
 	char szID[MAX_USER_ID_SIZE + 1] = { 0, };

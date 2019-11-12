@@ -1,4 +1,5 @@
 #pragma once
+#include "TypeDefine.h"
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <mswsock.h>
@@ -33,10 +34,13 @@ public:
 
 	SOCKET& GetSock() { return mRemoteSock; }
 
-	bool SendMsg(const unsigned int size, char* msg);
+	bool SendPushInLogic(c_u_Int size, char* pMsg);
+	void SendPop(c_u_Int size);
+	bool SendMsg();
+
 	bool RecvMsg();
 
-	void SetUniqueId(const unsigned int& id) { unique_id = id; }
+	void SetUniqueId(c_u_Int& id) { unique_id = id; }
 	unsigned int GetUniqueId() const { return unique_id; }
 
 private:
@@ -44,5 +48,7 @@ private:
 public:
 	CustomOverEx	mRecvOver;	//RECV Overlapped I/O작업을 위한 변수
 	CustomOverEx	mSendOver;	//SEND Overlapped I/O작업을 위한 변수
+	std::mutex		mSendLock;
+
 	unsigned int unique_id = -1;
 };

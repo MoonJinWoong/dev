@@ -50,14 +50,14 @@ void LogicMain::LogicThread()
 	{
 		// connet , disconnect 패킷 있는지 검사.
 		auto packet = GetConnectPkt();
-		if (packet.packet_type != (unsigned short)PACKET_TYPE::NONE)
+		if (packet.packet_type != (u_Short)PACKET_TYPE::NONE)
 		{
 			ProcRecv(packet);
 		}
 
 		// 어떤 유저가 보냈는지 큐에서 인덱스 검사.
 		auto packet2 = GetUserPkt();
-		if (packet2.packet_type >= (unsigned short)PACKET_TYPE::CS_LOGIN)
+		if (packet2.packet_type >= (u_Short)PACKET_TYPE::CS_LOGIN)
 		{
 			ProcRecv(packet2);
 		}

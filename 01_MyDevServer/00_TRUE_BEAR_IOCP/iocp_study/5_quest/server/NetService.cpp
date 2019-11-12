@@ -104,7 +104,7 @@ void NetService::DestroyThread()
 
 void NetService::CreateClient(c_u_Int maxClientCount)
 {
-	for (int i = 0; i < maxClientCount; ++i)
+	for (auto i = 0; i < maxClientCount; ++i)
 	{
 		auto pSession = new RemoteSession;
 		pSession->SetUniqueId(i);
@@ -116,7 +116,7 @@ bool NetService::CreateWokerThread()
 {
 	unsigned int uiThreadId = 0;
 	//WaingThread Queue에 대기 상태로 넣을 쓰레드들 생성 권장되는 개수 : (cpu개수 * 2) + 1 
-	for (int i = 0; i < MAX_WORKERTHREAD; i++)
+	for (auto i = 0; i < MAX_WORKERTHREAD; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WokerThread(); });
 	}
@@ -205,7 +205,7 @@ void NetService::WokerThread()
 			OnRecv(pSession->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
 
 			// echo
-			DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
+			//DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
 			
 			//recv
 			DoRecv(pSession);
@@ -213,6 +213,7 @@ void NetService::WokerThread()
 		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
+			DoSend(pSession, pOverlappedEx->m_RecvBuf, dwIoSize);
 			std::cout << "[Send] Byte : " << dwIoSize << ", Msg :" << pOverlappedEx->m_SendBuf << std::endl;
 		}
 		//예외 상황

@@ -1,10 +1,7 @@
 #pragma once
 #include <string>
+#include "TypeDefine.h"
 #include "Packet.h"
-
-//TODO: 한 곳에 몰아넣기
-typedef const unsigned int c_u_int;
-typedef unsigned int u_int;
 
 enum class USER_STATE
 {
@@ -19,24 +16,23 @@ public:
 	Client() = default;
 	~Client() = default;
 
-	void Init(c_u_int index);
+	void Init(c_u_Int index);
 	void Reset();
 
-	// set
+
 	int SetLogin(std::string& userID_);
 	void SetDomainState(USER_STATE state) { mState = state; }
 
-	// get
-	INT32 GetRemoteIdx() const { return mRemoteIdx; }
+	s_Int GetRemoteIdx() const { return mRemoteIdx; }
 	std::string GetUserId() const { return mNickName; }
 	USER_STATE GetUserState() const {return mState;}
 
 	// packet assemble
-	void SetPacketAssemble(c_u_int input_size, char* input_data);
+	void SetPacketAssemble(c_u_Int input_size, char* input_data);
 	PacketFrame GetPacketAssemble();
 
 private:
-	u_int mRemoteIdx;
+	u_int mRemoteIdx = -1;
 	std::string mNickName;
 	USER_STATE mState = USER_STATE::NONE;
 

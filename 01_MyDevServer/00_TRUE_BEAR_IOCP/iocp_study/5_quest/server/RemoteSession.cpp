@@ -9,10 +9,10 @@ RemoteSession::RemoteSession()
 }
 
 
-bool RemoteSession::SendMsg(const unsigned int size, char* pMsg)
+bool RemoteSession::SendPushInLogic(c_u_Int size, char* pMsg)
 {
+	// 무조건 로직스레드 에서만 콜해야 된다. 
 	DWORD dwRecvNumBytes = 0;
-	//전송될 메세지를 복사
 	CopyMemory(mSendOver.m_SendBuf, pMsg, size);
 
 	//Overlapped I/O을 위해 각 정보를 셋팅해 준다.
@@ -21,6 +21,42 @@ bool RemoteSession::SendMsg(const unsigned int size, char* pMsg)
 	mSendOver.m_eOperation = IOOperation::SEND;
 	mSendOver.m_SendBuf[size] = NULL;
 
+
+
+	// 여기서부터 다시.
+	auto sendOver = new CustomOverEx;
+	ZeroMemory(sendOver, sizeof(CustomOverEx));
+	sendOver->m_wsaBuf.len = size;
+	sendOver->m_wsaBuf.buf = new char[size];
+	CopyMemory(sendOver->m_wsaBuf.buf, pMsg, size);
+	sendOver->m_eOperation = IOOperation::SEND;
+
+
+	std::lock_guard<std::mutex> guard(mSendLock);
+
+
+
+}
+
+void RemoteSession::SendPop(c_u_Int size)
+{
+	printf("[송신 완료] bytes : %d\n", size);
+
+	auto_lock guard(mSendLock);
+
+	delete[] mSendDataqueue.front()->m_wsaBuf.buf;
+	delete mSendDataqueue.front();
+
+	mSendDataqueue.pop();
+
+	if (!mSendDataqueue.empty())
+	{
+		SendMsg();
+	}
+}
+
+bool RemoteSession::SendMsg()
+{
 	int nRet = WSASend(mRemoteSock,
 		&(mSendOver.m_wsaBuf),
 		1,

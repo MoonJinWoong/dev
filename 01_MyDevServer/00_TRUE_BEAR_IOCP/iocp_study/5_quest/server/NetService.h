@@ -5,13 +5,10 @@
 
 #include <thread>
 #include <vector>
-
+#include "TypeDefine.h"
 #include "RemoteSession.h"
 #include "Iocp.h"
 
-//TODO 타입재정의 한군데에 몰아넣기
-typedef const unsigned int c_u_Int;
-typedef const int c_Int;
 
 class NetService
 {
@@ -51,8 +48,6 @@ public:
 	bool DoSend(RemoteSession* pSession, char* pMsg, c_Int nLen);
 
 	void WokerThread();
-
-	//사용자의 접속을 받는 쓰레드
 	void AccepterThread();
 
 	//소켓의 연결을 종료 시킨다.

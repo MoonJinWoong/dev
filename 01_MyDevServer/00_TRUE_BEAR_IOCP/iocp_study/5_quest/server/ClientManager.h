@@ -1,4 +1,5 @@
 #pragma once
+#include "TypeDefine.h"
 #include "Client.h"
 #include <vector>
 #include <unordered_map>
@@ -10,7 +11,7 @@ public:
 	ClientManager() = default;
 	~ClientManager() = default;
 
-	void Init(const unsigned int maxCnt);
+	void Init(c_u_Int maxCnt);
 
 	void Add(std::string nickName, int unique_id);
 
@@ -18,11 +19,11 @@ public:
 
 	void Delete(Client* client);
 
-	Client* GetClient(unsigned int unique_id) { return mClientPool[unique_id]; }
+	Client* GetClient(u_Int unique_id) { return mClientPool[unique_id]; }
 
 private:
 	std::vector<Client*> mClientPool;
 	std::unordered_map<std::string, int> mDicClientId;
-	unsigned int maxClientCnt = 0;
+	u_Int maxClientCnt = 0;
 
 };

@@ -1,17 +1,11 @@
 #pragma once
 #include <thread>
-#include <mutex>
 #include <unordered_map>
 #include <functional>
 #include <queue>
+#include "TypeDefine.h"
 #include "Packet.h"
 #include "ClientManager.h"
-
-//TODO: 타입 재정의 한군데에 몰아넣기
-typedef const unsigned int c_u_Int;
-typedef unsigned int u_Int;
-typedef unsigned short u_Short;
-typedef std::lock_guard<std::mutex> auto_lock;
 
 class LogicMain
 {
@@ -55,6 +49,6 @@ private:
 
 	ClientManager* mClMgr;
 
-	typedef void(LogicMain::* RECV_PKT_TYPE)(unsigned int, unsigned short, char*);
+	typedef void(LogicMain::* RECV_PKT_TYPE)(u_Int, u_Short, char*);
 	std::unordered_map<int, RECV_PKT_TYPE> mRecvFuncDic;
 };
