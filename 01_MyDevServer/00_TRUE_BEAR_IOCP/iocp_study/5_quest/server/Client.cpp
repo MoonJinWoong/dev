@@ -25,13 +25,14 @@ int Client::SetLogin(std::string& nickname)
 	return 0;
 }
 
-void Client::SetPacketAssemble(c_u_Int input_size, char* input_data)
+void Client::SetPacketProc(c_u_Int input_size, char* input_data)
 {
-	// 버퍼사이즈보다 over
+	// 현재까지 사용한 버퍼의 남은 공간보다 들어온 버퍼사이즈가 크다면
+	// 처음으로 되돌아간다.
 	if ((mReadPos + input_size) >= PACKET_DATA_BUFFER_SIZE)
 	{
 		auto remainDataSize = mWritePos - mReadPos;
-
+		
 		if (remainDataSize > 0)
 		{
 			CopyMemory(&pBuffer[0], &pBuffer[mReadPos], remainDataSize);
@@ -47,7 +48,7 @@ void Client::SetPacketAssemble(c_u_Int input_size, char* input_data)
 	mWritePos += input_size;
 }
 
-PacketFrame Client::GetPacketAssemble()
+PacketFrame Client::GetPacketProc()
 {
 	u_int remainByte = mWritePos - mReadPos;
 

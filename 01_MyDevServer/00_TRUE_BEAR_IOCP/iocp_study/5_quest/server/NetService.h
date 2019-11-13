@@ -45,7 +45,7 @@ public:
 	bool DoRecv(RemoteSession* pSession);
 
 	//WSASend Overlapped I/O
-	void DoSend(RemoteSession* pSessoin, c_Int nLen);
+	void DoSend(RemoteSession* pSessoin);
 
 	void WokerThread();
 	void AccepterThread();
@@ -64,9 +64,9 @@ private:
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
 
-	//작업 쓰레드 동작 플래그
 	bool		mIsWorkerRun = true;
 	bool		mIsAccepterRun = true;
+	
 	//소켓 버퍼
-	char		mSocketBuf[1024] = { 0, };
+	//char		mSocketBuf[1024] = { 0, };
 };

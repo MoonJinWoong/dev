@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <iostream>
 #include "TypeDefine.h"
 #include "Packet.h"
 
@@ -28,8 +29,8 @@ public:
 	USER_STATE GetUserState() const {return mState;}
 
 	// packet assemble
-	void SetPacketAssemble(c_u_Int input_size, char* input_data);
-	PacketFrame GetPacketAssemble();
+	void SetPacketProc(c_u_Int input_size, char* input_data);
+	PacketFrame GetPacketProc();
 
 private:
 	u_int mRemoteIdx = -1;

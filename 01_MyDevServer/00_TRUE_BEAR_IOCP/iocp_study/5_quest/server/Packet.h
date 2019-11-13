@@ -6,12 +6,12 @@
 struct PacketFrame
 {
 	u_Int unique_id = 0;
-	u_Short packet_type = 0;
-	u_Short size = 0;
+	int packet_type = 0;
+	int size = 0;
 	char* pData = nullptr;
 };
 
-enum class  PACKET_TYPE : u_Short
+enum class  PACKET_TYPE : int
 {
 	NONE = 0,
 	CONNECTION = 1,
@@ -19,18 +19,21 @@ enum class  PACKET_TYPE : u_Short
 
 	/* SC -> server to client */
 	/* CS -> client to server */
+
 	CS_LOGIN = 100,
 	SC_LOGIN = 101,
-};
 
+	CS_LOBBY_LIST = 200,
+	SC_LOBBY_LIST = 201
+};
 
 
 /* Client class가 사용 */
 #pragma pack(push,1)
 struct PKT_HEADER
 {
-	u_Short packet_len;
-	u_Short packet_type;
+	int packet_len;
+	int packet_type;
 };
 
 c_u_Int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
@@ -48,6 +51,25 @@ struct SC_LOGIN_PKT : public PKT_HEADER
 	char msg[50] = { 0, };
 };
 
+
+// 로비 관련 
+c_Int MAX_LOBBY_LIST_COUNT = 10;
+struct LOBBY_INFO
+{
+	short LobbyID;
+	short LobbyClientCount;
+	short LobbyMaxClientCount;
+};
+
+struct CS_LOBBY_LIST_PKT : public PKT_HEADER
+{
+};
+
+struct SC_LOBBY_LIST_PKT : public PKT_HEADER
+{
+	int LobbyCount = 0;
+	LOBBY_INFO LobbyList[MAX_LOBBY_LIST_COUNT];
+};
 
 #pragma pack(pop) //위에 설정된 패킹설정이 사라짐
 

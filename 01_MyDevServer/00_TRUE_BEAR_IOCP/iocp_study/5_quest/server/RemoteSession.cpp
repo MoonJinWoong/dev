@@ -31,9 +31,8 @@ bool RemoteSession::SendPushInLogic(c_u_Int size, char* pMsg)
 	return true;
 }
 
-void RemoteSession::SendPop(c_u_Int size)
+void RemoteSession::SendPop()
 {
-	printf("[송신 완료] \n");
 
 	auto_lock guard(mSendLock);
 
@@ -59,10 +58,12 @@ void RemoteSession::SendMsg()
 		1,
 		&byte,
 		0,
-		(LPWSAOVERLAPPED)sendOver,    // 여기에 & 하나 잘못 넣어서 3시간 삽질.... 하....
+		(LPWSAOVERLAPPED)sendOver,
 		NULL);
+	
+	
+	printf("[Send] Byte: %d \n", byte);
 
-	//socket_error이면 client socket이 끊어진걸로 처리한다.
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
 		std::cout << " Err WSASend() code: " << WSAGetLastError() << std::endl;

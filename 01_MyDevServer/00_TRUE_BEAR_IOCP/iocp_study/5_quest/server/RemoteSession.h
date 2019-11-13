@@ -37,7 +37,7 @@ public:
 	SOCKET& GetSock() { return mRemoteSock; }
 
 	bool SendPushInLogic(c_u_Int size, char* pMsg);
-	void SendPop(c_u_Int size);
+	void SendPop();
 	void SendMsg();
 
 	bool RecvMsg();

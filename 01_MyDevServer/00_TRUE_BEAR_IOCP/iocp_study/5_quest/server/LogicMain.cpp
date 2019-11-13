@@ -37,9 +37,10 @@ void LogicMain::Stop()
 
 void LogicMain::RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg)
 {
+	// worker에서 recv 호출 될때마다 온다.
 	// manager 에서 client 가져와서 큐에 집어넣음
 	auto pClient = mClMgr->GetClient(unique_id);
-	pClient->SetPacketAssemble(len, msg);
+	pClient->SetPacketProc(len, msg);
 	PutUserIdx(unique_id);
 
 }
@@ -50,22 +51,21 @@ void LogicMain::LogicThread()
 	{
 		// connet , disconnect 패킷 있는지 검사.
 		auto packet = GetConnectPkt();
-		if (packet.packet_type != (u_Short)PACKET_TYPE::NONE)
+		if (packet.packet_type != (int)PACKET_TYPE::NONE)
 		{
 			ProcRecv(packet.unique_id,packet.packet_type,packet.size,packet.pData);
 		}
 
 		// 어떤 유저가 보냈는지 큐에서 인덱스 검사.
 		auto packet2 = GetUserPkt();
-		if (packet2.packet_type >= (u_Short)PACKET_TYPE::CS_LOGIN)
+		if (packet2.packet_type >= (int)PACKET_TYPE::CS_LOGIN)
 		{
 			ProcRecv(packet2.unique_id, packet2.packet_type, packet2.size, packet2.pData);
 		}
 	}
 }
-//void PacketManager::ProcessRecvPacket(const unsigned int clientIndex_, const unsigned short packetId_, const unsigned short packetSize_, char* pPacket_)
 
-void LogicMain::ProcRecv(c_u_Int uniqueId , c_u_Short pktType , c_u_Int size , char* pData)
+void LogicMain::ProcRecv(c_u_Int uniqueId , c_int pktType , c_u_Int size , char* pData)
 {
 
 	auto iter = mRecvFuncDic.find(pktType);
@@ -73,8 +73,6 @@ void LogicMain::ProcRecv(c_u_Int uniqueId , c_u_Short pktType , c_u_Int size , c
 	{
 		(this->*(iter->second))(uniqueId, size, pData);
 	}
-
-	std::cout << "ProcRecv******" << std::endl;
 }
 
 PacketFrame LogicMain::GetConnectPkt()
@@ -113,7 +111,7 @@ PacketFrame LogicMain::GetUserPkt()
 	auto cl = mClMgr->GetClient(user_id);
 
 	//TODO 여기서 패킷 가져올때 복수개를 가져올 수 있어야 한다. 
-	auto packet = cl->GetPacketAssemble();
+	auto packet = cl->GetPacketProc();
 	packet.unique_id = user_id;
 	return packet;
 }

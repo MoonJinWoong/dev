@@ -151,9 +151,9 @@ bool NetService::DoRecv(RemoteSession* pSession)
 	return pSession->RecvMsg();
 }
 
-void NetService::DoSend(RemoteSession* pSessoin , c_Int nLen)
+void NetService::DoSend(RemoteSession* pSessoin)
 {
-	pSessoin->SendPop(nLen);
+	pSessoin->SendPop();
 }
 
 void NetService::WokerThread()
@@ -213,8 +213,7 @@ void NetService::WokerThread()
 		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			DoSend(pSession,dwIoSize);
-			std::cout << "[Send] Byte : " << dwIoSize << ", Msg :" << pOverlappedEx->m_SendBuf << std::endl;
+			DoSend(pSession);
 		}
 		//예외 상황
 		else

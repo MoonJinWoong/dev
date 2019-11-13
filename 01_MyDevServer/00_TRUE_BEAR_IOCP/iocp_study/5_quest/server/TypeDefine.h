@@ -9,8 +9,7 @@ using s_Int			= signed int;
 
 
 using c_Short		= const short;
-using u_Short		= unsigned short;
-using c_u_Short		= const unsigned short;
+using c_int		= const unsigned short;
 
 
 #include <mutex>
