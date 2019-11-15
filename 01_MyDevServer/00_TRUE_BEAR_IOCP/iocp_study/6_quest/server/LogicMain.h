@@ -13,13 +13,13 @@ public:
 	LogicMain() = default;
 	~LogicMain() = default;
 
-	void Init(u_Int maxClient);
+	void Init(c_u_Int maxClient);
 
 	bool Start();
 
 	void Stop();
 
-	void RecvPktData(u_Int unique_id, u_Int len, char* msg);
+	void RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg);
 
 	void LogicThread();
 
@@ -27,9 +27,9 @@ public:
 	void		PutConnectPkt(PacketFrame packet);
 
 	PacketFrame GetUserPkt();
-	void		PutUserIdx(u_Int unique_id);
+	void		PutUserIdx(c_u_Int unique_id);
 
-	void ProcRecv(u_Int uniqueId, c_int pktType, u_Int size, char* pData);
+	void ProcRecv(c_u_Int uniqueId, c_int pktType, c_u_Int size, char* pData);
 
 	// 로직함수들이 이걸로 param 넣어서 태워 보낸다. 
 	std::function<void(u_Int, u_Int, char*)> SendPacketFunc;

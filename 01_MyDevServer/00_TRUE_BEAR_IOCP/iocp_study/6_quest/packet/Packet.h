@@ -41,7 +41,7 @@ namespace PacketLayer
 	};
 	struct SC_Login_Pkt
 	{
-		char msg[50] = { 0, };
+		char msg[13] = { 0, };
 	};
 
 

@@ -10,17 +10,19 @@ void ChatServer::OnAccept(u_Int unique_id)
 	mLogicProc->PutConnectPkt(packet);
 }
 
-void ChatServer::OnClose(u_Int unique_id)
+void ChatServer::OnClose(c_u_Int unique_id)
 {
 	// 세션이 접속끊을때마다 큐에 밀어넣는다.
 	PacketFrame packet{ unique_id ,(int)PACKET_TYPE::DISCONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
+	std::cout << "[OnClose] UniqueID : " << unique_id << std::endl;
 }
 
-void ChatServer::OnRecv(u_Int unique_id, u_Int len, char* msg)
+void ChatServer::OnRecv(c_u_Int unique_id, c_u_Int len, char* msg)
 {
 	// recv 올때마다 로직에서 받아서 처리한 후 인덱스를 큐에 밀어넣는다.
 	mLogicProc->RecvPktData(unique_id, len, msg);
+	std::cout << "[OnRecv] UniqueID : " << unique_id << std::endl;
 }
 
 void ChatServer::Run(u_Int maxClient)

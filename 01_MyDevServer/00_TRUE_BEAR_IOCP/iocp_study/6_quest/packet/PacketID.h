@@ -9,9 +9,9 @@ namespace PacketLayer
 		SC_CONNECTION = 1,
 		SC_SHUT_DOWN_CLIENT = 2,
 
-		// 여기서부터 하나씩 구현하자
-		CS_LOGIN = 100,
-		SC_LOGIN = 101,
+
+		CS_LOGIN = 10,
+		SC_LOGIN = 11,
 
 		CS_LOBBY_LIST = 20,
 		SC_LOBBY_LIST = 21,

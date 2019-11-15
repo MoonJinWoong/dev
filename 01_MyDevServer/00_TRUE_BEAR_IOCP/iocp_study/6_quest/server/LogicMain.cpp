@@ -1,7 +1,7 @@
 #include "LogicMain.h"
 #include "LogicProcess.h"
 
-void LogicMain::Init(u_Int maxClient)
+void LogicMain::Init(c_u_Int maxClient)
 {
 	mRecvFuncDic = std::unordered_map<int, RECV_PKT_TYPE>();
 
@@ -35,13 +35,14 @@ void LogicMain::Stop()
 	}
 }
 
-void LogicMain::RecvPktData(u_Int unique_id, u_Int len, char* msg)
+void LogicMain::RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg)
 {
 	// worker에서 recv 호출 될때마다 온다.
 	// manager 에서 client 가져와서 큐에 집어넣음
 	auto pClient = mClMgr->GetClient(unique_id);
 	pClient->SetPacketProc(len, msg);
 	PutUserIdx(unique_id);
+
 }
 
 void LogicMain::LogicThread()
@@ -59,19 +60,19 @@ void LogicMain::LogicThread()
 		auto packet2 = GetUserPkt();
 		if (packet2.packet_type >= (int)PACKET_TYPE::CS_LOGIN)
 		{
-			std::cout << "asdfasdf" << std::endl;
 			ProcRecv(packet2.unique_id, packet2.packet_type, packet2.size, packet2.pData);
 		}
 	}
 }
 
-void LogicMain::ProcRecv(u_Int uniqueId , c_int pktType , u_Int size , char* pData)
+void LogicMain::ProcRecv(c_u_Int uniqueId , c_int pktType , c_u_Int size , char* pData)
 {
+
 	auto iter = mRecvFuncDic.find(pktType);
 	if (iter != mRecvFuncDic.end())
 	{
 		(this->*(iter->second))(uniqueId, size, pData);
-	}//TODO : 로그 남기기 . 안들어오는 경우를 체크 해야함.
+	}
 }
 
 PacketFrame LogicMain::GetConnectPkt()
@@ -98,7 +99,6 @@ void LogicMain::PutConnectPkt(PacketFrame packet)
 
 PacketFrame LogicMain::GetUserPkt()
 {
-
 	auto_lock guard(mLock);
 	if (mUserIdQueue.empty())
 	{
@@ -108,7 +108,6 @@ PacketFrame LogicMain::GetUserPkt()
 	auto user_id = mUserIdQueue.front();
 	mUserIdQueue.pop();
 
-
 	auto cl = mClMgr->GetClient(user_id);
 
 	//TODO 여기서 패킷 가져올때 복수개를 가져올 수 있어야 한다. 
@@ -117,7 +116,7 @@ PacketFrame LogicMain::GetUserPkt()
 	return packet;
 }
 
-void LogicMain::PutUserIdx(u_Int unique_id)
+void LogicMain::PutUserIdx(c_u_Int unique_id)
 {
 	auto_lock guard(mLock);
 	mUserIdQueue.push(unique_id);

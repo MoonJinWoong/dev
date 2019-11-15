@@ -36,20 +36,21 @@ public:
 
 	SOCKET& GetSock() { return mRemoteSock; }
 
-	//bool SendPushInLogic(u_Int size, char* pMsg);
-	//void SendPop();
-	//void SendMsg();
+	bool SendPushInLogic(c_u_Int size, char* pMsg);
+	void SendPop();
+	void SendMsg();
 
 	bool RecvMsg();
 
-	void SetUniqueId(int& id) { unique_id = id; }
+	void SetUniqueId(c_u_Int& id) { unique_id = id; }
 	u_Int GetUniqueId() const { return unique_id; }
 
 	SOCKET						mRemoteSock;			//Cliet와 연결되는 소켓
-	CustomOverEx				mOverEx;	//RECV Overlapped I/O작업을 위한 변수
-	//CustomOverEx				mSendOver;	//SEND Overlapped I/O작업을 위한 변수
 private:
 
+	CustomOverEx				mRecvOver;	//RECV Overlapped I/O작업을 위한 변수
+	//CustomOverEx				mSendOver;	//SEND Overlapped I/O작업을 위한 변수
+	
 	std::mutex					mSendLock;
 	std::queue<CustomOverEx*>	mSendQ;
 

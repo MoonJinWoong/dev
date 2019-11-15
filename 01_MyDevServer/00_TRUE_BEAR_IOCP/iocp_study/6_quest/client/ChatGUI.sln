@@ -5,10 +5,10 @@ VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ChatGUI", "ChatGUI.vcxproj", "{F36C0D9C-A390-4E0E-BFDC-5660C074DFAC}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F0DD0502-AC31-4894-84BC-9695E7FDF575}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3CD13F10-E2EA-4015-90D1-67A193D8D8D0}"
 	ProjectSection(SolutionItems) = preProject
-		..\packet\Packet.h = ..\packet\Packet.h
-		..\packet\PacketID.h = ..\packet\PacketID.h
+		..\PacketDefine\Packet.h = ..\PacketDefine\Packet.h
+		..\PacketDefine\PacketID.h = ..\PacketDefine\PacketID.h
 	EndProjectSection
 EndProject
 Global

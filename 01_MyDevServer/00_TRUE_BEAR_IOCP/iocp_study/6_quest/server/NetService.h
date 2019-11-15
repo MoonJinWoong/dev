@@ -18,23 +18,24 @@ public:
 	~NetService() { WSACleanup(); }
 
 	virtual void OnAccept(u_Int index) {}
-	virtual void OnClose(u_Int index) {}
-	virtual void OnRecv(u_Int index, u_Int size_, char* pData_) {}
+	virtual void OnClose(c_u_Int index) {}
+	virtual void OnRecv(c_u_Int index, c_u_Int size_, char* pData_) {}
 
 
 	//소켓을 초기화하는 함수
 	bool InitSocket();
 
-	bool BindandListen(u_Int nBindPort);
+	bool BindandListen(c_u_Int nBindPort);
 
-	bool StartNetService(u_Int maxClientCount);
+	bool StartNetService(c_u_Int maxClientCount);
 
 	void DestroyThread();
 
-	void CreateClient(u_Int maxClientCount);
+	void CreateClient(c_u_Int maxClientCount);
+
 	bool CreateWokerThread();
+
 	bool CreateAccepterThread();
-	bool CreateSendThread();
 
 	RemoteSession* GetEmptyClientInfo();
 	RemoteSession* GetSessionByIdx(c_Int index) {return mVecSessions[index];}
@@ -49,14 +50,10 @@ public:
 	void WokerThread();
 	void AccepterThread();
 
-	void SendThread();
-	bool SendQueuePush(u_Int size, char* pMsg);
-
-
 	//소켓의 연결을 종료 시킨다.
 	void CloseSocket(RemoteSession* pSession, bool bIsForce = false);
 
-	bool SendMsg(u_Int unique_id, u_Int size, char* pData);
+	bool SendMsg(c_u_Int unique_id, c_u_Int size, char* pData);
 
 private:
 	Iocp mIocp;
@@ -66,16 +63,10 @@ private:
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
-	std::thread	mSendThread;
-
 
 	bool		mIsWorkerRun = true;
 	bool		mIsAccepterRun = true;
-	bool		mIsSendThreadRun = true;
-
-	std::mutex					mSendLock;
-	std::queue<u_Int>	mSendQ;
-
+	
 	//소켓 버퍼
 	//char		mSocketBuf[1024] = { 0, };
 };

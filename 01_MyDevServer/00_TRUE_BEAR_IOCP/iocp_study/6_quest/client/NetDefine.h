@@ -10,10 +10,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "resource.h"
-
-#include "../packet/Packet.h" 
+#include "../PacketDefine/Packet.h"
 #define SERVERIP   "127.0.0.1"
-#define SERVERPORT 8000
+#define SERVERPORT 9000
 #define BUFSIZE    512
 #define	WM_SOCKET				WM_USER + 1
 

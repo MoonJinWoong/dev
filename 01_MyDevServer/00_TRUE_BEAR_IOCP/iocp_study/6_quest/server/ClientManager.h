@@ -11,7 +11,7 @@ public:
 	ClientManager() = default;
 	~ClientManager() = default;
 
-	void Init(u_Int maxCnt);
+	void Init(c_u_Int maxCnt);
 
 	void Add(std::string nickName, int unique_id);
 

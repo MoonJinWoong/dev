@@ -21,11 +21,12 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 	//TODO: 예외 - 접속자수 초과
 
 	//TODO: 예외 - 이미 접속 
-	
+	std::cout << "asdfasdf" << std::endl;
 
 	// 로그인 세팅 
 	auto client = mClMgr->GetClient(uniqueId);
 	client->SetLogin((std::string)inputId);
+
 
 	// 성공 메세지
 	SC_LOGIN_PKT packet2;
@@ -38,10 +39,10 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 
 void LogicMain::ProcLobbyList(u_Int uniqueId, int size, char* pData)
 {
-	//SC_LOBBY_LIST_PKT packet;
+	SC_LOBBY_LIST_PKT packet;
 
 	// 로비 매니저에서 로비 갯수 가져옴
-	//packet.LobbyCount = 10;
+	packet.LobbyCount = 10;
 
 	//TODO : 로비랑 로비매니저 만들기
 

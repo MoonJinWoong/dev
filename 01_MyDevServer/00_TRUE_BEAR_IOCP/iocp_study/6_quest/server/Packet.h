@@ -6,7 +6,7 @@
 struct PacketFrame
 {
 	u_Int unique_id = 0;
-	int packet_type = 0; // NONE
+	int packet_type = 0;
 	int size = 0;
 	char* pData = nullptr;
 };
@@ -36,7 +36,7 @@ struct PKT_HEADER
 	unsigned short packet_type;
 };
 
-//int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
+c_u_Int PKT_HEADER_LENGTH = sizeof(PKT_HEADER);
 
 
 // 로그인 관련 구조체
@@ -53,23 +53,23 @@ struct SC_LOGIN_PKT : public PKT_HEADER
 
 
 // 로비 관련 
-//c_Int MAX_LOBBY_LIST_COUNT = 10;
-//struct LOBBY_INFO
-//{
-//	short LobbyID;
-//	short LobbyClientCount;
-//	short LobbyMaxClientCount;
-//};
+c_Int MAX_LOBBY_LIST_COUNT = 10;
+struct LOBBY_INFO
+{
+	short LobbyID;
+	short LobbyClientCount;
+	short LobbyMaxClientCount;
+};
 
-//struct CS_LOBBY_LIST_PKT : public PKT_HEADER
-//{
-//};
+struct CS_LOBBY_LIST_PKT : public PKT_HEADER
+{
+};
 
-//struct SC_LOBBY_LIST_PKT : public PKT_HEADER
-//{
-//	int LobbyCount = 0;
-//	LOBBY_INFO LobbyList[MAX_LOBBY_LIST_COUNT];
-//};
+struct SC_LOBBY_LIST_PKT : public PKT_HEADER
+{
+	int LobbyCount = 0;
+	LOBBY_INFO LobbyList[MAX_LOBBY_LIST_COUNT];
+};
 
 #pragma pack(pop) //위에 설정된 패킹설정이 사라짐
 

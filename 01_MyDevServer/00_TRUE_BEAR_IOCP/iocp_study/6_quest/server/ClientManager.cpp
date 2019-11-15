@@ -1,6 +1,6 @@
 #include "ClientManager.h"
 
-void ClientManager::Init(u_Int maxCnt)
+void ClientManager::Init(c_u_Int maxCnt)
 {
 	maxClientCnt = maxCnt;
 	mClientPool = std::vector<Client*>(maxClientCnt);

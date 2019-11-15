@@ -94,7 +94,8 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 				break;
 			}
 
-			DisplayText("[client] ID: %s  byte: %d \r\n", &input,ret);
+			DisplayText("[client] login try.... %s \r\n", &input);
+			DisplayText("[client] login %d byte    \r\n", ret);
 			return true;
 		}
 		case LOBBYLIST:
@@ -125,7 +126,7 @@ LRESULT CALLBACK DlgProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam)
 				err_display("send()");
 				break;
 			}
-			DisplayText("[client] LobbyList %d byte    \r\n", ret);
+			DisplayText("[client] Lobby List Call %d byte    \r\n", ret);
 			return true;
 		}
 		case LOBBYENTER:
@@ -324,7 +325,7 @@ DWORD WINAPI ClientMain(LPVOID arg)
 		{
 		case (int)PacketLayer::PACKET_ID::SC_LOGIN:
 		{
-			DisplayText("[server] login success ....");
+			DisplayText("[server] login ....");
 			break;
 		}
 		case (int)PacketLayer::PACKET_ID::SC_LOBBY_LIST:

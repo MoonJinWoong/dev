@@ -24,7 +24,7 @@ bool NetService::InitSocket()
 	return true;
 }
 
-bool NetService::BindandListen(u_Int nBindPort)
+bool NetService::BindandListen(c_u_Int nBindPort)
 {
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
@@ -55,7 +55,7 @@ bool NetService::BindandListen(u_Int nBindPort)
 	return true;
 }
 
-bool NetService::StartNetService(u_Int maxClientCount)
+bool NetService::StartNetService(c_u_Int maxClientCount)
 {
 	CreateClient(maxClientCount);
 
@@ -71,11 +71,6 @@ bool NetService::StartNetService(u_Int maxClientCount)
 	}
 
 	if(!CreateAccepterThread())
-	{
-		return false;
-	}
-
-	if (!CreateSendThread())
 	{
 		return false;
 	}
@@ -105,17 +100,9 @@ void NetService::DestroyThread()
 	{
 		mAccepterThread.join();
 	}
-
-	// send thread 종료 
-	mIsSendThreadRun = false;
-
-	if (mSendThread.joinable())
-	{
-		mSendThread.join();
-	}
 }
 
-void NetService::CreateClient(u_Int maxClientCount)
+void NetService::CreateClient(c_u_Int maxClientCount)
 {
 	for (auto i = 0; i < maxClientCount; ++i)
 	{
@@ -146,13 +133,6 @@ bool NetService::CreateAccepterThread()
 	return true;
 }
 
-bool NetService::CreateSendThread()
-{
-	mSendThread = std::thread([this]() { SendThread(); });
-	std::cout << "[Success] SendThread() " << std::endl;
-	return true;
-}
-
 RemoteSession* NetService::GetEmptyClientInfo()
 {
 	for (auto& client : mVecSessions)
@@ -173,7 +153,7 @@ bool NetService::DoRecv(RemoteSession* pSession)
 
 void NetService::DoSend(RemoteSession* pSessoin)
 {
-	//pSessoin->SendPop();
+	pSessoin->SendPop();
 }
 
 void NetService::WokerThread()
@@ -233,8 +213,7 @@ void NetService::WokerThread()
 		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			int a = 0;
-			//DoSend(pSession);
+			DoSend(pSession);
 		}
 		//예외 상황
 		else
@@ -243,50 +222,6 @@ void NetService::WokerThread()
 		}
 	}
 }
-
-void NetService::SendThread()
-{
-	while (mIsSendThreadRun)
-	{
-		if (!mSendQ.empty())
-		{
-			auto_lock guard(mSendLock);
-
-			auto uniqueId = mSendQ.front();
-			mSendQ.pop();
-
-			auto session = GetSessionByIdx(uniqueId);
-			unsigned long byte = 0;
-
-			auto sendOver = new CustomOverEx;
-			ZeroMemory(sendOver, sizeof(CustomOverEx));
-			sendOver->m_wsaBuf.len = sizeof(session->mOverEx.m_SendBuf);
-			sendOver->m_wsaBuf.buf = new char[sizeof(session->mOverEx.m_SendBuf)];
-			CopyMemory(sendOver->m_wsaBuf.buf, session->mOverEx.m_SendBuf, sizeof(session->mOverEx.m_SendBuf));
-			sendOver->m_eOperation = IOOperation::SEND;
-
-
-			int nRet = WSASend(session->GetSock(),
-				&(sendOver->m_wsaBuf),
-				1,
-				&byte,
-				0,
-				(LPWSAOVERLAPPED)sendOver,
-				NULL);
-
-
-			printf("[Send] Byte: %d \n", byte);
-
-			if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
-			{
-				std::cout << " Err WSASend() code: " << WSAGetLastError() << std::endl;
-			}
-		}
-
-	}
-}
-
-
 
 void NetService::AccepterThread()
 {
@@ -355,13 +290,8 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 }
 
 
-bool NetService::SendMsg(u_Int uniqueId, u_Int size, char* pData)
+bool NetService::SendMsg(c_u_Int uniqueId, c_u_Int size, char* pData)
 {
 	auto pSession = GetSessionByIdx(uniqueId);
-	CopyMemory(pSession->mOverEx.m_SendBuf, pData, size);
-
-	auto_lock guard(mSendLock);
-	mSendQ.push(uniqueId);
-
-	return true;
+	return pSession->SendPushInLogic(size, pData);
 }
