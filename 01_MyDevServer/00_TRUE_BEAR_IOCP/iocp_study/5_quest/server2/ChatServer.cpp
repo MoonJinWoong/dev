@@ -19,6 +19,7 @@ void ChatServer::OnClose(u_Int unique_id)
 
 void ChatServer::OnRecv(u_Int unique_id, u_Int len, char* msg)
 {
+
 	// recv 올때마다 로직에서 받아서 처리한 후 인덱스를 큐에 밀어넣는다.
 	mLogicProc->RecvPktData(unique_id, len, msg);
 }

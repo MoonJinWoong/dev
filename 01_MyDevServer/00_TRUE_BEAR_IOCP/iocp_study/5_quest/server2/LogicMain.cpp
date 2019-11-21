@@ -42,6 +42,8 @@ void LogicMain::RecvPktData(u_Int unique_id, u_Int len, char* msg)
 	auto pClient = mClMgr->GetClient(unique_id);
 	pClient->SetPacketProc(len, msg);
 	PutUserIdx(unique_id);
+
+
 }
 
 void LogicMain::LogicThread()

@@ -268,6 +268,7 @@ void NetService::SendThread()
 			memset(session->mOverEx.m_SendBuf, 0, MAX_SOCKBUF);
 
 
+			//TODO 이것도 짤리는거 처리해주어야 하는게 아닐까? 라는 생각이 든다.
 			int nRet = WSASend(session->GetSock(),
 				&(sendOver->m_wsaBuf),
 				1,

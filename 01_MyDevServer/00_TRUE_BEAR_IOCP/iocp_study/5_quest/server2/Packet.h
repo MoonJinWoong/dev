@@ -5,9 +5,9 @@
 
 struct PacketFrame
 {
-	u_Int unique_id = 0;
-	int packet_type = 0; // NONE
-	int size = 0;
+	int unique_id = 0;
+	short packet_type = 0; // NONE
+	short size = 0;
 	char* pData = nullptr;
 };
 
