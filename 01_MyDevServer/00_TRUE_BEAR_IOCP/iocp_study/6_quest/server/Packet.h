@@ -5,9 +5,9 @@
 
 struct PacketFrame
 {
-	u_Int unique_id = 0;
-	int packet_type = 0;
-	int size = 0;
+	int unique_id = 0;
+	short packet_type = 0;
+	short size = 0;
 	char* pData = nullptr;
 };
 
@@ -23,8 +23,12 @@ enum class  PACKET_TYPE : int
 	CS_LOGIN = 100,
 	SC_LOGIN = 101,
 
-	CS_LOBBY_LIST = 200,
-	SC_LOBBY_LIST = 201
+	CS_ROOM_ENTER = 200,
+	SC_ROOM_ENTER = 201,
+	CS_ROOM_LEAVE = 210,
+	SC_ROOM_LEAVE = 211,
+
+	SC_ROOM_CHAT_NOTICE = 222,
 };
 
 
@@ -52,23 +56,22 @@ struct SC_LOGIN_PKT : public PKT_HEADER
 };
 
 
-// 로비 관련 
-c_Int MAX_LOBBY_LIST_COUNT = 10;
-struct LOBBY_INFO
+// 방관련
+const int MAX_CHAT_MSG_SIZE = 256;
+struct CS_ROOM_ENTER : public PKT_HEADER
 {
-	short LobbyID;
-	short LobbyClientCount;
-	short LobbyMaxClientCount;
+
 };
 
-struct CS_LOBBY_LIST_PKT : public PKT_HEADER
+struct SC_ROOM_ENTER : public PKT_HEADER
 {
+
 };
 
-struct SC_LOBBY_LIST_PKT : public PKT_HEADER
+struct SC_NOTICE_IN_ROOM : public PKT_HEADER
 {
-	int LobbyCount = 0;
-	LOBBY_INFO LobbyList[MAX_LOBBY_LIST_COUNT];
+	char Id[MAX_USER_ID_SIZE + 1] = { 0, };
+	char Msg[MAX_CHAT_MSG_SIZE + 1] = { 0, };
 };
 
 #pragma pack(pop) //위에 설정된 패킹설정이 사라짐

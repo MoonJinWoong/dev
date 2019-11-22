@@ -5,12 +5,12 @@
 
 void LogicMain::ProcConnect(u_Int uniqueId, int size, char* pData)
 {
-	std::cout << "LogicMain ProcConnect" << std::endl;
+	std::cout << "** Client Connect[" << uniqueId<<"] **" <<std::endl;
 }
 
 void LogicMain::ProcDisConnect(u_Int uniqueId, int size, char* pData)
 {
-	std::cout << "LogicMain ProcDisConnect" << std::endl;
+	std::cout << "** Client DisConnect[" << uniqueId << "] **" << std::endl;
 }
 
 void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
@@ -19,9 +19,9 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 	auto inputId = packet->szID;
 
 	//TODO: 예외 - 접속자수 초과
-
 	//TODO: 예외 - 이미 접속 
-	std::cout << "asdfasdf" << std::endl;
+
+
 
 	// 로그인 세팅 
 	auto client = mClMgr->GetClient(uniqueId);
@@ -37,14 +37,9 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 	SendPacketFunc(uniqueId, sizeof(SC_LOGIN_PKT), (char*)&packet2);
 }
 
-void LogicMain::ProcLobbyList(u_Int uniqueId, int size, char* pData)
+void LogicMain::ProcRoomEnter(u_Int uniqueId, int size, char* pData)
 {
-	SC_LOBBY_LIST_PKT packet;
-
-	// 로비 매니저에서 로비 갯수 가져옴
-	packet.LobbyCount = 10;
-
-	//TODO : 로비랑 로비매니저 만들기
+	SC_ROOM_ENTER packet;
 
 }
 

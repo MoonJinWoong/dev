@@ -5,7 +5,6 @@ void ChatServer::OnAccept(u_Int unique_id)
 {
 	// 접속할때마다 큐에 밀어넣는다.
 	auto id = unique_id;
-	std::cout << "[OnAccept] UniqueID : " << id << std::endl;
 	PacketFrame packet{ id ,(int)PACKET_TYPE::CONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
 }
@@ -15,7 +14,6 @@ void ChatServer::OnClose(c_u_Int unique_id)
 	// 세션이 접속끊을때마다 큐에 밀어넣는다.
 	PacketFrame packet{ unique_id ,(int)PACKET_TYPE::DISCONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
-	std::cout << "[OnClose] UniqueID : " << unique_id << std::endl;
 }
 
 void ChatServer::OnRecv(c_u_Int unique_id, c_u_Int len, char* msg)

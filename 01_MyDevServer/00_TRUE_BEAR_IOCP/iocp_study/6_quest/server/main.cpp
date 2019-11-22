@@ -15,7 +15,7 @@ int main()
 	// start 
 	server.Run(MAX_CLIENT);
 
-	printf("show me the money...\n");
+	printf("show me the money...\n\n\n");
 	getchar();
 
 	server.Stop();

@@ -12,6 +12,7 @@
     <ClCompile Include="RemoteSession.cpp">
       <Filter>Network</Filter>
     </ClCompile>
+    <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
@@ -30,6 +31,7 @@
     <ClInclude Include="LogicProcess.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="TypeDefine.h" />
+    <ClInclude Include="Room.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Network">

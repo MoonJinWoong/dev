@@ -39,7 +39,7 @@ public:
 	void ProcConnect(u_Int uniqueId, int size, char* pData);
 	void ProcDisConnect(u_Int uniqueId, int size, char* pData);
 	void ProcLogin(u_Int uniqueId, int size, char* pData);
-	void ProcLobbyList(u_Int uniqueId, int size, char* pData);
+	void ProcRoomEnter(u_Int uniqueId, int size, char* pData);
 private:
 	bool isRun = false;
 	std::thread mLogicThread;

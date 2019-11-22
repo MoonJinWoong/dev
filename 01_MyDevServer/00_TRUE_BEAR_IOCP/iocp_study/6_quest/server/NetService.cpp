@@ -153,7 +153,7 @@ bool NetService::DoRecv(RemoteSession* pSession)
 
 void NetService::DoSend(RemoteSession* pSessoin)
 {
-	pSessoin->SendPop();
+	pSessoin->SendPopInWorker();
 }
 
 void NetService::WokerThread()
@@ -292,6 +292,7 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 
 bool NetService::SendMsg(c_u_Int uniqueId, c_u_Int size, char* pData)
 {
+	std::cout << "session : " << uniqueId << "  size :" << size << std::endl;
 	auto pSession = GetSessionByIdx(uniqueId);
 	return pSession->SendPushInLogic(size, pData);
 }

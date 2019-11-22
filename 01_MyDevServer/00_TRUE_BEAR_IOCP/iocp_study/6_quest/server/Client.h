@@ -23,6 +23,7 @@ public:
 
 	int SetLogin(std::string& userID_);
 	void SetDomainState(USER_STATE state) { mState = state; }
+	void SetRoomIndex(const int roomIdx) { mRoomIdx = roomIdx; }
 
 	s_Int GetRemoteIdx() const { return mRemoteIdx; }
 	std::string GetUserId() const { return mNickName; }
@@ -36,6 +37,7 @@ private:
 	u_int mRemoteIdx = -1;
 	std::string mNickName;
 	USER_STATE mState = USER_STATE::NONE;
+	int mRoomIdx = -1;
 
 	// buffer ฐüทร
 	char* pBuffer = nullptr;

@@ -31,9 +31,8 @@ bool RemoteSession::SendPushInLogic(c_u_Int size, char* pMsg)
 	return true;
 }
 
-void RemoteSession::SendPop()
+void RemoteSession::SendPopInWorker()
 {
-
 	auto_lock guard(mSendLock);
 
 	delete[] mSendQ.front()->m_wsaBuf.buf;
@@ -49,7 +48,6 @@ void RemoteSession::SendPop()
 
 void RemoteSession::SendMsg()
 {
-
 	auto sendOver = mSendQ.front();
 	DWORD byte = 0;
 

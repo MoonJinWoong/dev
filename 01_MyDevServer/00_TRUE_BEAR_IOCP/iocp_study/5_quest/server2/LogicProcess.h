@@ -27,6 +27,9 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 	auto client = mClMgr->GetClient(uniqueId);
 	client->SetLogin((std::string)inputId);
 
+	// 빈방 검색해서 번호까지 같이 내려준다.
+
+
 	// 성공 메세지
 	SC_LOGIN_PKT packet2;
 	packet2.packet_type = (unsigned short)PACKET_TYPE::SC_LOGIN;
@@ -36,7 +39,7 @@ void LogicMain::ProcLogin(u_Int uniqueId, int size, char* pData)
 	SendPacketFunc(uniqueId, sizeof(SC_LOGIN_PKT), (char*)&packet2);
 }
 
-void LogicMain::ProcLobbyList(u_Int uniqueId, int size, char* pData)
+void LogicMain::ProcRoomEnter(u_Int uniqueId, int size, char* pData)
 {
 	//SC_LOBBY_LIST_PKT packet;
 

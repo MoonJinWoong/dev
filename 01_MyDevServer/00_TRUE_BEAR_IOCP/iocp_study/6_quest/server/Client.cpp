@@ -27,8 +27,7 @@ int Client::SetLogin(std::string& nickname)
 
 void Client::SetPacketProc(c_u_Int input_size, char* input_data)
 {
-	// 현재까지 사용한 버퍼의 남은 공간보다 들어온 버퍼사이즈가 크다면
-	// 처음으로 되돌아간다.
+	// recv 받을때마다 버퍼에 Write
 	if ((mReadPos + input_size) >= PACKET_DATA_BUFFER_SIZE)
 	{
 		auto remainDataSize = mWritePos - mReadPos;
@@ -46,14 +45,18 @@ void Client::SetPacketProc(c_u_Int input_size, char* input_data)
 	}
 	CopyMemory(&pBuffer[mWritePos], input_data, input_size);
 	mWritePos += input_size;
+
+	std::cout << "Write buffer size->    " << mWritePos << std::endl;
 }
 
 PacketFrame Client::GetPacketProc()
 {
+	// 스레드에서 계속 이함수를 호출하면서 
+	// 충분히 Write가 되었을때 패킷을 조립해서 리턴한다. 
+	// Read는 증가시키고 기억한다.
 	u_int remainByte = mWritePos - mReadPos;
 
-	// while 루프 
-	if (remainByte < PKT_HEADER_LENGTH)
+	if (remainByte < sizeof(PacketFrame))
 	{
 		return PacketFrame();
 	}
@@ -69,7 +72,6 @@ PacketFrame Client::GetPacketProc()
 	packet.packet_type = pHeader->packet_type;
 	packet.size = pHeader->packet_len;
 	packet.pData = &pBuffer[mReadPos];
-
 	mReadPos += pHeader->packet_len;
 
 	return packet;

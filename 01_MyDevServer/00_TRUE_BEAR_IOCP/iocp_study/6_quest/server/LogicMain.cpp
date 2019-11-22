@@ -14,6 +14,9 @@ void LogicMain::Init(c_u_Int maxClient)
 	//login
 	mRecvFuncDic[(int)PACKET_TYPE::CS_LOGIN] = &LogicMain::ProcLogin;
 	
+	//Room Enter
+	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_ENTER] = &LogicMain::ProcRoomEnter;
+
 	
 	mClMgr = new ClientManager;
 	mClMgr->Init(maxClient);
