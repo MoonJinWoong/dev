@@ -166,9 +166,9 @@ RemoteSession* NetService::GetEmptyClientInfo()
 }
 
 
-bool NetService::DoRecv(RemoteSession* pSession)
+void NetService::DoRecv(RemoteSession* pSession)
 {
-	return pSession->RecvMsg();
+
 }
 
 void NetService::DoSend(RemoteSession* pSessoin)
@@ -179,13 +179,13 @@ void NetService::DoSend(RemoteSession* pSessoin)
 void NetService::WokerThread()
 {
 	//CompletionKey를 받을 포인터 변수
-	RemoteSession* pSession = NULL;
+	RemoteSession* pSession = nullptr;
 	//함수 호출 성공 여부
 	bool bSuccess = true;
 	//Overlapped I/O작업에서 전송된 데이터 크기
 	unsigned long dwIoSize = 0;
 	//I/O 작업을 위해 요청한 Overlapped 구조체를 받을 포인터
-	LPOVERLAPPED lpOverlapped = NULL;
+	LPOVERLAPPED lpOverlapped = nullptr;
 
 	while (mIsWorkerRun)
 	{
@@ -196,19 +196,19 @@ void NetService::WokerThread()
 			INFINITE);					// 대기할 시간
 
 		//사용자 쓰레드 종료 메세지 처리..
-		if (bSuccess == false && 0 == dwIoSize && NULL == lpOverlapped)
+		if (bSuccess == false && 0 == dwIoSize && nullptr == lpOverlapped)
 		{
 			mIsWorkerRun = false;
 			continue;
 		}
 
-		if (NULL == lpOverlapped)
+		if (nullptr == lpOverlapped)
 		{
 			continue;
 		}
 
 		//client가 접속을 끊었을때..			
-		if (FALSE == bSuccess || (0 == dwIoSize && true == bSuccess))
+		if (false == bSuccess || (0 == dwIoSize && true == bSuccess))
 		{
 			OnClose(pSession->GetUniqueId());
 			CloseSocket(pSession);
@@ -217,71 +217,47 @@ void NetService::WokerThread()
 
 
 		CustomOverEx* pOverlappedEx = (CustomOverEx*)lpOverlapped;
-
-		//Overlapped I/O Recv작업 결과 뒤 처리
 		if (IOOperation::RECV == pOverlappedEx->m_eOperation)
 		{
-			pOverlappedEx->m_RecvBuf[dwIoSize] = NULL;			
-			OnRecv(pSession->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
-
-			// echo
-			//DoSend(pSession, dwIoSize);
+			// OS가 받은 recv 뒤처리(패킷 분해해조립하고 큐에 담기)
+			pOverlappedEx->mUid = pSession->GetUniqueId();
+			OnRecv(pOverlappedEx, dwIoSize);
 			
-			//recv
-			DoRecv(pSession);
+
 		}
-		//Overlapped I/O Send작업 결과 뒤 처리
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
-			int a = 0;
-			//DoSend(pSession);
+			if (pOverlappedEx->m_wsaBuf.len != dwIoSize)
+			{
+				// 모든 메세지 전송하지 못한 상황을 고려해야함
+			}
+			else
+			{
+				// send 뒤처리
+				pSession->SendFinish(dwIoSize);
+			}
 		}
-		//예외 상황
+		//예외
 		else
 		{
-			std::cout << "[Err] SocketFd : " << (int)pSession->GetSock() << std::endl;
+			std::cout << "[Err] Operation : " << (int)pSession->GetSock() << std::endl;
 		}
+
 	}
 }
 
 void NetService::SendThread()
 {
-	while (mIsSendThreadRun)
+	while (true)
 	{
 		if (!mSendQ.empty())
 		{
-			auto_lock guard(mSendLock);
-
-			auto uniqueId = mSendQ.front();
-			mSendQ.pop();
-
-			auto session = GetSessionByIdx(uniqueId);
-			unsigned long byte = 0;
-
-
-			auto sendOver = new CustomOverEx;
-			ZeroMemory(sendOver, sizeof(CustomOverEx));
-			sendOver->m_wsaBuf.len = sizeof(session->mOverEx.m_SendBuf);
-			sendOver->m_wsaBuf.buf = new char[sizeof(session->mOverEx.m_SendBuf)];
-			CopyMemory(sendOver->m_wsaBuf.buf, session->mOverEx.m_SendBuf, sizeof(session->mOverEx.m_SendBuf));
-			sendOver->m_eOperation = IOOperation::SEND;
-			memset(session->mOverEx.m_SendBuf, 0, MAX_SOCKBUF);
-
-
-			//TODO 이것도 짤리는거 처리해주어야 하는게 아닐까? 라는 생각이 든다.
-			int nRet = WSASend(session->GetSock(),
-				&(sendOver->m_wsaBuf),
-				1,
-				&byte,
-				0,
-				(LPWSAOVERLAPPED)sendOver,
-				NULL);
-
-			printf("[Send] Byte: %d \n", byte);
-
-			if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+			auto& over = mSendQ.front();
+			auto session = GetSessionByIdx(over->mUid);
+			
+			if (session->SendPacket(over->m_SendBuf.data(), over->mSendPos))
 			{
-				std::cout << " Err WSASend() code: " << WSAGetLastError() << std::endl;
+				mSendQ.pop();
 			}
 		}
 	}
@@ -319,7 +295,7 @@ void NetService::AccepterThread()
 		}
 
 		//Recv Overlapped I/O작업을 요청해 놓는다.
-		if (!DoRecv(pClientInfo))
+		if (!pClientInfo->RecvMsg())
 		{
 			return;
 		}
@@ -337,7 +313,6 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 {
 	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER로 설정
 
-// bIsForce가 true이면 SO_LINGER, timeout = 0으로 설정하여 강제 종료 시킨다. 주의 : 데이터 손실이 있을수 있음 
 	if (true == bIsForce)
 	{
 		stLinger.l_onoff = 1;
@@ -358,11 +333,17 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 
 bool NetService::SendMsg(u_Int uniqueId, u_Int size, char* pData)
 {
-	auto pSession = GetSessionByIdx(uniqueId);
-	CopyMemory(pSession->mOverEx.m_SendBuf, pData, size);
-
+	// 다 조립되서 온다.
 	auto_lock guard(mSendLock);
-	mSendQ.push(uniqueId);
 
-	return true;
+	if (uniqueId < 0 || uniqueId >= mMaxSessionCnt)
+	{
+		return false;
+	}
+
+	CustomOverEx* over = new CustomOverEx;
+	over->mUid = uniqueId;
+	CopyMemory(over->m_SendBuf.data(), pData, size);
+	over->mSendPos += size;
+	mSendQ.push(over);
 }

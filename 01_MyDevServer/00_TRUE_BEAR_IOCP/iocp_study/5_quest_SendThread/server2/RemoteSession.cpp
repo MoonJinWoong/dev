@@ -1,5 +1,5 @@
 #include "RemoteSession.h"
-
+#include "Packet.h"
 
 RemoteSession::RemoteSession()
 {
@@ -69,6 +69,70 @@ RemoteSession::RemoteSession()
 //	}
 //}
 
+bool RemoteSession::SendReady()
+{
+	return true;
+}
+bool RemoteSession::SendPacket(char* pBuf , int len)
+{
+	auto_lock guard(mSendLock);
+
+	/// 이전 send가 완료되어야 이 함수에서 패킷을 보낸다.
+	if (mSendPendingCnt > 0)
+		return false;
+
+	// WSASend
+	CustomOverEx* sendOver = new CustomOverEx;
+	sendOver->m_wsaBuf.len = len;
+	sendOver->m_wsaBuf.buf = pBuf;
+	sendOver->m_eOperation = IOOperation::SEND;
+
+
+	DWORD sendbytes = 0;
+	DWORD flags = 0;
+	auto ret = WSASend(
+		mRemoteSock, 
+		&sendOver->m_wsaBuf,
+		1, 
+		&sendbytes, 
+		flags, 
+		(LPWSAOVERLAPPED)sendOver,
+		NULL);
+
+	if (ret == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			// 세션 끊어준다.
+			delete sendOver;
+			return true;
+		}
+	}
+
+	if (sendbytes < len)
+	{
+		mOverEx.mRemainByte += len - sendbytes;
+		return false;
+	}
+	
+	++mSendPendingCnt;
+
+	if (mSendPendingCnt == 1) 
+		return true;
+	else 
+		return false;
+}
+
+void RemoteSession::SendFinish(unsigned long len)
+{
+	//TODO 파라미터 만큼 빽해주어야 하는데 일단 초기화 시켜주자
+	// IO 완료 됐을 때 호출 된다.
+	auto_lock guard(mSendLock);
+	--mSendPendingCnt;
+
+	//std::cout << "Send Complete byte:" << len << std::endl;
+}
+
 bool RemoteSession::RecvMsg()
 {
 	DWORD dwFlag = 0;
@@ -76,7 +140,7 @@ bool RemoteSession::RecvMsg()
 
 	//Overlapped I/O을 위해 각 정보를 셋팅해 준다.
 	mOverEx.m_wsaBuf.len = MAX_SOCKBUF;
-	mOverEx.m_wsaBuf.buf = mOverEx.m_RecvBuf;
+	mOverEx.m_wsaBuf.buf = mOverEx.m_RecvBuf.data();
 	mOverEx.m_eOperation = IOOperation::RECV;
 
 	int nRet = WSARecv(mRemoteSock,
@@ -96,5 +160,12 @@ bool RemoteSession::RecvMsg()
 
 	return true;
 }
+
+bool RemoteSession::RecvReady()
+{
+	// zero byte recv
+	return true;
+}
+
 
 

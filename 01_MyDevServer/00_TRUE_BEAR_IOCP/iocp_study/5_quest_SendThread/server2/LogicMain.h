@@ -14,26 +14,23 @@ public:
 	~LogicMain() = default;
 
 	void Init(u_Int maxClient);
-
 	bool Start();
-
 	void Stop();
 
-	void RecvPktData(u_Int unique_id, u_Int len, char* msg);
+	void RecvPktData(u_Int unique_id, char* msg , int size);
 
 	void LogicThread();
 
 	PacketFrame GetConnectPkt();
 	void		PutConnectPkt(PacketFrame packet);
 
-	PacketFrame GetUserPkt();
-	void		PutUserIdx(u_Int unique_id);
+	//PacketFrame DeQueueRecvPkt();
+	//void		EnQueueRecvPkt(u_Int unique_id);
 
 	void ProcRecv(u_Int uniqueId, c_int pktType, u_Int size, char* pData);
 
 	// 로직함수들이 이걸로 param 넣어서 태워 보낸다. 
 	std::function<void(u_Int, u_Int, char*)> SendPacketFunc;
-
 
 	// 로직처리 모음
 	void ProcConnect(u_Int uniqueId, int size, char* pData);
@@ -44,7 +41,7 @@ private:
 	bool isRun = false;
 	std::thread mLogicThread;
 	std::mutex mLock;
-	std::queue<u_Int> mUserIdQueue;
+	std::queue<PacketFrame> mRecvPktQ;
 	std::queue<PacketFrame> mConnectQueue;
 
 	ClientManager* mClMgr;

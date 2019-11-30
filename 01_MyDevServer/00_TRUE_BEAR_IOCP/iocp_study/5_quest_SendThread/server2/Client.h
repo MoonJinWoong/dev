@@ -30,7 +30,7 @@ public:
 	USER_STATE GetUserState() const {return mState;}
 
 	// packet assemble
-	void SetPacketProc(u_Int input_size, char* input_data);
+	bool SetPacketProc(u_Int input_size, char* input_data);
 	PacketFrame GetPacketProc();
 
 private:

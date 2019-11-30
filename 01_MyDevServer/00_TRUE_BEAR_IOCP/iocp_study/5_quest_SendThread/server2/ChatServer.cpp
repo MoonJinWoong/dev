@@ -17,12 +17,68 @@ void ChatServer::OnClose(u_Int unique_id)
 	mLogicProc->PutConnectPkt(packet);
 }
 
-void ChatServer::OnRecv(u_Int unique_id, u_Int len, char* msg)
+void ChatServer::OnRecv(CustomOverEx *pOver, u_Int ioSize)
 {
+	RemoteSession* session = GetSessionByIdx(pOver->mUid);
+	if (session == nullptr)
+	{
+		return;
+	}
 
-	// recv 올때마다 로직에서 받아서 처리한 후 인덱스를 큐에 밀어넣는다.
-	mLogicProc->RecvPktData(unique_id, len, msg);
+	session->mOverEx.mCurrRecvPos += ioSize;
+	if (session->mOverEx.mCurrRecvPos > MAX_SOCKBUF)
+	{
+		session->mOverEx.mCurrRecvPos = 0;
+	}
+
+	pOver->m_wsaBuf.buf = session->mOverEx.m_RecvBuf.data();
+	pOver->mRemainByte += ioSize;
+	
+	auto& remain = pOver->mRemainByte;
+	auto pBuf = pOver->m_wsaBuf.buf;
+
+	// 패킷 헤더 길이, 패킷 전체 길이
+	const int HEAD_LEN = sizeof(PKT_HEADER);
+	const int PKT_TOTAL_LEN = 2;
+	const int PKT_TYPE_LEN = 2;
+
+	short packetSize = 0;
+
+	while (true)
+	{
+		if (remain < HEAD_LEN)
+		{
+			break;
+		}
+
+		// 패킷 헤더에서 토탈 길이 추출
+		CopyMemory(&packetSize, pBuf, PKT_TOTAL_LEN);
+		auto currentSize = packetSize;
+
+		if (packetSize <= 0 || packetSize > MAX_SOCKBUF)
+		{
+			return;
+		}
+
+		// 로직으로 던진다.
+		if (remain >= (DWORD)currentSize)
+		{
+			mLogicProc->RecvPktData(session->GetUniqueId(), pBuf , currentSize);
+			remain -= currentSize;
+			pBuf += currentSize;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	// recv IO
+	// 1130 여기서부터 다시
+	session->RecvFinish();
 }
+
+
 
 void ChatServer::Run(u_Int maxClient)
 {

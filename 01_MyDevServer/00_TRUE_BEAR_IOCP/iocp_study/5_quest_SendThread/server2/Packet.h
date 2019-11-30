@@ -2,23 +2,24 @@
 #include <Windows.h>
 #include "TypeDefine.h"
 
-
+// recv ->  parsing 
 struct PacketFrame
 {
 	int unique_id = 0;
-	short packet_type = 0; // NONE
+	short packet_type = -1; // NONE
 	short size = 0;
 	char* pData = nullptr;
 };
 
+
+
+/* SC -> server to client */
+/* CS -> client to server */
 enum class  PACKET_TYPE : int
 {
 	NONE = 0,
 	CONNECTION = 1,
 	DISCONNECTION = 2,
-
-	/* SC -> server to client */
-	/* CS -> client to server */
 
 	CS_LOGIN = 100,
 	SC_LOGIN = 101,
@@ -29,8 +30,9 @@ enum class  PACKET_TYPE : int
 	SC_ROOM_LEAVE = 211,
 	
 	SC_ROOM_CHAT_NOTICE = 222,
-
 };
+
+
 
 
 /* Client class°¡ »ç¿ë */

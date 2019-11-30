@@ -13,7 +13,7 @@ public:
 
 	virtual void OnAccept(u_Int unique_id) override;
 	virtual void OnClose(u_Int unique_id) override;
-	virtual void OnRecv(u_Int unique_id, u_Int size_, char* pData_) override;
+	virtual void OnRecv(CustomOverEx *pOver, u_Int size_) override;
 
 	void Run(u_Int maxClient);
 	void Stop();

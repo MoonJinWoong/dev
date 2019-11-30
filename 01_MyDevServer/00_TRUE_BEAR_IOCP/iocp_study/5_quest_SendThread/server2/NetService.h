@@ -17,9 +17,9 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void OnAccept(u_Int index) {}
-	virtual void OnClose(u_Int index) {}
-	virtual void OnRecv(u_Int index, u_Int size_, char* pData_) {}
+	virtual void OnAccept(u_Int index) = 0;
+	virtual void OnClose(u_Int index) = 0;
+	virtual void OnRecv(CustomOverEx* pOver, u_Int size_) = 0;
 
 
 	//소켓을 초기화하는 함수
@@ -37,11 +37,11 @@ public:
 	bool CreateSendThread();
 
 	RemoteSession* GetEmptyClientInfo();
-	RemoteSession* GetSessionByIdx(c_Int index) {return mVecSessions[index];}
+	RemoteSession* GetSessionByIdx(int index) {return mVecSessions[index];}
 	
 	
 	//WSARecv Overlapped I/O
-	bool DoRecv(RemoteSession* pSession);
+	void DoRecv(RemoteSession* pSession);
 
 	//WSASend Overlapped I/O
 	void DoSend(RemoteSession* pSessoin);
@@ -62,7 +62,9 @@ private:
 	Iocp mIocp;
 	std::vector<RemoteSession*> mVecSessions;
 	SOCKET		mListenSocket = INVALID_SOCKET;
+	
 	int			mClientCnt = 0;
+	const unsigned int mMaxSessionCnt = 3;   //TODO 나중에 옵션으로 따로 빼줄 것
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
@@ -74,7 +76,8 @@ private:
 	bool		mIsSendThreadRun = true;
 
 	std::mutex					mSendLock;
-	std::queue<u_Int>	mSendQ;
+	//std::queue<RemoteSession*>	mSendQ;
+	std::queue<CustomOverEx*>	mSendQ;
 
 	//소켓 버퍼
 	//char		mSocketBuf[1024] = { 0, };

@@ -25,7 +25,7 @@ int Client::SetLogin(std::string& nickname)
 	return 0;
 }
 
-void Client::SetPacketProc(u_Int input_size, char* input_data)
+bool Client::SetPacketProc(u_Int input_size, char* input_data)
 {
 	// recv 받을때마다 버퍼에 Write
 	if ((mReadPos + input_size) >= PACKET_DATA_BUFFER_SIZE)
@@ -46,7 +46,15 @@ void Client::SetPacketProc(u_Int input_size, char* input_data)
 	CopyMemory(&pBuffer[mWritePos], input_data, input_size);
 	mWritePos += input_size;
 
-	std::cout << "Write buffer size->    " << mWritePos << std::endl;
+
+
+	u_int remainByte = mWritePos - mReadPos;
+	if (remainByte < sizeof(PacketFrame))
+	{
+		return false;  // 아직 충분히 다 못받았을 때
+	}
+
+	return true;
 }
 
 PacketFrame Client::GetPacketProc()
@@ -55,7 +63,6 @@ PacketFrame Client::GetPacketProc()
 	// 충분히 Write가 되었을때 패킷을 조립해서 리턴한다. 
 	// Read는 증가시키고 기억한다.
 	u_int remainByte = mWritePos - mReadPos;
-	std::cout << "1111    "<<sizeof(PacketFrame) << std::endl;
 	if (remainByte < sizeof(PacketFrame))
 	{
 		return PacketFrame();
