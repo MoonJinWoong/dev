@@ -24,7 +24,7 @@ bool NetService::InitSocket()
 	return true;
 }
 
-bool NetService::BindandListen(u_Int nBindPort)
+bool NetService::BindandListen(unsigned int nBindPort)
 {
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
@@ -55,7 +55,7 @@ bool NetService::BindandListen(u_Int nBindPort)
 	return true;
 }
 
-bool NetService::StartNetService(u_Int maxClientCount)
+bool NetService::StartNetService(unsigned int maxClientCount)
 {
 	CreateClient(maxClientCount);
 
@@ -115,7 +115,7 @@ void NetService::DestroyThread()
 	}
 }
 
-void NetService::CreateClient(u_Int maxClientCount)
+void NetService::CreateClient(unsigned int maxClientCount)
 {
 	for (auto i = 0; i < maxClientCount; ++i)
 	{
@@ -223,7 +223,8 @@ void NetService::WokerThread()
 			pOverlappedEx->mUid = pSession->GetUniqueId();
 			OnRecv(pOverlappedEx, dwIoSize);
 			
-
+			// 처리 하고 다시 RECVIO 걸어야함
+			pSession->RecvMsg();
 		}
 		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
 		{
@@ -252,13 +253,16 @@ void NetService::SendThread()
 	{
 		if (!mSendQ.empty())
 		{
-			auto& over = mSendQ.front();
-			auto session = GetSessionByIdx(over->mUid);
+			auto& sendOver = mSendQ.front();
+			auto session = GetSessionByIdx(sendOver->mUid);
 			
-			if (session->SendPacket(over->m_SendBuf.data(), over->mSendPos))
+			if (session->SendPacket(sendOver->mBuf.data(), sendOver->mSendPos))
 			{
-				mSendQ.pop();
+				// 접속 끊어준다
 			}
+
+			// 무조건 꺼내야 한다. 안그럼 다른 세션들도 막힘
+			mSendQ.pop();
 		}
 	}
 }
@@ -331,19 +335,21 @@ void NetService::CloseSocket(RemoteSession* pSession, bool bIsForce)
 }
 
 
-bool NetService::SendMsg(u_Int uniqueId, u_Int size, char* pData)
+bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 {
+
 	// 다 조립되서 온다.
-	auto_lock guard(mSendLock);
+	std::lock_guard<std::mutex> guard(mSendLock);
 
 	if (uniqueId < 0 || uniqueId >= mMaxSessionCnt)
 	{
 		return false;
 	}
 
-	CustomOverEx* over = new CustomOverEx;
-	over->mUid = uniqueId;
-	CopyMemory(over->m_SendBuf.data(), pData, size);
-	over->mSendPos += size;
-	mSendQ.push(over);
+	CustomOverEx* SendOver = new CustomOverEx;
+
+	SendOver->mUid = uniqueId;
+	CopyMemory(SendOver->mBuf.data(), pData, size);
+	SendOver->mSendPos += size;
+	mSendQ.push(SendOver);
 }

@@ -1,10 +1,11 @@
 #pragma once
-#include "TypeDefine.h"
+
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <mswsock.h>
 #include <iostream>
 #include <queue>
+#include <mutex>
 #include <array>
 const int MAX_SOCKBUF = 1024;	
 const int MAX_WORKERTHREAD = 4; 
@@ -23,10 +24,10 @@ struct CustomOverEx
 	unsigned int  mUid = -1;			// unique id
 	unsigned int  mRemainByte = 0;
 
-	std::array<char, MAX_SOCKBUF> m_RecvBuf;
-	std::array<char, MAX_SOCKBUF> m_SendBuf;
+	std::array<char, MAX_SOCKBUF> mBuf;
+	//std::array<char, MAX_SOCKBUF> m_SendBuf;
 	int         mSendPos = 0;
-	char* mCurrMark = nullptr;
+	char*		mCurrMark = nullptr;
 	size_t      mCurrRecvPos = 0;
 	size_t      mTotalRecvByte = 0;
 
@@ -36,40 +37,15 @@ struct CustomOverEx
 	{
 		memset(&m_wsaOverlapped, 0, sizeof(OVERLAPPED));
 		memset(&m_wsaBuf, 0, sizeof(WSABUF));
-		m_RecvBuf.fill(0);
-		m_SendBuf.fill(0);
+		mBuf.fill(0);
+		//m_SendBuf.fill(0);
 	}
 	void Init()
 	{
-		m_RecvBuf.fill(0);
-		m_SendBuf.fill(0);
+		mBuf.fill(0);
+		//m_SendBuf.fill(0);
 		mTotalRecvByte = 0;
 		mCurrRecvPos = 0;
-	}
-	bool IsMoreRecv(size_t size)
-	{
-		mCurrRecvPos += size;
-		if (mCurrRecvPos < mTotalRecvByte)
-			return true;
-		else
-			return false;
-	}
-
-	signed int CalTotalByte()
-	{
-		unsigned short PACKET_LEN = 2;
-		unsigned short PACKET_TYPE = 2;
-		short pos = 0;
-		short packetLen[1] = { 0, };
-		if (mTotalRecvByte == 0)
-		{
-			memcpy_s((void*)packetLen, sizeof(packetLen),
-						(void*)m_RecvBuf.data(), sizeof(packetLen));
-			mTotalRecvByte = (size_t)packetLen[0];
-		}
-
-		pos += sizeof(packetLen);
-		return pos;
 	}
 };
 
@@ -81,7 +57,7 @@ public:
 	RemoteSession();
 	SOCKET& GetSock() { return mRemoteSock; }
 
-	//bool SendPushInLogic(u_Int size, char* pMsg);
+	//bool SendPushInLogic(unsigned int size, char* pMsg);
 	//void SendPop();
 	//void SendMsg();
 	
@@ -91,16 +67,17 @@ public:
 
 	bool RecvMsg();
 	bool RecvReady();
+	bool RecvFinish(const char* pNextBuf, const unsigned long remain);
 
 
 	void SetUniqueId(int& id) { unique_id = id; }
-	u_Int GetUniqueId() const { return unique_id; }
+	unsigned int GetUniqueId() const { return unique_id; }
 	int GetSendBuffPos() { return mSendBuffPos; }
 	void IncreaseBuffPos(int len) { mSendBuffPos += len; }
 
 	SOCKET						mRemoteSock;			//Cliet와 연결되는 소켓
-	CustomOverEx				mOverEx;	//RECV Overlapped I/O작업을 위한 변수
-	//CustomOverEx				mSendOver;	//SEND Overlapped I/O작업을 위한 변수
+	CustomOverEx				mRecvOverEx;	//RECV Overlapped I/O작업을 위한 변수
+	CustomOverEx				mSendOverEx;	//SEND Overlapped I/O작업을 위한 변수
 private:
 
 	std::mutex					mSendLock;

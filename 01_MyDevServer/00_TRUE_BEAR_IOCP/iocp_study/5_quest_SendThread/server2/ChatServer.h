@@ -1,5 +1,5 @@
 #pragma once
-#include "TypeDefine.h"
+
 #include "NetService.h"
 #include "LogicMain.h"
 #include "Packet.h"
@@ -11,11 +11,11 @@ public:
 	ChatServer() = default;
 	virtual ~ChatServer() = default;
 
-	virtual void OnAccept(u_Int unique_id) override;
-	virtual void OnClose(u_Int unique_id) override;
-	virtual void OnRecv(CustomOverEx *pOver, u_Int size_) override;
+	virtual void OnAccept(unsigned int unique_id) override;
+	virtual void OnClose(unsigned int unique_id) override;
+	virtual void OnRecv(CustomOverEx *pOver, unsigned int size_) override;
 
-	void Run(u_Int maxClient);
+	void Run(unsigned int maxClient);
 	void Stop();
 private:
 	std::unique_ptr<LogicMain> mLogicProc;

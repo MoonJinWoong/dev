@@ -3,13 +3,13 @@
 
 RemoteSession::RemoteSession()
 {
-	ZeroMemory(&mOverEx, sizeof(CustomOverEx));
-	//ZeroMemory(&mSendOver, sizeof(CustomOverEx));
+	ZeroMemory(&mRecvOverEx, sizeof(CustomOverEx));
+	ZeroMemory(&mSendOverEx, sizeof(CustomOverEx));
 	mRemoteSock = INVALID_SOCKET;
 }
 
 
-//bool RemoteSession::SendPushInLogic(u_Int size, char* pMsg)
+//bool RemoteSession::SendPushInLogic(unsigned int size, char* pMsg)
 //{
 //	// 무조건 로직스레드 에서만 콜해야 된다. 
 //	auto sendOver = new CustomOverEx;
@@ -19,7 +19,7 @@ RemoteSession::RemoteSession()
 //	CopyMemory(sendOver->m_wsaBuf.buf, pMsg, size);
 //	sendOver->m_eOperation = IOOperation::SEND;
 //
-//	auto_lock guard(mSendLock);
+//	std::lock_guard<std::mutex> guard(mSendLock);
 //
 //	mSendQ.push(sendOver);
 //
@@ -33,7 +33,7 @@ RemoteSession::RemoteSession()
 //
 //void RemoteSession::SendPop()
 //{
-//	auto_lock guard(mSendLock);
+//	std::lock_guard<std::mutex> guard(mSendLock);
 //
 //	delete[] mSendQ.front()->m_wsaBuf.buf;
 //	delete mSendQ.front();
@@ -75,7 +75,7 @@ bool RemoteSession::SendReady()
 }
 bool RemoteSession::SendPacket(char* pBuf , int len)
 {
-	auto_lock guard(mSendLock);
+	std::lock_guard<std::mutex> guard(mSendLock);
 
 	/// 이전 send가 완료되어야 이 함수에서 패킷을 보낸다.
 	if (mSendPendingCnt > 0)
@@ -111,7 +111,7 @@ bool RemoteSession::SendPacket(char* pBuf , int len)
 
 	if (sendbytes < len)
 	{
-		mOverEx.mRemainByte += len - sendbytes;
+		mSendOverEx.mRemainByte += len - sendbytes;
 		return false;
 	}
 	
@@ -125,9 +125,8 @@ bool RemoteSession::SendPacket(char* pBuf , int len)
 
 void RemoteSession::SendFinish(unsigned long len)
 {
-	//TODO 파라미터 만큼 빽해주어야 하는데 일단 초기화 시켜주자
 	// IO 완료 됐을 때 호출 된다.
-	auto_lock guard(mSendLock);
+	std::lock_guard<std::mutex> guard(mSendLock);
 	--mSendPendingCnt;
 
 	//std::cout << "Send Complete byte:" << len << std::endl;
@@ -139,16 +138,16 @@ bool RemoteSession::RecvMsg()
 	DWORD dwRecvNumBytes = 0;
 
 	//Overlapped I/O을 위해 각 정보를 셋팅해 준다.
-	mOverEx.m_wsaBuf.len = MAX_SOCKBUF;
-	mOverEx.m_wsaBuf.buf = mOverEx.m_RecvBuf.data();
-	mOverEx.m_eOperation = IOOperation::RECV;
+	mRecvOverEx.m_wsaBuf.len = MAX_SOCKBUF;
+	mRecvOverEx.m_wsaBuf.buf = mRecvOverEx.mBuf.data();
+	mRecvOverEx.m_eOperation = IOOperation::RECV;
 
 	int nRet = WSARecv(mRemoteSock,
-		&(mOverEx.m_wsaBuf),
+		&(mRecvOverEx.m_wsaBuf),
 		1,
 		&dwRecvNumBytes,
 		&dwFlag,
-		(LPWSAOVERLAPPED) & (mOverEx),
+		(LPWSAOVERLAPPED) & (mRecvOverEx),
 		NULL);
 
 	//socket_error이면 client socket이 끊어진걸로 처리한다.
@@ -166,6 +165,21 @@ bool RemoteSession::RecvReady()
 	// zero byte recv
 	return true;
 }
+
+bool RemoteSession::RecvFinish(const char* pNext, const unsigned long remain)
+{
+//	mRecvOverEx.m_eOperation = IOOperation::RECV;
+//	mRecvOverEx.mRemainByte = remain;
+//
+//	auto diff = (int)(remain - (mRecvOverEx.mCurrMark - pNext));
+//
+//	mRecvOverEx.m_wsaBuf.len = MAX_SOCKBUF;
+//	mRecvOverEx.m_wsaBuf.buf = m_ConnectionInfo.RingRecvBuffer.ForwardMark(moveMark, m_RecvBufSize, remainByte);
+//
+//
+	return true;
+}
+
 
 
 

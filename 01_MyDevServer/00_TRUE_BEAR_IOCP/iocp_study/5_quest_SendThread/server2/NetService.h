@@ -5,7 +5,9 @@
 
 #include <thread>
 #include <vector>
-#include "TypeDefine.h"
+#include <mutex>
+
+
 #include "RemoteSession.h"
 #include "Iocp.h"
 
@@ -17,21 +19,21 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void OnAccept(u_Int index) = 0;
-	virtual void OnClose(u_Int index) = 0;
-	virtual void OnRecv(CustomOverEx* pOver, u_Int size_) = 0;
+	virtual void OnAccept(unsigned int index) = 0;
+	virtual void OnClose(unsigned int index) = 0;
+	virtual void OnRecv(CustomOverEx* pOver, unsigned int size_) = 0;
 
 
 	//소켓을 초기화하는 함수
 	bool InitSocket();
 
-	bool BindandListen(u_Int nBindPort);
+	bool BindandListen(unsigned int nBindPort);
 
-	bool StartNetService(u_Int maxClientCount);
+	bool StartNetService(unsigned int maxClientCount);
 
 	void DestroyThread();
 
-	void CreateClient(u_Int maxClientCount);
+	void CreateClient(unsigned int maxClientCount);
 	bool CreateWokerThread();
 	bool CreateAccepterThread();
 	bool CreateSendThread();
@@ -50,13 +52,13 @@ public:
 	void AccepterThread();
 
 	void SendThread();
-	//bool SendQueuePush(u_Int size, char* pMsg);
+	//bool SendQueuePush(unsigned int size, char* pMsg);
 
 
 	//소켓의 연결을 종료 시킨다.
 	void CloseSocket(RemoteSession* pSession, bool bIsForce = false);
 
-	bool SendMsg(u_Int unique_id, u_Int size, char* pData);
+	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 
 private:
 	Iocp mIocp;
