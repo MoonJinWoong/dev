@@ -22,14 +22,14 @@ void LogicMain::Init(unsigned int maxClient)
 
 bool LogicMain::Start()
 {
-	isRun = true;
+	mIsRun = true;
 	mLogicThread = std::thread([this]() { LogicThread(); });
 	return true;
 }
 
 void LogicMain::Stop()
 {
-	isRun = false;
+	mIsRun = false;
 	if (mLogicThread.joinable())
 	{
 		mLogicThread.join();
@@ -62,7 +62,7 @@ void LogicMain::RecvPktData(unsigned int unique_id, char* pBuf , int size)
 
 void LogicMain::LogicThread()
 {
-	while (isRun)
+	while (mIsRun)
 	{
 		// connet , disconnect 패킷 있는지 검사.
 		auto packet = GetConnectPkt();

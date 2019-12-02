@@ -61,12 +61,12 @@ public:
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 
 private:
-	Iocp mIocp;
+	Iocp mIocpService;
 	std::vector<RemoteSession*> mVecSessions;
 	SOCKET		mListenSocket = INVALID_SOCKET;
 	
-	int			mClientCnt = 0;
-	const unsigned int mMaxSessionCnt = 3;   //TODO 나중에 옵션으로 따로 빼줄 것
+	int			mSessionCnt = 0;
+	const unsigned int mMaxSessionCnt = 100;   //TODO 나중에 옵션으로 따로 빼줄 것
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
@@ -78,9 +78,6 @@ private:
 	bool		mIsSendThreadRun = true;
 
 	std::mutex					mSendLock;
-	//std::queue<RemoteSession*>	mSendQ;
 	std::queue<CustomOverEx*>	mSendQ;
 
-	//소켓 버퍼
-	//char		mSocketBuf[1024] = { 0, };
 };

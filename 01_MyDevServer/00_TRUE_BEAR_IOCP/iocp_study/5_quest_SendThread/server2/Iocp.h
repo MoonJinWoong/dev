@@ -22,17 +22,17 @@ public:
 
 	Iocp()
 	{
-		m_workIocp = INVALID_HANDLE_VALUE;
+		mIocp = INVALID_HANDLE_VALUE;
 	}
 	~Iocp()
 	{
-		CloseHandle(m_workIocp);
+		CloseHandle(mIocp);
 	}
 
 	bool CreateNewIocp(unsigned int threadCnt)
 	{
-		m_workIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, threadCnt);
-		if (!m_workIocp)
+		mIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, threadCnt);
+		if (!mIocp)
 		{
 			std::cout << "fail CreateNewIocp " << std::endl;
 			return false;
@@ -44,11 +44,11 @@ public:
 	{
 		auto ret = CreateIoCompletionPort(
 			(HANDLE)listenSock,
-			m_workIocp,
+			mIocp,
 			(ULONG_PTR)nullptr,
 			0
 		);
-		if (ret != m_workIocp)
+		if (ret != mIocp)
 		{
 			std::cout << "fail AddDeviceListenSocket " << std::endl;
 			return false;
@@ -59,11 +59,11 @@ public:
 	{
 		auto ret = CreateIoCompletionPort(
 			(HANDLE)RemoteSession->GetSock(),
-			m_workIocp,
+			mIocp,
 			(ULONG_PTR)RemoteSession,
 			0
 		);
-		if (ret != m_workIocp)
+		if (ret != mIocp)
 		{
 			std::cout << "fail AddDeviceRemoteSocket " << std::endl;
 			return false;
@@ -97,5 +97,5 @@ public:
 	//	}
 	//}
 public:
-	HANDLE m_workIocp;
+	HANDLE mIocp;
 };

@@ -1,10 +1,6 @@
 #pragma once
 #include <Windows.h>
 
-
-
-
-
 /* SC -> server to client */
 /* CS -> client to server */
 enum class  PACKET_TYPE : int

@@ -24,18 +24,11 @@ void ChatServer::OnRecv(CustomOverEx *pOver, unsigned int ioSize)
 	{
 		return;
 	}
-
-	//session->mRecvOverEx.mCurrRecvPos += ioSize;
-	//if (session->mRecvOverEx.mCurrRecvPos > MAX_SOCKBUF)
-	//{
-	//	session->mRecvOverEx.mCurrRecvPos = 0;
-	//}
-
-	pOver->m_wsaBuf.buf = pOver->mBuf.data();
+	pOver->mWSABuf.buf = pOver->mBuf.data();
 	pOver->mRemainByte += ioSize;
 	
 	auto& remain = pOver->mRemainByte;
-	auto pBuf = pOver->m_wsaBuf.buf;
+	auto pBuf = pOver->mWSABuf.buf;
 
 	// 패킷 헤더 길이, 패킷 전체 길이
 	const int PKT_HEAD_LEN = sizeof(PKT_HEADER);
@@ -58,7 +51,6 @@ void ChatServer::OnRecv(CustomOverEx *pOver, unsigned int ioSize)
 			return;
 		}
 
-		pOver->mTotalRecvByte = packetSize;
 
 		// 로직으로 던진다.
 		if (remain >= (DWORD)packetSize)
@@ -73,10 +65,7 @@ void ChatServer::OnRecv(CustomOverEx *pOver, unsigned int ioSize)
 		}
 	}
 
-	// recv IO
-	// 1130 여기서부터 다시
-	//session->RecvFinish();
-	pOver->mBuf.fill(0);
+	//session->mRecvOverEx.mBuf.fill(0);
 }
 
 

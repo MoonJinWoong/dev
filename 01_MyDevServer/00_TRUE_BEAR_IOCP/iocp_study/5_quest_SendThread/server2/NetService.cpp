@@ -60,7 +60,7 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 	CreateClient(maxClientCount);
 
 	//CompletionPort객체 생성 요청을 한다.
-	if (!mIocp.CreateNewIocp(MAX_WORKERTHREAD))
+	if (!mIocpService.CreateNewIocp(MAX_WORKERTHREAD))
 	{
 		return false;
 	}
@@ -87,7 +87,7 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 void NetService::DestroyThread()
 {
 	mIsWorkerRun = false;
-	CloseHandle(mIocp.m_workIocp);
+	CloseHandle(mIocpService.mIocp);
 
 	for (auto& th : mIOWorkerThreads)
 	{
@@ -189,7 +189,7 @@ void NetService::WokerThread()
 
 	while (mIsWorkerRun)
 	{
-		bSuccess = GetQueuedCompletionStatus(mIocp.m_workIocp,
+		bSuccess = GetQueuedCompletionStatus(mIocpService.mIocp,
 			&dwIoSize,					// 실제로 전송된 바이트
 			(PULONG_PTR)&pSession,		// CompletionKey
 			&lpOverlapped,				// Overlapped IO 객체
@@ -210,6 +210,7 @@ void NetService::WokerThread()
 		//client가 접속을 끊었을때..			
 		if (false == bSuccess || (0 == dwIoSize && true == bSuccess))
 		{
+			std::cout << "disconnect  " << std::endl;
 			OnClose(pSession->GetUniqueId());
 			CloseSocket(pSession);
 			continue;
@@ -217,7 +218,7 @@ void NetService::WokerThread()
 
 
 		CustomOverEx* pOverlappedEx = (CustomOverEx*)lpOverlapped;
-		if (IOOperation::RECV == pOverlappedEx->m_eOperation)
+		if (IOOperation::RECV == pOverlappedEx->mIoType)
 		{
 			// OS가 받은 recv 뒤처리(패킷 분해해조립하고 큐에 담기)
 			pOverlappedEx->mUid = pSession->GetUniqueId();
@@ -226,11 +227,11 @@ void NetService::WokerThread()
 			// 처리 하고 다시 RECVIO 걸어야함
 			pSession->RecvMsg();
 		}
-		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
+		else if (IOOperation::SEND == pOverlappedEx->mIoType)
 		{
-			if (pOverlappedEx->m_wsaBuf.len != dwIoSize)
+			if (pOverlappedEx->mWSABuf.len != dwIoSize)
 			{
-				// 모든 메세지 전송하지 못한 상황을 고려해야함
+				//TODO 모든 메세지를 전송하지 못한 상황. 재현이 어렵다..
 			}
 			else
 			{
@@ -256,7 +257,7 @@ void NetService::SendThread()
 			auto& sendOver = mSendQ.front();
 			auto session = GetSessionByIdx(sendOver->mUid);
 			
-			if (session->SendPacket(sendOver->mBuf.data(), sendOver->mSendPos))
+			if (!session->SendPacket(sendOver->mBuf.data(), sendOver->mSendPos))
 			{
 				// 접속 끊어준다
 			}
@@ -293,7 +294,7 @@ void NetService::AccepterThread()
 		}
 
 		//I/O Completion Port객체와 소켓을 연결시킨다.
-		if (!mIocp.AddDeviceRemoteSocket(pClientInfo))
+		if (!mIocpService.AddDeviceRemoteSocket(pClientInfo))
 		{
 			return;
 		}
@@ -309,7 +310,7 @@ void NetService::AccepterThread()
 		OnAccept(id);
 
 		//클라이언트 갯수 증가
-		++mClientCnt;
+		++mSessionCnt;
 	}
 }
 

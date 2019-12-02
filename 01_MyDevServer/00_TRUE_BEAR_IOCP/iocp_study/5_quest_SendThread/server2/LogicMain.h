@@ -42,7 +42,7 @@ public:
 	void ProcRoomChat(unsigned int uniqueId, int size, char* pData);
 
 private:
-	bool isRun = false;
+	bool mIsRun = false;
 	std::thread mLogicThread;
 	std::mutex mLock;
 	std::queue<PacketFrame> mRecvPktQ;
