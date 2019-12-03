@@ -1,17 +1,18 @@
 #pragma once
-#include "TypeDefine.h"
+
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #include <mswsock.h>
 #include <iostream>
 #include <queue>
+#include <mutex>
+#include <array>
+const int MAX_SOCKBUF = 1024;	
+const int MAX_WORKERTHREAD = 4; 
 
-const int MAX_SOCKBUF = 1024;	//패킷 크기
-const int MAX_WORKERTHREAD = 4;  //쓰레드 풀에 넣을 쓰레드 수
-
-enum class IOOperation
+enum class IOOperation 
 {
-	RECV,
+	RECV ,
 	SEND,
 	ACCEPT
 };
@@ -19,51 +20,67 @@ enum class IOOperation
 //WSAOVERLAPPED구조체를 확장
 struct CustomOverEx
 {
-	WSAOVERLAPPED	 m_wsaOverlapped;		
-	WSABUF			 m_wsaBuf;				
-	u_Int			 mUid = -1;			// unique id
+	WSAOVERLAPPED mWSAOverlapped;		//Overlapped I/O구조체
+	WSABUF		  mWSABuf;				//Overlapped I/O작업 버퍼
+	unsigned int  mUid = -1;			// unique id
+	unsigned int  mRemainByte = 0;
 
-	char		m_RecvBuf[MAX_SOCKBUF]; //데이터 버퍼
-	char		m_SendBuf[MAX_SOCKBUF]; //데이터 버퍼
-	IOOperation m_eOperation;			//작업 동작 종류
+	std::array<char, MAX_SOCKBUF> mBuf;
+	int         mSendPos = 0;
 
+	IOOperation mIoType;			//작업 동작 종류
+
+	CustomOverEx()
+	{
+		memset(&mWSAOverlapped, 0, sizeof(OVERLAPPED));
+		memset(&mWSABuf, 0, sizeof(WSABUF));
+		mBuf.fill(0);
+	}
+	void Init()
+	{
+		mBuf.fill(0);
+	}
 };
 
 // 원격 세션
 class RemoteSession
 {
 public:
+
 	RemoteSession();
-
-	bool AccpetAsync(SOCKET listenSock);
-	bool AcceptFinish(HANDLE mhIocp);
-
-	bool SendPushInLogic(c_u_Int size, char* pMsg);
-	void SendPopInWorker();
-	void SendMsg();
-
-	bool RecvZeroByte();
-	bool RecvStart();
-
-	void SetUniqueId(c_u_Int& id) { mIdx = id; }
-	u_Int GetUniqueId() const { return mIdx; }
-
-	void SetConnected() { mIsConnected = true; }
-	bool IsConnected() const { return mIsConnected; }
-
-	void Release(bool IsForce,SOCKET mListenSock);
-
-	SOCKET						mRemoteSock;			//Client와 연결되는 소켓
 	SOCKET& GetSock() { return mRemoteSock; }
-
-private:
-	CustomOverEx				mOverIo;		// I/O작업
-	CustomOverEx				mOverAccept;	// acceptEx 작업 
-	char						mAcceptBuf[64];
 	
-	std::mutex					mSendLock;
-	std::queue<CustomOverEx*>	mSendQ;
+	bool AcceptReady(SOCKET listenSock);
+	bool AcceptFinish(HANDLE mIocp);
 
-	bool						mIsConnected = false;
-	u_Int						mIdx = -1;
+	bool SendReady(const unsigned int size, char* msg);
+	bool SendPacket();
+	void SendFinish(unsigned long len);
+
+	bool RecvMsg();
+	bool RecvReady();
+	bool RecvFinish(const char* pNextBuf, const unsigned long remain);
+
+	bool UnInit(bool IsForce, SOCKET mListenSock);
+	
+	void SetUniqueId(int& id) { mUID = id; }
+	unsigned int GetUniqueId() const { return mUID; }
+	bool IsLive() const { return mIsLive; }
+
+
+	SOCKET						mRemoteSock;	
+	CustomOverEx				mRecvOverEx;	
+	CustomOverEx				mSendOverEx;	
+	CustomOverEx                mAcceptOverEx;    
+private:
+	bool						mIsLive = false;
+
+	std::mutex					mSendLock;
+	int                         mSendBuffPos = 0;      // 샌드 버퍼 위치
+	int							mSendPendingCnt = 0;  // 다 보내지 못한 경우 체크
+	char						mSendReservedBuf[MAX_SOCKBUF]; //데이터 버퍼	
+	char						mSendBuf[MAX_SOCKBUF]; //데이터 버퍼
+	
+	unsigned int				mUID = -1;
+	char						mAcceptBuf[64];
 };

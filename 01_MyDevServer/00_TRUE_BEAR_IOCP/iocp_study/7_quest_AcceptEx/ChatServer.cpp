@@ -1,32 +1,79 @@
 #include "ChatServer.h"
+#include <iostream>
 
-
-void ChatServer::OnAccept(u_Int unique_id)
+void ChatServer::ThrowLogicConnect(unsigned int unique_id)
 {
 	// 접속할때마다 큐에 밀어넣는다.
 	auto id = unique_id;
+	std::cout << "[OnAccept] UniqueID : " << id << std::endl;
 	PacketFrame packet{ id ,(int)PACKET_TYPE::CONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
 }
 
-void ChatServer::OnClose(c_u_Int unique_id)
+void ChatServer::ThrowLogicClose(unsigned int unique_id)
 {
 	// 세션이 접속끊을때마다 큐에 밀어넣는다.
 	PacketFrame packet{ unique_id ,(int)PACKET_TYPE::DISCONNECTION,0 };
 	mLogicProc->PutConnectPkt(packet);
 }
 
-void ChatServer::OnRecv(c_u_Int unique_id, c_u_Int len, char* msg)
+void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
 {
-	// recv 올때마다 로직에서 받아서 처리한 후 인덱스를 큐에 밀어넣는다.
-	mLogicProc->RecvPktData(unique_id, len, msg);
-	std::cout << "[OnRecv] UniqueID : " << unique_id << std::endl;
+	RemoteSession* session = GetSessionByIdx(pOver->mUid);
+	if (session == nullptr)
+	{
+		return;
+	}
+	pOver->mWSABuf.buf = pOver->mBuf.data();
+	pOver->mRemainByte += ioSize;
+	
+	auto& remain = pOver->mRemainByte;
+	auto pBuf = pOver->mWSABuf.buf;
+
+	// 패킷 헤더 길이, 패킷 전체 길이
+	const int PKT_HEAD_LEN = sizeof(PKT_HEADER);
+	const int PKT_TOTAL_LEN = 2;
+	const int PKT_TYPE_LEN = 2;
+
+	short packetSize = 0;
+
+	while (true)
+	{
+		if (remain < PKT_HEAD_LEN)
+		{
+			break;
+		}
+		// 패킷 헤더에서 토탈 길이 추출
+		CopyMemory(&packetSize, pBuf, PKT_TOTAL_LEN);
+
+		if (packetSize <= 0 || packetSize > MAX_SOCKBUF)
+		{
+			return;
+		}
+
+
+		// 로직으로 던진다.
+		if (remain >= (DWORD)packetSize)
+		{
+			mLogicProc->RecvPktData(session->GetUniqueId(), pBuf , packetSize);
+			remain -= packetSize;
+			pBuf += packetSize;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//session->mRecvOverEx.mBuf.fill(0);
 }
 
-void ChatServer::Run(u_Int maxClient)
+
+
+void ChatServer::Run(unsigned int maxClient)
 {
 	// logic에서 Send를 부르면 실행
-	auto SendFunc = [&](u_Int index, int size, char* pPacket)
+	auto SendFunc = [&](unsigned int index, int size, char* pPacket)
 	{
 		SendMsg(index, size, pPacket);
 	};

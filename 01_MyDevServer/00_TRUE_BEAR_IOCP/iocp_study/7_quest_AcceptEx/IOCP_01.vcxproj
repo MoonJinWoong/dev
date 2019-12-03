@@ -91,7 +91,6 @@
     <ClCompile Include="NetService.cpp" />
     <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="RemoteSession.cpp" />
-    <ClCompile Include="Room.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
@@ -104,7 +103,7 @@
     <ClInclude Include="LogicMain.h" />
     <ClInclude Include="RemoteSession.h" />
     <ClInclude Include="Room.h" />
-    <ClInclude Include="TypeDefine.h" />
+    <ClInclude Include="RoomManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

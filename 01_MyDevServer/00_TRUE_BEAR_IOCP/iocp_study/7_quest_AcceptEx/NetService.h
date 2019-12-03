@@ -5,7 +5,9 @@
 
 #include <thread>
 #include <vector>
-#include "TypeDefine.h"
+#include <mutex>
+
+
 #include "RemoteSession.h"
 #include "Iocp.h"
 
@@ -17,45 +19,56 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void OnAccept(u_Int index) {}
-	virtual void OnClose(c_u_Int index) {}
-	virtual void OnRecv(c_u_Int index, c_u_Int size_, char* pData_) {}
+	virtual void ThrowLogicConnect(unsigned int index) = 0;
+	virtual void ThrowLogicClose(unsigned int index) = 0;
+	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size_) = 0;
 
+
+	//소켓을 초기화하는 함수
 	bool InitSocket();
 
-	bool BindandListen(c_u_Int nBindPort);
+	bool BindandListen(unsigned int nBindPort);
 
-	bool StartNetService(c_u_Int maxClientCount);
+	bool StartNetService(unsigned int maxClientCount);
 
+	bool CreateSessionPool(unsigned int maxClientCount);
+	bool CreateWokerThread();
+	bool CreateSendThread();
 	void DestroyThread();
 
-	bool CreateSessions(c_u_Int maxClientCount);
-
-	bool CreateWokerThread();
-
-	RemoteSession* GetEmptySession();
-	RemoteSession* GetSessionByIdx(c_Int index) {return mVecSessions[index];}
+	RemoteSession* GetEmptyClientInfo();
+	RemoteSession* GetSessionByIdx(int index) {return mVecSessions[index];}
 	
+	
+	void DoRecvFinish(CustomOverEx* pOver,unsigned long size);
 	void DoSend(RemoteSession* pSessoin);
+	void DoAcceptFinish(RemoteSession* pSession, unsigned int uid);
+
 
 	void WokerThread();
+	void SendThread();
 
-	void KickOutSession(RemoteSession* pSession, bool isForce = false);
+	void KickSession(RemoteSession* pSession, bool bIsForce = false);
 
-	bool SendMsg(c_u_Int unique_id, c_u_Int size, char* pData);
+	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 
 private:
-	Iocp mIocp;
+	Iocp mIocpService;
 	std::vector<RemoteSession*> mVecSessions;
 	SOCKET		mListenSocket = INVALID_SOCKET;
-	int			mClientCnt = 0;
+	
+	int			mSessionCnt = 0;
+	const unsigned int mMaxSessionCnt = 100;   //TODO 나중에 옵션으로 따로 빼줄 것
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
+	std::thread	mSendThread;
 
-	bool		mIsWorkerRun = true;
-	bool		mIsAccepterRun = true;
-	
-	//소켓 버퍼
-	//char		mSocketBuf[1024] = { 0, };
+
+	bool		mWorkerRun = false;
+	bool		mSendRun = false;
+
+	std::mutex					mSendLock;
+	std::queue<CustomOverEx*>	mSendQ;
+
 };

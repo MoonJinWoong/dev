@@ -57,7 +57,6 @@ bool NetService::BindandListen(unsigned int nBindPort)
 
 bool NetService::StartNetService(unsigned int maxClientCount)
 {
-	CreateClient(maxClientCount);
 
 	//CompletionPort객체 생성 요청을 한다.
 	if (!mIocpService.CreateNewIocp(MAX_WORKERTHREAD))
@@ -65,12 +64,14 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 		return false;
 	}
 
-	if(!CreateWokerThread())
+	// 리슨 소켓을 iocp에 등록
+	if (!mIocpService.AddDeviceListenSocket(mListenSocket))
 	{
 		return false;
+
 	}
 
-	if(!CreateAccepterThread())
+	if(!CreateWokerThread())
 	{
 		return false;
 	}
@@ -79,6 +80,12 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 	{
 		return false;
 	}
+
+	if (!CreateSessionPool(maxClientCount))
+	{
+		return false;
+	}
+
 
 	std::cout << "[Success] StartNetService() " << std::endl;
 	return true;
@@ -97,15 +104,6 @@ void NetService::DestroyThread()
 		}
 	}
 
-	//Accepter 쓰레드를 종요한다.
-	mIsAccepterRun = false;
-	closesocket(mListenSocket);
-
-	if (mAccepterThread.joinable())
-	{
-		mAccepterThread.join();
-	}
-
 	// send thread 종료 
 	mIsSendThreadRun = false;
 
@@ -115,14 +113,19 @@ void NetService::DestroyThread()
 	}
 }
 
-void NetService::CreateClient(unsigned int maxClientCount)
+bool NetService::CreateSessionPool(unsigned int maxClientCount)
 {
 	for (auto i = 0; i < maxClientCount; ++i)
 	{
+		std::cout << "asdfasdfasdfasdfsafd" << std::endl;
+
 		auto pSession = new RemoteSession;
 		pSession->SetUniqueId(i);
+		if (!pSession->AcceptReady(mListenSocket))
+			return false;
 		mVecSessions.emplace_back(pSession);
 	}
+	true;
 }
 
 bool NetService::CreateWokerThread()
@@ -195,30 +198,45 @@ void NetService::WokerThread()
 			&lpOverlapped,				// Overlapped IO 객체
 			INFINITE);					// 대기할 시간
 
-		//사용자 쓰레드 종료 메세지 처리..
-		if (bSuccess == false && 0 == dwIoSize && nullptr == lpOverlapped)
+		if (bSuccess == true && 0 == dwIoSize && NULL == lpOverlapped)
 		{
 			mIsWorkerRun = false;
 			continue;
 		}
 
-		if (nullptr == lpOverlapped)
+		if (NULL == lpOverlapped)
 		{
 			continue;
 		}
-
-		//client가 접속을 끊었을때..			
-		if (false == bSuccess || (0 == dwIoSize && true == bSuccess))
-		{
-			std::cout << "disconnect  " << std::endl;
-			OnClose(pSession->GetUniqueId());
-			CloseSocket(pSession);
-			continue;
-		}
-
 
 		CustomOverEx* pOverlappedEx = (CustomOverEx*)lpOverlapped;
-		if (IOOperation::RECV == pOverlappedEx->mIoType)
+
+		//client가 접속을 끊음		
+		if (bSuccess == false || (0 == dwIoSize && IOOperation::ACCEPT != pOverlappedEx->m_eOperation))
+		{
+			KickOutSession(pSession);
+			continue;
+		}
+
+
+		if (IOOperation::ACCEPT == pOverlappedEx->mIoType)
+		{
+			pSession = GetSessionByIdx(pOverlappedEx->mUid);
+			if (mIocpService.AddDeviceRemoteSocket(pSession))
+			{
+				//TODO 정확하게 증가 하려면 락을 걸어야 할거 같다.
+				++mClientCnt;
+				pSession->AcceptFinish(mIocpService.mIocp);
+
+				OnAccept(pOverlappedEx->mUid);
+			}
+			else
+			{
+				KickOutSession(pSession, true);;
+			}
+			
+		}
+		else if (IOOperation::RECV == pOverlappedEx->mIoType)
 		{
 			// OS가 받은 recv 뒤처리(패킷 분해해조립하고 큐에 담기)
 			pOverlappedEx->mUid = pSession->GetUniqueId();
@@ -252,6 +270,7 @@ void NetService::SendThread()
 {
 	while (true)
 	{
+
 		if (!mSendQ.empty())
 		{
 			auto& sendOver = mSendQ.front();
@@ -265,52 +284,6 @@ void NetService::SendThread()
 			// 무조건 꺼내야 한다. 안그럼 다른 세션들도 막힘
 			mSendQ.pop();
 		}
-	}
-}
-
-
-
-void NetService::AccepterThread()
-{
-	SOCKADDR_IN		stClientAddr;
-	int nAddrLen = sizeof(SOCKADDR_IN);
-
-	while (mIsAccepterRun)
-	{
-		//접속을 받을 구조체의 인덱스를 얻어온다.
-		RemoteSession* pClientInfo = GetEmptyClientInfo();
-		if (NULL == pClientInfo)
-		{
-			std::cout << "[Err] Client Pull... UU " << std::endl;
-			return;
-		}
-
-		//클라이언트 접속 요청이 들어올 때까지 기다린다.
-		pClientInfo->mRemoteSock = accept(mListenSocket, (SOCKADDR*)&stClientAddr, &nAddrLen);
-		
-		if (INVALID_SOCKET == pClientInfo->GetSock())
-		{
-			continue;
-		}
-
-		//I/O Completion Port객체와 소켓을 연결시킨다.
-		if (!mIocpService.AddDeviceRemoteSocket(pClientInfo))
-		{
-			return;
-		}
-
-		//Recv Overlapped I/O작업을 요청해 놓는다.
-		if (!pClientInfo->RecvMsg())
-		{
-			return;
-		}
-
-
-		auto id = pClientInfo->GetUniqueId();
-		OnAccept(id);
-
-		//클라이언트 갯수 증가
-		++mSessionCnt;
 	}
 }
 
@@ -353,4 +326,19 @@ bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 	CopyMemory(SendOver->mBuf.data(), pData, size);
 	SendOver->mSendPos += size;
 	mSendQ.push(SendOver);
+}
+
+void NetService::KickOutSession(RemoteSession* pSession, bool isForce)
+{
+	if (pSession->IsLive() == false)
+	{
+		return;
+	}
+	pSession->Release(isForce, mListenSocket);
+
+	//TODO 락을 걸어야 할거 같다.
+	--mClientCnt;
+
+	auto uniqueId = pSession->GetUniqueId();
+	OnClose(uniqueId);
 }

@@ -5,20 +5,20 @@
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClientManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="LogicMain.cpp" />
     <ClCompile Include="NetService.cpp">
       <Filter>Network</Filter>
     </ClCompile>
     <ClCompile Include="RemoteSession.cpp">
       <Filter>Network</Filter>
     </ClCompile>
-    <ClCompile Include="Room.cpp" />
+    <ClCompile Include="LogicMain.cpp">
+      <Filter>Logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClientManager.h" />
-    <ClInclude Include="LogicMain.h" />
     <ClInclude Include="NetService.h">
       <Filter>Network</Filter>
     </ClInclude>
@@ -28,14 +28,22 @@
     <ClInclude Include="RemoteSession.h">
       <Filter>Network</Filter>
     </ClInclude>
-    <ClInclude Include="LogicProcess.h" />
     <ClInclude Include="Packet.h" />
-    <ClInclude Include="TypeDefine.h" />
     <ClInclude Include="Room.h" />
+    <ClInclude Include="RoomManager.h" />
+    <ClInclude Include="LogicMain.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="LogicProcess.h">
+      <Filter>Logic</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Network">
       <UniqueIdentifier>{7bcee5c2-3ecb-4f5a-9ce0-d1bf7751d979}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logic">
+      <UniqueIdentifier>{3b1e6d75-b5af-4b15-9455-de64ff670696}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

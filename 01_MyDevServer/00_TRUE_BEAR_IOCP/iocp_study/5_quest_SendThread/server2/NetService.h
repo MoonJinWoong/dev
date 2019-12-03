@@ -23,17 +23,13 @@ public:
 	virtual void OnClose(unsigned int index) = 0;
 	virtual void OnRecv(CustomOverEx* pOver, unsigned int size_) = 0;
 
-
-	//소켓을 초기화하는 함수
 	bool InitSocket();
-
 	bool BindandListen(unsigned int nBindPort);
-
 	bool StartNetService(unsigned int maxClientCount);
 
 	void DestroyThread();
 
-	void CreateClient(unsigned int maxClientCount);
+	bool CreateSessionPool(unsigned int maxClientCount);
 	bool CreateWokerThread();
 	bool CreateAccepterThread();
 	bool CreateSendThread();
@@ -41,22 +37,15 @@ public:
 	RemoteSession* GetEmptyClientInfo();
 	RemoteSession* GetSessionByIdx(int index) {return mVecSessions[index];}
 	
-	
-	//WSARecv Overlapped I/O
 	void DoRecv(RemoteSession* pSession);
-
-	//WSASend Overlapped I/O
 	void DoSend(RemoteSession* pSessoin);
 
 	void WokerThread();
-	void AccepterThread();
-
 	void SendThread();
-	//bool SendQueuePush(unsigned int size, char* pMsg);
 
 
 	//소켓의 연결을 종료 시킨다.
-	void CloseSocket(RemoteSession* pSession, bool bIsForce = false);
+	void KickOutSession(RemoteSession* pSession, bool isForce);
 
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 

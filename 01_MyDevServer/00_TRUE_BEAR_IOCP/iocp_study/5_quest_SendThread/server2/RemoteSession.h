@@ -7,13 +7,16 @@
 #include <queue>
 #include <mutex>
 #include <array>
+#pragma comment(lib,"mswsock.lib")
+
 const int MAX_SOCKBUF = 1024;	
 const int MAX_WORKERTHREAD = 4; 
 
 enum class IOOperation 
 {
 	RECV ,
-	SEND
+	SEND,
+	ACCEPT
 };
 
 //WSAOVERLAPPED구조체를 확장
@@ -47,8 +50,11 @@ class RemoteSession
 public:
 
 	RemoteSession();
-	SOCKET& GetSock() { return mRemoteSock; }
-	
+	void UnInit(bool IsForce, SOCKET listenSock);
+
+	bool AcceptReady(SOCKET listenSock);
+	bool AcceptFinish(HANDLE mhIocp);
+
 	bool SendReady();
 	bool SendPacket(char* pBuf , int len);
 	void SendFinish(unsigned long len);
@@ -58,14 +64,19 @@ public:
 	bool RecvFinish(const char* pNextBuf, const unsigned long remain);
 
 	void SetUniqueId(int& id) { mUID = id; }
+	
 	unsigned int GetUniqueId() const { return mUID; }
 	int GetSendBuffPos() { return mSendBuffPos; }
+	SOCKET& GetSock() { return mRemoteSock; }
+
+	bool IsLive() const { return mIsLive; }
+
 	void IncreaseBuffPos(int len) { mSendBuffPos += len; }
 
-	SOCKET						mRemoteSock;			//Cliet와 연결되는 소켓
-	CustomOverEx				mRecvOverEx;	//RECV Overlapped I/O작업을 위한 변수
-	CustomOverEx				mSendOverEx;	//SEND Overlapped I/O작업을 위한 변수
-
+	SOCKET						mRemoteSock;	
+	CustomOverEx				mRecvOverEx;	
+	CustomOverEx				mSendOverEx;	
+	CustomOverEx				mAcceptOverEx;
 private:
 	std::mutex					mSendLock;
 	bool						mIsLive = false;

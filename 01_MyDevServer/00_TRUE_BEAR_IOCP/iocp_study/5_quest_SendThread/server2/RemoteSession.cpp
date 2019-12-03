@@ -5,8 +5,66 @@ RemoteSession::RemoteSession()
 {
 	ZeroMemory(&mRecvOverEx, sizeof(CustomOverEx));
 	ZeroMemory(&mSendOverEx, sizeof(CustomOverEx));
+	ZeroMemory(&mAcceptOverEx, sizeof(CustomOverEx));
+
 	mRemoteSock = INVALID_SOCKET;
 }
+
+bool RemoteSession::AcceptReady(SOCKET listenSock)
+{
+	mRemoteSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP,
+		NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (mRemoteSock == INVALID_SOCKET)
+	{
+		std::cout << "[ERR] AccpetAsync WSASocket fail" << std::endl;
+	}
+
+	ZeroMemory(&mOverAccept, sizeof(CustomOverEx));
+
+	DWORD bytes = 0;
+	DWORD flags = 0;
+	mOverAccept.m_wsaBuf.len = 0;
+	mOverAccept.m_wsaBuf.buf = nullptr;
+	mOverAccept.m_eOperation = IOOperation::ACCEPT;
+	mOverAccept.mUid = mIdx;
+
+	auto ret = AcceptEx(
+		listenSock,
+		mRemoteSock,
+		mAcceptBuf,
+		0,
+		sizeof(SOCKADDR_IN) + 16,
+		sizeof(SOCKADDR_IN) + 16,
+		&bytes,
+		(LPWSAOVERLAPPED) & (mOverAccept)
+	);
+
+	if (!ret)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			printf_s("AcceptEx Error : %d\n", GetLastError());
+			return false;
+		}
+	}
+
+	return true;
+}
+bool RemoteSession::AcceptFinish(HANDLE mhIocp)
+{
+	mIsLive = true;
+
+	SOCKADDR_IN		RemoteAddr;
+	int nAddrLen = sizeof(SOCKADDR_IN);
+	char clientIP[32] = { 0, };
+	inet_ntop(AF_INET, &(RemoteAddr.sin_addr), clientIP, 32 - 1);
+	printf("접속 : INDEX(%d) , SOCKET(%d)\n", (int)mIdx, mRemoteSock);
+
+	RecvMsg();
+	return true;
+}
+
+
 bool RemoteSession::SendReady()
 {
 	return true;
@@ -105,18 +163,31 @@ bool RemoteSession::RecvReady()
 
 bool RemoteSession::RecvFinish(const char* pNext, const unsigned long remain)
 {
-//	mRecvOverEx.mIoType = IOOperation::RECV;
-//	mRecvOverEx.mRemainByte = remain;
-//
-//	auto diff = (int)(remain - (mRecvOverEx.mCurrMark - pNext));
-//
-//	mRecvOverEx.mWSABuf.len = MAX_SOCKBUF;
-//	mRecvOverEx.mWSABuf.buf = m_ConnectionInfo.RingRecvBuffer.ForwardMark(moveMark, m_RecvBufSize, remainByte);
-//
-//
 	return true;
 }
 
+void RemoteSession::UnInit(bool IsForce, SOCKET listenSock)
+{
+	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER로 설정
 
+	// 강제 종료
+	if (IsForce)
+	{
+		stLinger.l_onoff = 1;
+	}
+
+	printf("종료 : INDEX(%d) , SOCKET(%d)\n", (int)mUID, mRemoteSock);
+
+
+	shutdown(mRemoteSock, SD_BOTH);
+	setsockopt(mRemoteSock, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
+	closesocket(mRemoteSock);
+
+	mRemoteSock = INVALID_SOCKET;
+	mIsLive = false;
+
+	// 비동기 Accept 다시 걸어줘서 쓰자
+	AcceptReady(listenSock);
+}
 
 

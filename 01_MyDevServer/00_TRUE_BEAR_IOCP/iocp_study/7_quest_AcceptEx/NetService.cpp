@@ -11,6 +11,7 @@ bool NetService::InitSocket()
 		return false;
 	}
 
+	//연결지향형 TCP , Overlapped I/O 소켓을 생성
 	mListenSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
 
 	if (INVALID_SOCKET == mListenSocket)
@@ -23,14 +24,17 @@ bool NetService::InitSocket()
 	return true;
 }
 
-bool NetService::BindandListen(c_u_Int nBindPort)
+bool NetService::BindandListen(unsigned int nBindPort)
 {
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
 	stServerAddr.sin_port = htons(nBindPort); //서버 포트를 설정한다.		
+	//어떤 주소에서 들어오는 접속이라도 받아들이겠다.
+	//보통 서버라면 이렇게 설정한다. 만약 한 아이피에서만 접속을 받고 싶다면
+	//그 주소를 inet_addr함수를 이용해 넣으면 된다.
 	stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-
+	//위에서 지정한 서버 주소 정보와 cIOCompletionPort 소켓을 연결한다.
 	int nRet = ::bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
 	if (0 != nRet)
 	{
@@ -38,8 +42,9 @@ bool NetService::BindandListen(c_u_Int nBindPort)
 		return false;
 	}
 
-	//TODO 접속 테스트 할때 접속대기큐 조절해볼 것
-	nRet = ::listen(mListenSocket, SOMAXCONN);
+	//접속 요청을 받아들이기 위해 cIOCompletionPort소켓을 등록하고 
+	//접속대기큐를 5개로 설정 한다.
+	nRet = ::listen(mListenSocket, 5);
 	if (0 != nRet)
 	{
 		std::cout << "[err] listen() fail..." << WSAGetLastError();
@@ -50,30 +55,30 @@ bool NetService::BindandListen(c_u_Int nBindPort)
 	return true;
 }
 
-bool NetService::StartNetService(c_u_Int maxClientCount)
+bool NetService::StartNetService(unsigned int maxClientCount)
 {
 
-	// iocp 생성
-	if (!mIocp.CreateNewIocp(MAX_WORKERTHREAD))
+	//CompletionPort 객체 생성 요청을 한다.
+	if (!mIocpService.CreateNewIocp(MAX_WORKERTHREAD))
+	{
+		return false;
+	}
+	if (!mIocpService.AddDeviceListenSocket(mListenSocket))
 	{
 		return false;
 	}
 
-	// 리슨 소켓을 iocp에 등록
-	if (!mIocp.AddDeviceListenSocket(mListenSocket))
-	{
-		return false;
-
-	}
-
-	// 워커 스레드 
 	if(!CreateWokerThread())
 	{
 		return false;
 	}
 
-	// 세션풀 생성 , acceptEX 걸어놓기
-	if (!CreateSessions(maxClientCount))
+	if (!CreateSendThread())
+	{
+		return false;
+	}
+
+	if (!CreateSessionPool(maxClientCount))
 	{
 		return false;
 	}
@@ -84,8 +89,8 @@ bool NetService::StartNetService(c_u_Int maxClientCount)
 
 void NetService::DestroyThread()
 {
-	mIsWorkerRun = false;
-	CloseHandle(mIocp.m_workIocp);
+	mWorkerRun = false;
+	CloseHandle(mIocpService.mIocp);
 
 	for (auto& th : mIOWorkerThreads)
 	{
@@ -95,17 +100,26 @@ void NetService::DestroyThread()
 		}
 	}
 
-	closesocket(mListenSocket);
+	// send thread 종료 
+	mSendRun = false;
+
+	if (mSendThread.joinable())
+	{
+		mSendThread.join();
+	}
 }
 
-bool NetService::CreateSessions(c_u_Int maxClientCount)
+bool NetService::CreateSessionPool(unsigned int maxClientCount)
 {
 	for (auto i = 0; i < maxClientCount; ++i)
 	{
 		auto pSession = new RemoteSession;
 		pSession->SetUniqueId(i);
-		if (!pSession->AccpetAsync(mListenSocket))
+		if (!pSession->AcceptReady(mListenSocket))
+		{
+			std::cout << "AcceptReady fail" << std::endl;
 			return false;
+		}
 		mVecSessions.emplace_back(pSession);
 	}
 	return true;
@@ -113,8 +127,7 @@ bool NetService::CreateSessions(c_u_Int maxClientCount)
 
 bool NetService::CreateWokerThread()
 {
-	unsigned int uiThreadId = 0;
-	//WaingThread Queue에 대기 상태로 넣을 쓰레드들 생성 권장되는 개수 : (cpu개수 * 2) + 1 
+	mWorkerRun = true;
 	for (auto i = 0; i < MAX_WORKERTHREAD; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WokerThread(); });
@@ -124,7 +137,15 @@ bool NetService::CreateWokerThread()
 	return true;
 }
 
-RemoteSession* NetService::GetEmptySession()
+bool NetService::CreateSendThread()
+{
+	mSendRun = true;
+	mSendThread = std::thread([this]() { SendThread(); });
+	std::cout << "[Success] SendThread() " << std::endl;
+	return true;
+}
+
+RemoteSession* NetService::GetEmptyClientInfo()
 {
 	for (auto& client : mVecSessions)
 	{
@@ -136,106 +157,140 @@ RemoteSession* NetService::GetEmptySession()
 	return nullptr;
 }
 
+void NetService::DoAcceptFinish(RemoteSession* pSession,unsigned int uid)
+{
+	pSession = GetSessionByIdx(uid);
+
+	if (mIocpService.AddDeviceRemoteSocket(pSession))
+	{
+		pSession->AcceptFinish(mIocpService.mIocp);
+		ThrowLogicConnect(pSession->GetUniqueId());
+	}
+	else
+	{
+		KickSession(pSession, true);
+	}
+}
+void NetService::DoRecvFinish(CustomOverEx* pOver,unsigned long ioSize)
+{
+	auto session = GetSessionByIdx(pOver->mUid);	
+	ThrowLogicRecv(pOver, ioSize);
+	session->RecvMsg();
+}
 
 void NetService::DoSend(RemoteSession* pSessoin)
 {
-	pSessoin->SendPopInWorker();
 }
 
 void NetService::WokerThread()
 {
-	RemoteSession* pSession = NULL;  // completeion key
+	RemoteSession* pSession = nullptr;
 	bool bSuccess = true;
 	unsigned long dwIoSize = 0;
-	LPOVERLAPPED lpOverlapped = NULL;
+	LPOVERLAPPED lpOverlapped = nullptr;
 
-	while (mIsWorkerRun)
+	while (mWorkerRun)
 	{
-		bSuccess = GetQueuedCompletionStatus(mIocp.m_workIocp,
+
+		bSuccess = GetQueuedCompletionStatus(mIocpService.mIocp,
 			&dwIoSize,					// 실제로 전송된 바이트
 			(PULONG_PTR)&pSession,		// CompletionKey
 			&lpOverlapped,				// Overlapped IO 객체
 			INFINITE);					// 대기할 시간
 
-		if (bSuccess == true && 0 == dwIoSize && NULL == lpOverlapped)
+
+		if (bSuccess == true && 0 == dwIoSize && nullptr == lpOverlapped)
 		{
-			mIsWorkerRun = false;
+			mWorkerRun = false;
 			continue;
 		}
 
-		if (NULL == lpOverlapped)
+		if (nullptr == lpOverlapped)
 		{
 			continue;
 		}
 
 		CustomOverEx* pOverlappedEx = (CustomOverEx*)lpOverlapped;
 
-		//client가 접속을 끊음		
-		if (bSuccess == false || (0 == dwIoSize && IOOperation::ACCEPT != pOverlappedEx->m_eOperation))
+		if (bSuccess == false || (0 == dwIoSize && IOOperation::ACCEPT != pOverlappedEx->mIoType))
 		{
-			KickOutSession(pSession);
+			KickSession(pSession);
 			continue;
 		}
 
-		if (IOOperation::ACCEPT == pOverlappedEx->m_eOperation)
-		{
-			pSession = GetSessionByIdx(pOverlappedEx->mUid);
-			if (mIocp.AddDeviceRemoteSocket(pSession))
-			{
-				//TODO 정확하게 증가 하려면 락을 걸어야 할거 같다.
-				++mClientCnt;
-				pSession->AcceptFinish(mIocp.m_workIocp);
 
-				OnAccept(pOverlappedEx->mUid);
-			}
-			else
-			{
-				KickOutSession(pSession, true);
-			}
-
-		}
-		else if (IOOperation::RECV == pOverlappedEx->m_eOperation)
+		if (IOOperation::ACCEPT == pOverlappedEx->mIoType)
 		{
-			// logic
-			pOverlappedEx->m_RecvBuf[dwIoSize] = NULL;			
-			OnRecv(pSession->GetUniqueId(), dwIoSize, pOverlappedEx->m_RecvBuf);
-			
-			// 버퍼
-			pSession->RecvStart();
+			DoAcceptFinish(pSession,pOverlappedEx->mUid);
 		}
-		else if (IOOperation::SEND == pOverlappedEx->m_eOperation)
+		else if (IOOperation::RECV == pOverlappedEx->mIoType)
 		{
-			DoSend(pSession);
+			pOverlappedEx->mUid = pSession->GetUniqueId();
+			DoRecvFinish(pOverlappedEx, dwIoSize);
+		}
+		else if (IOOperation::SEND == pOverlappedEx->mIoType)
+		{
+			pSession->SendFinish(dwIoSize);
 		}
 		else
 		{
-			std::cout << "[Err] SocketFd : " << (int)pSession->GetSock() << std::endl;
+			std::cout << "[Err] Operation : " << (int)pSession->GetSock() << std::endl;
 		}
+
 	}
 }
 
 
-void NetService::KickOutSession(RemoteSession* pSession, bool isForce)
-{
 
-	if (pSession->IsConnected() == false)
+void NetService::SendThread()
+{
+	while (mSendRun)
+	{
+		for (auto client : mVecSessions)
+		{
+			if (!client->IsLive())
+			{
+				continue;
+			}
+
+			if (!client->SendPacket())
+			{
+				continue;
+			}
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(8));
+	}
+}
+
+
+
+void NetService::KickSession(RemoteSession* pSession, bool isForce)
+{
+	//TODO  락을 걸던지 , interlock을 걸던지 두번 호출 안되게 해야 한다. 
+	if (!pSession->IsLive())
 	{
 		return;
 	}
-	pSession->Release(isForce, mListenSocket);
-	
-	//TODO 락을 걸어야 할거 같다.
-	--mClientCnt;
-	
+	pSession->UnInit(isForce, mListenSocket);
+
+	--mSessionCnt;
+
 	auto uniqueId = pSession->GetUniqueId();
-	OnClose(uniqueId);
+	ThrowLogicClose(uniqueId);
 }
 
 
-bool NetService::SendMsg(c_u_Int uniqueId, c_u_Int size, char* pData)
+bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 {
-	std::cout << "session : " << uniqueId << "  size :" << size << std::endl;
-	auto pSession = GetSessionByIdx(uniqueId);
-	return pSession->SendPushInLogic(size, pData);
-}
+	// 다 조립되서 온다.
+	std::lock_guard<std::mutex> guard(mSendLock);
 
+	if (uniqueId < 0 || uniqueId >= mMaxSessionCnt)
+	{
+		return false;
+	}
+	auto pClient = GetSessionByIdx(uniqueId);
+
+	return pClient->SendReady(size, pData);
+}

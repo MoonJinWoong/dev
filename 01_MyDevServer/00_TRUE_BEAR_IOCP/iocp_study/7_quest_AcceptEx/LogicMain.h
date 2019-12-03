@@ -3,52 +3,56 @@
 #include <unordered_map>
 #include <functional>
 #include <queue>
-#include "TypeDefine.h"
+#include <mutex>
+
 #include "Packet.h"
 #include "ClientManager.h"
-
+#include "RoomManager.h"
 class LogicMain
 {
 public:
 	LogicMain() = default;
 	~LogicMain() = default;
 
-	void Init(c_u_Int maxClient);
-
+	void Init(unsigned int maxClient);
 	bool Start();
-
 	void Stop();
 
-	void RecvPktData(c_u_Int unique_id, c_u_Int len, char* msg);
+	void RecvPktData(unsigned int unique_id, char* msg , int size);
 
 	void LogicThread();
 
 	PacketFrame GetConnectPkt();
 	void		PutConnectPkt(PacketFrame packet);
 
-	PacketFrame GetUserPkt();
-	void		PutUserIdx(c_u_Int unique_id);
+	//PacketFrame DeQueueRecvPkt();
+	//void		EnQueueRecvPkt(unsigned int unique_id);
 
-	void ProcRecv(c_u_Int uniqueId, c_int pktType, c_u_Int size, char* pData);
+	void ProcRecv(unsigned int uniqueId, const int pktType, unsigned int size, char* pData);
 
 	// 로직함수들이 이걸로 param 넣어서 태워 보낸다. 
-	std::function<void(u_Int, u_Int, char*)> SendPacketFunc;
-
+	std::function<void(unsigned int, unsigned int, char*)> SendPacketFunc;
 
 	// 로직처리 모음
-	void ProcConnect(u_Int uniqueId, int size, char* pData);
-	void ProcDisConnect(u_Int uniqueId, int size, char* pData);
-	void ProcLogin(u_Int uniqueId, int size, char* pData);
-	void ProcRoomEnter(u_Int uniqueId, int size, char* pData);
+	void ProcConnect(unsigned int uniqueId, int size, char* pData);
+	void ProcDisConnect(unsigned int uniqueId, int size, char* pData);
+	void ProcLogin(unsigned int uniqueId, int size, char* pData);
+	void ProcRoomList(unsigned int uniqueId, int size, char* pData);
+	void ProcRoomEnter(unsigned int uniqueId, int size, char* pData);
+	void ProcRoomChat(unsigned int uniqueId, int size, char* pData);
+
 private:
-	bool isRun = false;
+	bool mIsRun = false;
 	std::thread mLogicThread;
 	std::mutex mLock;
-	std::queue<u_Int> mUserIdQueue;
+	std::queue<PacketFrame> mRecvPktQ;
 	std::queue<PacketFrame> mConnectQueue;
 
 	ClientManager* mClMgr;
 
-	typedef void(LogicMain::* RECV_PKT_TYPE)(u_Int, int, char*);
+	RoomManager* mRoomMgr;
+	unsigned int mMaxRoomCnt = 0;
+	typedef void(LogicMain::* RECV_PKT_TYPE)(unsigned int, int, char*);
 	std::unordered_map<int, RECV_PKT_TYPE> mRecvFuncDic;
 };
+
