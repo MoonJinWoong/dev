@@ -15,16 +15,14 @@ void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
 	{
 		return;
 	}
-	pOver->mWSABuf.buf = pOver->mBuf.data();
 	pOver->mRemainByte += ioSize;
-	
 	auto& remain = pOver->mRemainByte;
-	auto pBuf = pOver->mWSABuf.buf;
+
+	auto pBuf = pOver->mBuf.data();
 
 	// 패킷 헤더 길이, 패킷 전체 길이
 	const int PKT_HEAD_LEN = sizeof(PKT_HEADER);
 	const int PKT_TOTAL_LEN = 2;
-	const int PKT_TYPE_LEN = 2;
 
 	short packetSize = 0;
 
@@ -56,7 +54,8 @@ void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
 		}
 	}
 
-	//session->mRecvOverEx.mBuf.fill(0);
+	session->mRecvOverEx.mRemainByte = remain;
+
 }
 
 

@@ -2,8 +2,6 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="ChatServer.cpp" />
-    <ClCompile Include="Client.cpp" />
-    <ClCompile Include="ClientManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NetService.cpp">
       <Filter>Network</Filter>
@@ -14,11 +12,15 @@
     <ClCompile Include="LogicMain.cpp">
       <Filter>Logic</Filter>
     </ClCompile>
+    <ClCompile Include="Client.cpp">
+      <Filter>Contents</Filter>
+    </ClCompile>
+    <ClCompile Include="ClientManager.cpp">
+      <Filter>Contents</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChatServer.h" />
-    <ClInclude Include="Client.h" />
-    <ClInclude Include="ClientManager.h" />
     <ClInclude Include="NetService.h">
       <Filter>Network</Filter>
     </ClInclude>
@@ -29,13 +31,23 @@
       <Filter>Network</Filter>
     </ClInclude>
     <ClInclude Include="Packet.h" />
-    <ClInclude Include="Room.h" />
-    <ClInclude Include="RoomManager.h" />
     <ClInclude Include="LogicMain.h">
       <Filter>Logic</Filter>
     </ClInclude>
     <ClInclude Include="LogicProcess.h">
       <Filter>Logic</Filter>
+    </ClInclude>
+    <ClInclude Include="Client.h">
+      <Filter>Contents</Filter>
+    </ClInclude>
+    <ClInclude Include="ClientManager.h">
+      <Filter>Contents</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Contents</Filter>
+    </ClInclude>
+    <ClInclude Include="RoomManager.h">
+      <Filter>Contents</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +56,9 @@
     </Filter>
     <Filter Include="Logic">
       <UniqueIdentifier>{3b1e6d75-b5af-4b15-9455-de64ff670696}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Contents">
+      <UniqueIdentifier>{dc65aa2b-246c-4990-b8da-1fb04b480ead}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

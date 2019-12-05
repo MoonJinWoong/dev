@@ -39,7 +39,6 @@ struct CustomOverEx
 class RemoteSession
 {
 public:
-
 	RemoteSession();
 	SOCKET& GetSock() { return mRemoteSock; }
 	
@@ -51,7 +50,6 @@ public:
 	void SendFinish(unsigned long len);
 
 	bool RecvMsg();
-	bool RecvReady();
 	bool RecvFinish(const char* pNextBuf, const unsigned long remain);
 
 	bool UnInit(bool IsForce, SOCKET mListenSock);

@@ -63,6 +63,7 @@ bool RemoteSession::AcceptFinish(HANDLE mIocp)
 	RecvMsg();
 	return true;
 }
+
 bool RemoteSession::SendReady(const unsigned int size, char* msg)
 {
 	std::lock_guard<std::mutex> guard(mSendLock);
@@ -79,7 +80,6 @@ bool RemoteSession::SendReady(const unsigned int size, char* msg)
 
 	return true;
 }
-
 bool RemoteSession::SendPacket()
 {
 	/// 이전 send가 완료되어야 패킷을 보낸다.
@@ -131,6 +131,7 @@ void RemoteSession::SendFinish(unsigned long len)
 	std::cout << "Send Complete byte:" << len << std::endl;
 }
 
+
 bool RemoteSession::RecvMsg()
 {
 	DWORD dwFlag = 0;
@@ -140,7 +141,7 @@ bool RemoteSession::RecvMsg()
 	mRecvOverEx.mWSABuf.buf = mRecvOverEx.mBuf.data();
 	mRecvOverEx.mIoType = IOOperation::RECV;
 
-	int nRet = WSARecv(mRemoteSock,
+	auto ret = WSARecv(mRemoteSock,
 		&(mRecvOverEx.mWSABuf),
 		1,
 		&dwRecvNumBytes,
@@ -148,9 +149,10 @@ bool RemoteSession::RecvMsg()
 		(LPWSAOVERLAPPED) & (mRecvOverEx),
 		NULL);
 
-	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
+	if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		printf("[에러] WSARecv()함수 실패 : %d\n", WSAGetLastError());
+		std::cout << "[에러] WSARecv fail.. :" << WSAGetLastError()
+			<< "   socket num:" << mRemoteSock << std::endl;
 		return false;
 	}
 

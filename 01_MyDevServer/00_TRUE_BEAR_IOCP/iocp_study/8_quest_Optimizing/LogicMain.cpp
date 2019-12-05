@@ -39,7 +39,6 @@ void LogicMain::Stop()
 void LogicMain::RecvPktData(unsigned int unique_id, char* pBuf , int size)
 {
 	// OnRecv 에서 완성되서 온다. 
-	std::lock_guard<std::mutex> guard(mLock);
 		
 	char *recvBuf = new char[size];
 	memcpy(recvBuf, pBuf, size);
@@ -57,6 +56,7 @@ void LogicMain::RecvPktData(unsigned int unique_id, char* pBuf , int size)
 	packet.pData = recvBuf;
 	packet.unique_id = unique_id;
 
+	std::lock_guard<std::mutex> guard(mLock);
 	mRecvPktQ.push(packet);
 }
 
@@ -76,7 +76,6 @@ void LogicMain::LogicThread()
 {
 	while (mIsRun)
 	{
-
 		if (!mRecvPktQ.empty())
 		{
 			auto packet = mRecvPktQ.front();			
@@ -85,6 +84,7 @@ void LogicMain::LogicThread()
 			{
 				ProcRecv(packet.unique_id, packet.packet_type, packet.size, packet.pData);
 			}
+				delete packet.pData;
 		}
 		else
 		{
