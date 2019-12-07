@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Config.h" />
     <ClInclude Include="Iocp.h" />
     <ClInclude Include="NetService.h" />
     <ClInclude Include="Packet.h" />

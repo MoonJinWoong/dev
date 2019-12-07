@@ -7,10 +7,11 @@
 #include <vector>
 #include <mutex>
 
-
+#include "Config.h"
 #include "RemoteSession.h"
 #include "Iocp.h"
 #include "Packet.h"
+
 
 class NetService
 {
@@ -22,8 +23,9 @@ public:
 	virtual void ThrowLogicConnection(unsigned int index,PACKET_TYPE type) = 0;
 	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size_) = 0;
 
+	void InitConfig();
 	bool InitSocket();
-	bool BindandListen(unsigned int nBindPort);
+	bool BindandListen();
 	bool StartNetService(unsigned int maxClientCount);
 
 	bool CreateSessionPool(unsigned int maxClientCount);
@@ -62,5 +64,7 @@ private:
 
 	std::mutex					mLock;
 	std::queue<CustomOverEx*>	mSendQ;
+
+	Config mConfig;
 
 };

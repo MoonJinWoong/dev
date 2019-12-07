@@ -6,22 +6,18 @@
 #include "RemoteSession.h"
 
 
-class IocpEvents
-{
-public:
-	OVERLAPPED_ENTRY m_IoArray[1000]; //TODO 배열안의 인덱스 따로 처리
-	int m_eventCount;
-};
-
 
 class Iocp
 {
 public:
 
-	Iocp()
+	class IocpEvents
 	{
-		mIocp = INVALID_HANDLE_VALUE;
-	}
+	public:
+		OVERLAPPED_ENTRY m_IoArray[1000]; //TODO 배열안의 인덱스 따로 처리
+		int m_eventCount;
+	};
+	 
 	~Iocp()
 	{
 		CloseHandle(mIocp);
@@ -76,12 +72,12 @@ public:
 		return true;
 	}
 
-	void GQCSEx(IocpEvents& IoEvent, unsigned long timeOut)
+	void GQCSEx(Iocp::IocpEvents& IoEvent, unsigned long timeOut)
 	{
 		bool ret = GetQueuedCompletionStatusEx(
 			mIocp,
 			IoEvent.m_IoArray,
-			1000,	//TODO const int로 변경해주자 .한번에 가져올 이벤트 양
+			1000,	//한번에 가져올 이벤트 양
 			(ULONG*)&IoEvent.m_eventCount,
 			timeOut,
 			FALSE
@@ -93,5 +89,5 @@ public:
 		}
 	}
 public:
-	HANDLE mIocp;
+	HANDLE mIocp = INVALID_HANDLE_VALUE;
 };

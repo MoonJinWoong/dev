@@ -1,6 +1,10 @@
 
 #include "NetService.h"
 
+void NetService::InitConfig()
+{
+	mConfig.ReadConfig();
+}
 bool NetService::InitSocket()
 {
 	WSADATA wsaData;
@@ -23,11 +27,11 @@ bool NetService::InitSocket()
 	return true;
 }
 
-bool NetService::BindandListen(unsigned int nBindPort)
+bool NetService::BindandListen()
 {
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
-	stServerAddr.sin_port = htons(nBindPort); 
+	stServerAddr.sin_port = htons(mConfig.mServerPort); 
 	stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int nRet = ::bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
@@ -39,7 +43,7 @@ bool NetService::BindandListen(unsigned int nBindPort)
 
 	//접속 요청을 받아들이기 위해 cIOCompletionPort소켓을 등록하고 
 	//접속대기큐를 5개로 설정 한다.
-	nRet = ::listen(mListenSocket, 5);
+	nRet = ::listen(mListenSocket, mConfig.mBackLog);
 	if (0 != nRet)
 	{
 		std::cout << "[err] listen() fail..." << WSAGetLastError();
@@ -52,7 +56,7 @@ bool NetService::BindandListen(unsigned int nBindPort)
 
 bool NetService::StartNetService(unsigned int maxClientCount)
 {
-	if (!mIocpService.CreateNewIocp(MAX_WORKERTHREAD))
+	if (!mIocpService.CreateNewIocp(mConfig.mMaxWorkThreadCnt))
 	{
 		return false;
 	}
@@ -120,7 +124,7 @@ bool NetService::CreateSessionPool(unsigned int maxClientCount)
 bool NetService::CreateWokerThread()
 {
 	mWorkerRun = true;
-	for (auto i = 0; i < MAX_WORKERTHREAD; i++)
+	for (auto i = 0; i < mConfig.mMaxWorkThreadCnt; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WokerThread(); });
 	}
@@ -183,14 +187,15 @@ void NetService::WokerThread()
 
 	while (mWorkerRun)
 	{
-		IocpEvents events;
+
+		Iocp::IocpEvents events;
 		mIocpService.GQCSEx(events, 100);
 
 		for (int i = 0; i < events.m_eventCount; ++i)
 		{
 			auto Over = reinterpret_cast<CustomOverEx*>(events.m_IoArray[i].lpOverlapped);
 			auto ioSize = events.m_IoArray[i].dwNumberOfBytesTransferred;
-			pSession = (RemoteSession*)events.m_IoArray[i].lpCompletionKey;
+			pSession = reinterpret_cast<RemoteSession*>(events.m_IoArray[i].lpCompletionKey);
 
 			if (0 >= ioSize && IO_TYPE::ACCEPT != Over->mIoType)
 			{

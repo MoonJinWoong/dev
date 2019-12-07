@@ -8,7 +8,6 @@
 #include <mutex>
 #include <array>
 const int MAX_SOCKBUF = 1024;	
-const int MAX_WORKERTHREAD = 4; 
 
 enum class IO_TYPE 
 {

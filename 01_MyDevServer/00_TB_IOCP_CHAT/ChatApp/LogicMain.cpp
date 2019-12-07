@@ -1,6 +1,7 @@
 #include "LogicMain.h"
 #include "LogicProcess.h"
 
+
 void LogicMain::Init(unsigned int maxClient)
 {
 	mRecvFuncDic = std::unordered_map<int, RECV_PKT_TYPE>();
@@ -11,12 +12,14 @@ void LogicMain::Init(unsigned int maxClient)
 	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_ENTER] = &LogicMain::ProcRoomEnter;
 	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_CHAT] = &LogicMain::ProcRoomChat;
 
-	mClMgr = new ClientManager;
+
+	//TODO 옵션값으로 빼줄 것
+	//TODO  굳이 힙에 할당 해줄 필요가 있을까 고민해보자
+	mMaxRoomCnt = 10;
+	mClMgr = std::make_unique<ClientManager>();
 	mClMgr->Init(maxClient);
 
-	//TODO const unsigned int 값 나중에 따로 옵션값으로 빼줄 것
-	mMaxRoomCnt = 10;
-	mRoomMgr = new RoomManager;
+	mRoomMgr = std::make_unique<RoomManager>();
 	mRoomMgr->Init(mMaxRoomCnt);
 }
 

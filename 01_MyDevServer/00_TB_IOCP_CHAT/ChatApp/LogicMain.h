@@ -4,6 +4,7 @@
 #include <functional>
 #include <queue>
 #include <mutex>
+#include <memory>
 
 #include "../NetLib/Packet.h"
 #include "ClientManager.h"
@@ -43,11 +44,11 @@ private:
 	std::queue<PacketFrame> mRecvPktQ;
 	std::queue<PacketFrame> mConnectQueue;
 
-	ClientManager* mClMgr;
-
-	RoomManager* mRoomMgr;
+	std::shared_ptr<ClientManager> mClMgr;
+	std::shared_ptr<RoomManager>   mRoomMgr;
 	unsigned int mMaxRoomCnt = 0;
-	typedef void(LogicMain::* RECV_PKT_TYPE)(unsigned int, int, char*);
+
+	using RECV_PKT_TYPE = void (LogicMain::*)(unsigned int, int, char*);
 	std::unordered_map<int, RECV_PKT_TYPE> mRecvFuncDic;
 };
 
