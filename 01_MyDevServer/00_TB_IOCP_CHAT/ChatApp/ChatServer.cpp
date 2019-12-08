@@ -6,8 +6,6 @@ void ChatServer::ThrowLogicConnection(unsigned int unique_id,PACKET_TYPE type)
 	mLogicProc->ConnectionPktData(unique_id,type);
 }
 
-
-
 void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
 {
 	RemoteSession* session = GetSessionByIdx(pOver->mUid);
@@ -55,7 +53,6 @@ void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
 	}
 
 	session->mRecvOverEx.mRemainByte = remain;
-
 }
 
 

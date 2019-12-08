@@ -33,7 +33,7 @@ public:
 		}
 		return true;
 	}
-
+	
 	bool AddDeviceListenSocket(SOCKET listenSock)
 	{
 		auto ret = CreateIoCompletionPort(
@@ -49,6 +49,7 @@ public:
 		}
 		return true;
 	}
+	
 	bool AddDeviceRemoteSocket(RemoteSession* RemoteSession)
 	{
 		auto ret = CreateIoCompletionPort(
@@ -64,14 +65,12 @@ public:
 		}
 		return true;
 	}
-
-
-	//TODO: 필요할때 구현해주자
+	
 	bool PQCS()
 	{
 		return true;
 	}
-
+	
 	void GQCSEx(Iocp::IocpEvents& IoEvent, unsigned long timeOut)
 	{
 		bool ret = GetQueuedCompletionStatusEx(

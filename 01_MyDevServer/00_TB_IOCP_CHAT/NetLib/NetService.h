@@ -44,7 +44,6 @@ public:
 	void SendThread();
 
 	void KickSession(RemoteSession* pSession, bool bIsForce = false);
-
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 
 private:

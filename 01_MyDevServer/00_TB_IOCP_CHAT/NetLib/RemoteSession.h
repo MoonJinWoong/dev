@@ -16,15 +16,14 @@ enum class IO_TYPE
 	ACCEPT
 };
 
-//WSAOVERLAPPED구조체를 확장
 struct CustomOverEx
 {
-	WSAOVERLAPPED mWSAOverlapped;		//Overlapped I/O구조체
-	WSABUF		  mWSABuf;				//Overlapped I/O작업 버퍼
+	WSAOVERLAPPED mWSAOverlapped;		
+	WSABUF		  mWSABuf;				
 	unsigned int  mUid = -1;			// unique id
 	unsigned int  mRemainByte = 0;
 	std::array<char, MAX_SOCKBUF> mBuf;
-	IO_TYPE mIoType;			//작업 동작 종류
+	IO_TYPE mIoType;			
 
 	CustomOverEx()
 	{
@@ -69,9 +68,9 @@ private:
     bool						mIsLive = false;
 
 	std::mutex					mSendLock;
-	int                         mSendBuffPos = 0;      // 샌드 버퍼 위치
+	int                         mSendBuffPos = 0;    
 	int							mSendPendingCnt = 0;  // 다 보내지 못한 경우 체크
-	char						mSendReservedBuf[MAX_SOCKBUF]; //데이터 버퍼	
+	char						mSendReservedBuf[MAX_SOCKBUF]; 
 	char						mSendBuf[MAX_SOCKBUF]; //데이터 버퍼
 	
 	unsigned int				mUID = -1;
