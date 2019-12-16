@@ -81,13 +81,17 @@ void LogicMain::LogicThread()
 	{
 		if (!mRecvPktQ.empty())
 		{
-			auto packet = mRecvPktQ.front();			
+			std::lock_guard<std::mutex> guard(mLock);
+			auto packet = mRecvPktQ.front();
+			
+			//delete [] mRecvPktQ.front().pData;
 			mRecvPktQ.pop();
+			
 			if (packet.packet_type >= (int)PACKET_TYPE::CONNECTION)
 			{
 				ProcRecv(packet.unique_id, packet.packet_type, packet.size, packet.pData);
 			}
-				delete packet.pData;
+			delete[] packet.pData;
 		}
 		else
 		{

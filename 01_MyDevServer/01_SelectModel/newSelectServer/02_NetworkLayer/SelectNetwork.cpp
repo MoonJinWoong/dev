@@ -170,7 +170,6 @@ namespace NetworkLayer
 	void SelectNetwork::Run()
 	{
 		auto r_set = m_ReadSet;
-		//연결된 모든 세션을 write 이벤트를 조사하고 있는데 사실 다 할 필요는 없다. 이전에 send 버퍼가 다 찼던 세션만 조사해도 된다.
 		auto w_set = m_ReadSet;
 
 		// Select 
@@ -179,16 +178,12 @@ namespace NetworkLayer
 		if (ret == 0 || ret == -1) // -1은 에러이다
 			return;
 		
-
 		// Accept
 		if (FD_ISSET(m_ServerSocket, &r_set))
 			auto accepRet = AcceptNewClient();
 		
-
 		// read write set 검사. 
 		checkClient(r_set, w_set);
-
-
 	}
 
 

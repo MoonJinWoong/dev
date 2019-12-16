@@ -10,12 +10,12 @@ void Client::Reset()
 {
 	mRoomIdx = -1;
 	mNickName = "";
-	mState = Client::USER_STATE::NONE;
+	mState = USER_STATE::NONE;
 }
 
 int Client::SetLogin(std::string& nickname , int unique_id)
 {
-	mState = Client::USER_STATE::LOGIN;
+	mState = USER_STATE::LOGIN;
 	mNickName = nickname;
 	mRemoteIdx = unique_id;
 	return 0;

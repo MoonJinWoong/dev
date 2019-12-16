@@ -6,53 +6,43 @@ void ChatServer::ThrowLogicConnection(unsigned int unique_id,PACKET_TYPE type)
 	mLogicProc->ConnectionPktData(unique_id,type);
 }
 
-void ChatServer::ThrowLogicRecv(CustomOverEx *pOver, unsigned int ioSize)
+void ChatServer::ThrowLogicRecv(CustomOverEx* pOver, unsigned int ioSize)
 {
 	RemoteSession* session = GetSessionByIdx(pOver->mUid);
 	if (session == nullptr)
 	{
 		return;
 	}
-	pOver->mRemainByte += ioSize;
-	auto& remain = pOver->mRemainByte;
 
-	auto pBuf = pOver->mBuf.data();
-
-	// 패킷 헤더 길이, 패킷 전체 길이
-	const int PKT_HEAD_LEN = sizeof(PKT_HEADER);
-	const int PKT_TOTAL_LEN = 2;
-
-	short packetSize = 0;
-
-	while (true)
+	if (ioSize != session->GetRecvBuffer().MoveWritePos(ioSize))
 	{
-		if (remain < PKT_HEAD_LEN)
+		std::cout << "Recv Move Write Err" << std::endl;
+		return;
+	}
+
+	PKT_HEADER header;
+	while (session->GetRecvBuffer().GetReadAbleSize() > 0)
+	{
+		if (session->GetRecvBuffer().GetReadAbleSize() <= sizeof(header))
 		{
 			break;
 		}
-		// 패킷 헤더에서 토탈 길이 추출
-		CopyMemory(&packetSize, pBuf, PKT_TOTAL_LEN);
 
-		if (packetSize <= 0 || packetSize > MAX_SOCKBUF)
+		session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
+
+		if (session->GetRecvBuffer().GetReadAbleSize() < header.packet_len)
 		{
-			return;
-		}
-
-
-		// 로직으로 던진다.
-		if (remain >= (DWORD)packetSize)
-		{
-			mLogicProc->RecvPktData(session->GetUniqueId(), pBuf , packetSize);
-			remain -= packetSize;
-			pBuf += packetSize;
+			break;
 		}
 		else
 		{
-			break;
+			mLogicProc->RecvPktData(session->GetUniqueId(), session->GetRecvBuffer().GetReadBufferPtr() , header.packet_len);
+			session->RecvFinish(header.packet_len);
 		}
-	}
 
-	session->mRecvOverEx.mRemainByte = remain;
+	}
+	session->RecvMsg();
+
 }
 
 

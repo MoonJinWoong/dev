@@ -14,7 +14,7 @@ public:
 	void Init(unsigned int maxCnt);
 
 	void Add(std::string nickName, int unique_id);
-	int FindID(std::string nickName);
+	bool FindID(std::string nickName);
 	void Delete(Client* client);
 
 

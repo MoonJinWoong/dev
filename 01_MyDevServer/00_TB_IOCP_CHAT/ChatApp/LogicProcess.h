@@ -33,7 +33,7 @@ void LogicMain::ProcLogin(unsigned int uniqueId, int size, char* pData)
 	}
 
 	// already
-	if (mClMgr->FindID(inputId) != -1)
+	if (!mClMgr->FindID(inputId))
 	{
 		const char* retMsg = "login already...!!!!";
 		strcpy_s(packet2.msg, retMsg);
@@ -62,7 +62,7 @@ void LogicMain::ProcRoomList(unsigned int uniqueId, int size, char* pData)
 	auto client = mClMgr->GetClient(uniqueId);
 
 
-	if (client->GetUserState() != Client::USER_STATE::LOGIN)
+	if (client->GetUserState() != USER_STATE::LOGIN)
 	{
 		packet.mRoomCount = -1;
 		strcpy_s(packet.mMsg, "You not login...!");
@@ -85,6 +85,7 @@ void LogicMain::ProcRoomEnter(unsigned int uniqueId, int size, char* pData)
 	SC_ROOM_ENTER packet2;
 	packet2.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_ENTER;
 	packet2.packet_len = sizeof(SC_ROOM_ENTER);
+
 
 	auto client = mClMgr->GetClient(uniqueId);
 
@@ -130,6 +131,5 @@ void LogicMain::ProcRoomChat(unsigned int uniqueId, int size, char* pData)
 	{
 		SendPacketFunc(cl->GetRemoteIdx(), sizeof(SC_ROOM_CHAT), (char*)&packet2);
 	}
-
 }
 

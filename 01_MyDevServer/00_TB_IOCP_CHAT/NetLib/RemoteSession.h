@@ -7,29 +7,23 @@
 #include <queue>
 #include <mutex>
 #include <array>
-const int MAX_SOCKBUF = 1024;	
+#include "IoDefine.h"
+#include "CircleBuffer.h"
 
-enum class IO_TYPE 
-{
-	RECV ,
-	SEND,
-	ACCEPT
-};
+const int MAX_SOCKBUF = 1024;	
 
 struct CustomOverEx
 {
-	WSAOVERLAPPED mWSAOverlapped;		
-	WSABUF		  mWSABuf;				
-	unsigned int  mUid = -1;			// unique id
-	unsigned int  mRemainByte = 0;
-	std::array<char, MAX_SOCKBUF> mBuf;
-	IO_TYPE mIoType;			
+	WSAOVERLAPPED	mWSAOverlapped;		// Overlapped I/O구조체
+	WSABUF			mWSABuf;			// Overlapped I/O작업 버퍼
+	unsigned int	mUid;				// unique id
+	IO_TYPE			mIoType;			// 작업 동작 종류
 
 	CustomOverEx()
 	{
 		memset(&mWSAOverlapped, 0, sizeof(OVERLAPPED));
 		memset(&mWSABuf, 0, sizeof(WSABUF));
-		mBuf.fill(0);
+		mUid = -1;
 	}
 };
 
@@ -38,40 +32,39 @@ class RemoteSession
 {
 public:
 	RemoteSession();
-	SOCKET& GetSock() { return mRemoteSock; }
 	
-	bool AcceptReady(SOCKET listenSock);
-	bool AcceptFinish(HANDLE mIocp);
+	bool			AcceptReady(SOCKET listenSock);
+	bool			AcceptFinish(HANDLE mIocp);
 
-	bool SendReady(const unsigned int size, char* msg);
-	bool SendPacket();
-	void SendFinish(unsigned long len);
+	bool			SendReady(const unsigned int size, char* msg);
+	bool			SendPacket();
+	void			SendFinish(unsigned long len);
 
-	bool RecvMsg();
-	bool RecvFinish(const char* pNextBuf, const unsigned long remain);
-
-	bool UnInit(bool IsForce, SOCKET mListenSock);
+	bool			RecvMsg();
+	void			RecvFinish(unsigned short size);
 	
-	void SetUniqueId(int& id) { mUID = id; }
-	unsigned int GetUniqueId() const { return mUID; }
-	
-	bool IsLive() const { return mIsLive; }
-	void SetIsLive() const { InterlockedExchange((LPLONG)&mIsLive, true); }
-	void UnSetIsLive() const { InterlockedExchange((LPLONG)&mIsLive, false); }
+	void			SetUniqueId(int& id) { mUID = id; }
+	bool			IsLive()  { return mIsLive.load(); }
+	void			SetIsLive() { mIsLive.store(true); }
 
-	SOCKET						mRemoteSock;	
-	CustomOverEx				mRecvOverEx;	
-	CustomOverEx				mSendOverEx;	
-	CustomOverEx                mAcceptOverEx;  
+	void			UnSetIsLive()  { mIsLive.store(false); }
+	bool			UnInit(bool IsForce, SOCKET mListenSock);
+
+	unsigned int	GetUniqueId() const { return mUID; }
+	SOCKET&			GetSock() { return mRemoteSock; }
+	CircleBuffer&	GetRecvBuffer() { return mRecvBuffer; }
+	CircleBuffer&	GetSendBuffer() { return mSendBuffer; }
 
 private:
-    bool						mIsLive = false;
+	SOCKET						mRemoteSock;
 
-	std::mutex					mSendLock;
-	int                         mSendBuffPos = 0;    
-	int							mSendPendingCnt = 0;  // 다 보내지 못한 경우 체크
-	char						mSendReservedBuf[MAX_SOCKBUF]; 
-	char						mSendBuf[MAX_SOCKBUF]; //데이터 버퍼
+	CustomOverEx				mRecvOverEx;
+	CustomOverEx				mSendOverEx;
+	CustomOverEx                mAcceptOverEx;
+
+	CircleBuffer				mSendBuffer;
+	CircleBuffer				mRecvBuffer;
+    std::atomic<bool>			mIsLive = false;
 	
 	unsigned int				mUID = -1;
 	char						mAcceptBuf[64];

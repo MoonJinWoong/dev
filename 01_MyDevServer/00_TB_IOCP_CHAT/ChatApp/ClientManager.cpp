@@ -27,14 +27,14 @@ void ClientManager::Delete(Client* client)
 	client->Reset();
 }
 
-int ClientManager::FindID(std::string nickName)
+bool ClientManager::FindID(std::string nickName)
 {
 	if (mDicClientId.find(nickName) != mDicClientId.end())
 	{
-		return 1;
+		return false;
 	}
 	else
 	{
-		return -1;
+		return true;
 	}
 }

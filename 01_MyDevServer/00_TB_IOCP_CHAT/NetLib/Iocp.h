@@ -14,7 +14,7 @@ public:
 	class IocpEvents
 	{
 	public:
-		OVERLAPPED_ENTRY m_IoArray[1000]; //TODO 배열안의 인덱스 따로 처리
+		OVERLAPPED_ENTRY m_IoArray[1000]; //TODO 상수 넣기
 		int m_eventCount;
 	};
 	 
@@ -33,7 +33,7 @@ public:
 		}
 		return true;
 	}
-	
+
 	bool AddDeviceListenSocket(SOCKET listenSock)
 	{
 		auto ret = CreateIoCompletionPort(
@@ -42,14 +42,16 @@ public:
 			(ULONG_PTR)nullptr,
 			0
 		);
+
 		if (ret != mIocp)
 		{
+			//TODO 로그 라이브러리 사용하기
+			//SPD DOG
 			std::cout << "fail AddDeviceListenSocket " << std::endl;
 			return false;
 		}
 		return true;
 	}
-	
 	bool AddDeviceRemoteSocket(RemoteSession* RemoteSession)
 	{
 		auto ret = CreateIoCompletionPort(
@@ -58,6 +60,7 @@ public:
 			(ULONG_PTR)RemoteSession,
 			0
 		);
+
 		if (ret != mIocp)
 		{
 			std::cout << "fail AddDeviceRemoteSocket " << std::endl;
@@ -65,12 +68,14 @@ public:
 		}
 		return true;
 	}
-	
+
+
+	//TODO: 필요할때 구현해주자
 	bool PQCS()
 	{
 		return true;
 	}
-	
+
 	void GQCSEx(Iocp::IocpEvents& IoEvent, unsigned long timeOut)
 	{
 		bool ret = GetQueuedCompletionStatusEx(
@@ -87,6 +92,8 @@ public:
 			IoEvent.m_eventCount = 0;
 		}
 	}
-public:
+
+	HANDLE& GetIocp()  { return mIocp; }
+private:
 	HANDLE mIocp = INVALID_HANDLE_VALUE;
 };

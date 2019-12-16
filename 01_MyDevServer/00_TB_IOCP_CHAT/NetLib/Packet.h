@@ -36,8 +36,6 @@ struct PacketFrame
 	char* pData = nullptr;
 };
 
-
-
 struct PKT_HEADER
 {
 	unsigned short packet_len;

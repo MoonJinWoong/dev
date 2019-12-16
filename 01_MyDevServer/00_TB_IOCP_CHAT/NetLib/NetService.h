@@ -21,7 +21,8 @@ public:
 	~NetService() { WSACleanup(); }
 
 	virtual void ThrowLogicConnection(unsigned int index,PACKET_TYPE type) = 0;
-	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size_) = 0;
+	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size) = 0;
+
 
 	void InitConfig();
 	bool InitSocket();
@@ -37,13 +38,14 @@ public:
 	RemoteSession* GetSessionByIdx(int index) {return mSessionPool[index];}
 	
 	void DoRecvFinish(CustomOverEx* pOver,unsigned long size);
-	void DoSend(RemoteSession* pSessoin);
+	void DoSend(RemoteSession* pSessoin,unsigned long size);
 	void DoAcceptFinish( unsigned int uid);
 
 	void WokerThread();
 	void SendThread();
 
 	void KickSession(RemoteSession* pSession, bool bIsForce = false);
+
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 
 private:

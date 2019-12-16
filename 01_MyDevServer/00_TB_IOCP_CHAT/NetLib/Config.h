@@ -45,8 +45,4 @@ struct Config
 	int mMaxUserCount = 0;
 	unsigned short mMaxWorkThreadCnt = 0;
 	unsigned short mBackLog = 0;
-
-
-
-	
 };

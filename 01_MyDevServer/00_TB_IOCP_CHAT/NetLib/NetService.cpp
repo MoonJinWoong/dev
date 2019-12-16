@@ -88,7 +88,7 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 void NetService::DestroyThread()
 {
 	mWorkerRun = false;
-	CloseHandle(mIocpService.mIocp);
+	CloseHandle(mIocpService.GetIocp());
 
 	for (auto& th : mIOWorkerThreads)
 	{
@@ -116,7 +116,9 @@ bool NetService::CreateSessionPool(unsigned int maxClientCount)
 			std::cout << "AcceptReady fail" << std::endl;
 			return false;
 		}
-		mSessionPool.emplace_back(pSession);
+		// emplace_back 을 쓰려면 생성자를 안에 넣어야 되는데 
+		// 세션풀을 처음에 만들때만 호출하니까 그렇게 속도를 고려 안해도 될듯하다 
+		mSessionPool.push_back(pSession);
 	}
 	return true;
 }
@@ -159,7 +161,7 @@ void NetService::DoAcceptFinish(unsigned int uid)
 
 	if (mIocpService.AddDeviceRemoteSocket(pSession))
 	{
-		pSession->AcceptFinish(mIocpService.mIocp);
+		pSession->AcceptFinish(mIocpService.GetIocp());
 		ThrowLogicConnection(pSession->GetUniqueId(),PACKET_TYPE::CONNECTION);
 	}
 	else
@@ -171,11 +173,11 @@ void NetService::DoRecvFinish(CustomOverEx* pOver,unsigned long ioSize)
 {
 	auto session = GetSessionByIdx(pOver->mUid);	
 	ThrowLogicRecv(pOver, ioSize);
-	session->RecvMsg();
 }
 
-void NetService::DoSend(RemoteSession* pSessoin)
+void NetService::DoSend(RemoteSession* pSession,unsigned long size)
 {
+	pSession->SendFinish(size);
 }
 
 void NetService::WokerThread()
@@ -187,7 +189,6 @@ void NetService::WokerThread()
 
 	while (mWorkerRun)
 	{
-
 		Iocp::IocpEvents events;
 		mIocpService.GQCSEx(events, 100);
 
@@ -212,7 +213,7 @@ void NetService::WokerThread()
 				DoRecvFinish(Over, ioSize);
 				break;
 			case IO_TYPE::SEND:
-				pSession->SendFinish(ioSize);
+				DoSend(pSession, ioSize);
 				break;
 			default:
 				std::cout << "[Err] Operation : " << (int)pSession->GetSock() << std::endl;
@@ -223,7 +224,7 @@ void NetService::WokerThread()
 }
 
 
-
+//TODO 구조 바꿔보자.
 void NetService::SendThread()
 {
 	while (mSendRun)
@@ -244,8 +245,6 @@ void NetService::SendThread()
 	}
 }
 
-
-
 void NetService::KickSession(RemoteSession* pSession, bool isForce)
 {
 	if (!pSession->IsLive())
@@ -260,14 +259,13 @@ void NetService::KickSession(RemoteSession* pSession, bool isForce)
 	ThrowLogicConnection(uniqueId,PACKET_TYPE::DISCONNECTION);
 }
 
-
 bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 {
-	// 다 조립되서 온다.
 	if (uniqueId < 0 || uniqueId >= mMaxSessionCnt)
 	{
 		return false;
 	}
-	auto pClient = GetSessionByIdx(uniqueId);
-	return pClient->SendReady(size, pData);
+
+	auto session = GetSessionByIdx(uniqueId);
+	session->SendReady(size, pData);
 }

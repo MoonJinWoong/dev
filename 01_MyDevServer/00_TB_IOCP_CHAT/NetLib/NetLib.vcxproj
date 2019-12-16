@@ -139,8 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CircleBuffer.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="Iocp.h" />
+    <ClInclude Include="IoDefine.h" />
     <ClInclude Include="NetService.h" />
     <ClInclude Include="Packet.h" />
     <ClInclude Include="RemoteSession.h" />
