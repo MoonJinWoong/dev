@@ -1,4 +1,5 @@
 #include "ChatServer.h"
+#include "../NetLib/easylogging++.h"
 #include <iostream>
 
 void ChatServer::ThrowLogicConnection(unsigned int unique_id,PACKET_TYPE type)
@@ -16,7 +17,7 @@ void ChatServer::ThrowLogicRecv(CustomOverEx* pOver, unsigned int ioSize)
 
 	if (ioSize != session->GetRecvBuffer().MoveWritePos(ioSize))
 	{
-		std::cout << "Recv Move Write Err" << std::endl;
+		LOG(ERROR) << "ThrowLogicRecv::MoveWritePos";
 		return;
 	}
 
