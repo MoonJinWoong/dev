@@ -23,13 +23,11 @@ public:
 	virtual void ThrowLogicConnection(unsigned int index,PACKET_TYPE type) = 0;
 	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size) = 0;
 
-
-	void InitConfig();
 	bool InitSocket();
 	bool BindandListen();
-	bool StartNetService(unsigned int maxClientCount);
+	bool StartNetService();
 
-	bool CreateSessionPool(unsigned int maxClientCount);
+	bool CreateSessionPool();
 	bool CreateWokerThread();
 	bool CreateSendThread();
 	void DestroyThread();
@@ -44,17 +42,16 @@ public:
 	void WokerThread();
 	void SendThread();
 
-	void KickSession(RemoteSession* pSession, bool bIsForce = false);
+	void KickSession(RemoteSession* pSession, IO_TYPE ioType);
+	void ThrowDisConnectProcess(RemoteSession* pSession);
 
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
-
 private:
 	Iocp mIocpService;
 	std::vector<RemoteSession*> mSessionPool;
 	SOCKET		mListenSocket = INVALID_SOCKET;
 	
-	int			mSessionCnt = 0;
-	const unsigned int mMaxSessionCnt = 100;   //TODO 나중에 옵션으로 따로 빼줄 것
+	unsigned int mMaxSessionCnt;
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;
@@ -65,7 +62,5 @@ private:
 
 	std::mutex					mLock;
 	std::queue<CustomOverEx*>	mSendQ;
-
-	Config mConfig;
 
 };

@@ -34,12 +34,13 @@ public:
 
 	int	SetWriteBuffer(char* pData, int size)
 	{
+		std::lock_guard<std::mutex> guard(mLock);
+
 		if (size > GetRemainSize())
 		{
 			size = GetRemainSize();
 		}
 
-		std::lock_guard<std::mutex> guard(mLock);
 		for (int index = 0; index < size; ++index)
 		{
 			mBuffer[mWritePos] = pData[index];
@@ -76,15 +77,16 @@ public:
 
 	int	GetHeaderSize(char* pData, int size)
 	{
+		std::lock_guard<std::mutex> guard(mLock);
+
 		if (size > GetReadAbleSize())
 		{
 			size = GetReadAbleSize();
 		}
 
-		std::lock_guard<std::mutex> guard(mLock);
-		for (int iCnt = 0; iCnt < size; iCnt++)
+		for (int index = 0; index < size; ++index)
 		{
-			pData[iCnt] = mBuffer[(mReadPos + iCnt) % mTotalSize];
+			pData[index] = mBuffer[(mReadPos + index) % mTotalSize];
 		}
 		return size;
 	}
@@ -92,22 +94,24 @@ public:
 	
 	void MoveReadPos(int size)
 	{
+		std::lock_guard<std::mutex> guard(mLock);
+
 		if (GetRemainSize() < size)
 		{
 			size = GetRemainSize();
 		}
 
-		std::lock_guard<std::mutex> guard(mLock);
 		mReadPos = (mReadPos + size) % mTotalSize;
 	}
 
 	int	MoveWritePos(int size)
 	{
+		std::lock_guard<std::mutex> guard(mLock);
+
 		if (GetRemainSize() < size)
 		{
 			size = GetRemainSize();
 		}
-		std::lock_guard<std::mutex> guard(mLock);
 		mWritePos = (mWritePos + size) % mTotalSize;
 		return size;
 	}

@@ -33,13 +33,13 @@ public:
 	{
 		mClientList.remove_if
 		(
-			[ID = client->GetUserId()](Client* client2)
-		{
-			if (ID == client2->GetUserId())
-				return true;
-			else
-				false;
-		}
+				[ID = client->GetUserId()](Client* client2)
+			{
+				if (ID == client2->GetUserId())
+					return true;
+				else
+					false;
+			}
 		);
 		return false;
 	}

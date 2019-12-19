@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="NetService.cpp" />
+    <ClCompile Include="RemoteSession.cpp" />
+    <ClCompile Include="easylogging++.cc">
+      <Filter>ExternelLib</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CircleBuffer.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="Iocp.h" />
+    <ClInclude Include="IoDefine.h" />
+    <ClInclude Include="NetService.h" />
+    <ClInclude Include="Packet.h" />
+    <ClInclude Include="RemoteSession.h" />
+    <ClInclude Include="easylogging++.h">
+      <Filter>ExternelLib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ExternelLib">
+      <UniqueIdentifier>{89ef6446-d034-455f-9555-055412879ac2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

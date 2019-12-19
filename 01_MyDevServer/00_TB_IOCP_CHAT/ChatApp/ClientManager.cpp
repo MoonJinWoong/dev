@@ -1,8 +1,8 @@
 #include "ClientManager.h"
 
-void ClientManager::Init(unsigned int maxCnt)
+void ClientManager::Init()
 {
-	mMaxCnt = maxCnt;
+	mMaxCnt = Config::LoadNetConfig(CATEGORY_LOGIC, MAX_CLIENT_COUNT);
 	mClientPool = std::vector<Client*>(mMaxCnt);
 
 	for (auto i = 0; i < mMaxCnt; i++)

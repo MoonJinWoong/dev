@@ -1,17 +1,17 @@
-
 #include "NetService.h"
 
-void NetService::InitConfig()
-{
-	mConfig.ReadConfig();
-}
+
+#include "easylogging++.h"
+INITIALIZE_EASYLOGGINGPP
+
+
 bool NetService::InitSocket()
 {
 	WSADATA wsaData;
 	int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (0 != nRet)
 	{
-		std::cout << "[err] WSAStartUP() fail..." << WSAGetLastError();
+		LOG(ERROR) << "WSAStartUp";
 		return false;
 	}
 
@@ -19,11 +19,11 @@ bool NetService::InitSocket()
 
 	if (INVALID_SOCKET == mListenSocket)
 	{
-		std::cout << "[err] WSASocket() fail..." << WSAGetLastError();
+		LOG(ERROR) << "WSASocket";
 		return false;
 	}
 
-	std::cout << "[Success] InitSocket() "<<std::endl;
+	LOG(INFO) << "[SUCCESS] InitSocket";
 	return true;
 }
 
@@ -31,32 +31,34 @@ bool NetService::BindandListen()
 {
 	SOCKADDR_IN		stServerAddr;
 	stServerAddr.sin_family = AF_INET;
-	stServerAddr.sin_port = htons(mConfig.mServerPort); 
+	auto port = Config::LoadNetConfig(CATEGORY_NET, PORT);
+
+	stServerAddr.sin_port = htons(port);
 	stServerAddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	int nRet = ::bind(mListenSocket, (SOCKADDR*)&stServerAddr, sizeof(SOCKADDR_IN));
 	if (0 != nRet)
 	{
-		std::cout << "[err] bind() fail..." << WSAGetLastError();
+		LOG(ERROR) << "bind";
 		return false;
 	}
 
-	//접속 요청을 받아들이기 위해 cIOCompletionPort소켓을 등록하고 
-	//접속대기큐를 5개로 설정 한다.
-	nRet = ::listen(mListenSocket, mConfig.mBackLog);
+	auto backlog = Config::LoadNetConfig(CATEGORY_NET, BACKLOG);
+	nRet = ::listen(mListenSocket, backlog);
 	if (0 != nRet)
 	{
-		std::cout << "[err] listen() fail..." << WSAGetLastError();
+		LOG(ERROR) << "listen";
 		return false;
 	}
 
-	std::cout << "[Success] BindandListen() " << std::endl;
+	LOG(INFO) << "[SUCCESS] BindandListen";
 	return true;
 }
 
-bool NetService::StartNetService(unsigned int maxClientCount)
+bool NetService::StartNetService()
 {
-	if (!mIocpService.CreateNewIocp(mConfig.mMaxWorkThreadCnt))
+	auto mMaxWorkThreadCnt = Config::LoadNetConfig(CATEGORY_NET, MAX_WORK_THEAD_CNT);
+	if (!mIocpService.CreateNewIocp(mMaxWorkThreadCnt))
 	{
 		return false;
 	}
@@ -75,13 +77,12 @@ bool NetService::StartNetService(unsigned int maxClientCount)
 	{
 		return false;
 	}
-
-	if (!CreateSessionPool(maxClientCount))
+	if (!CreateSessionPool())
 	{
 		return false;
 	}
 
-	std::cout << "[Success] StartNetService() " << std::endl;
+	LOG(INFO) << "[SUCCESS] StartNetService";
 	return true;
 }
 
@@ -105,19 +106,18 @@ void NetService::DestroyThread()
 	}
 }
 
-bool NetService::CreateSessionPool(unsigned int maxClientCount)
+bool NetService::CreateSessionPool()
 {
-	for (auto i = 0; i < maxClientCount; ++i)
+	mMaxSessionCnt = Config::LoadNetConfig(CATEGORY_NET, MAX_SESSION_COUNT);
+	for (auto i = 0; i < mMaxSessionCnt; ++i)
 	{
 		auto pSession = new RemoteSession;
 		pSession->SetUniqueId(i);
 		if (!pSession->AcceptReady(mListenSocket))
 		{
-			std::cout << "AcceptReady fail" << std::endl;
+			LOG(ERROR) << "AcceptReady";
 			return false;
 		}
-		// emplace_back 을 쓰려면 생성자를 안에 넣어야 되는데 
-		// 세션풀을 처음에 만들때만 호출하니까 그렇게 속도를 고려 안해도 될듯하다 
 		mSessionPool.push_back(pSession);
 	}
 	return true;
@@ -125,13 +125,14 @@ bool NetService::CreateSessionPool(unsigned int maxClientCount)
 
 bool NetService::CreateWokerThread()
 {
+	auto maxWorker = Config::LoadNetConfig(CATEGORY_NET, MAX_WORK_THEAD_CNT);
 	mWorkerRun = true;
-	for (auto i = 0; i < mConfig.mMaxWorkThreadCnt; i++)
+	for (auto i = 0; i < maxWorker; i++)
 	{
 		mIOWorkerThreads.emplace_back([this]() { WokerThread(); });
 	}
 
-	std::cout << "[Success] WokerThread() " << std::endl;
+	LOG(INFO) << "[SUCCESS] CreateWokerThread";
 	return true;
 }
 
@@ -139,7 +140,7 @@ bool NetService::CreateSendThread()
 {
 	mSendRun = true;
 	mSendThread = std::thread([this]() { SendThread(); });
-	std::cout << "[Success] SendThread() " << std::endl;
+	LOG(INFO) << "[SUCCESS] CreateSendThread";
 	return true;
 }
 
@@ -166,7 +167,7 @@ void NetService::DoAcceptFinish(unsigned int uid)
 	}
 	else
 	{
-		KickSession(pSession, true);
+		KickSession(pSession,IO_TYPE::ACCEPT);
 	}
 }
 void NetService::DoRecvFinish(CustomOverEx* pOver,unsigned long ioSize)
@@ -200,7 +201,7 @@ void NetService::WokerThread()
 
 			if (0 >= ioSize && IO_TYPE::ACCEPT != Over->mIoType)
 			{
-				KickSession(pSession);
+				KickSession(pSession, Over->mIoType);
 				continue;
 			}
 
@@ -216,7 +217,7 @@ void NetService::WokerThread()
 				DoSend(pSession, ioSize);
 				break;
 			default:
-				std::cout << "[Err] Operation : " << (int)pSession->GetSock() << std::endl;
+				LOG(ERROR) << "Bad Operation : " << (int)pSession->GetSock();
 				break;
 			}
 		}
@@ -245,18 +246,32 @@ void NetService::SendThread()
 	}
 }
 
-void NetService::KickSession(RemoteSession* pSession, bool isForce)
+void NetService::KickSession(RemoteSession* pSession, IO_TYPE ioType)
 {
-	if (!pSession->IsLive())
+	if (ioType == IO_TYPE::RECV)
+		pSession->GetIoRef().DecRecvCount();
+	else if(ioType == IO_TYPE::SEND)
+		pSession->GetIoRef().DecSendCount();
+	else
+		pSession->GetIoRef().DecAcptCount();
+
+
+	if (pSession->DisconnectFinish(mListenSocket))
 	{
-		return;
+		std::lock_guard<std::mutex> guard(mLock);
+
+		ThrowDisConnectProcess(pSession);
+		pSession->Init();
+		pSession->AcceptReady(mListenSocket);
 	}
-	
-	std::lock_guard<std::mutex> guard(mLock);
-	pSession->UnInit(isForce, mListenSocket);
-	--mSessionCnt;
+
+}
+
+void NetService::ThrowDisConnectProcess(RemoteSession* pSession)
+{
+	pSession->CloseSocket();
 	auto uniqueId = pSession->GetUniqueId();
-	ThrowLogicConnection(uniqueId,PACKET_TYPE::DISCONNECTION);
+	ThrowLogicConnection(uniqueId, PACKET_TYPE::DISCONNECTION);
 }
 
 bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
@@ -265,6 +280,7 @@ bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 	{
 		return false;
 	}
+
 
 	auto session = GetSessionByIdx(uniqueId);
 	session->SendReady(size, pData);

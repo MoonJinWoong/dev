@@ -1,4 +1,0 @@
-ServerPort=8000
-ListenWaitQueue=5
-MaxClient=1000
-MaxWorkThread=6

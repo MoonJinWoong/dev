@@ -8,6 +8,7 @@
 #include <mutex>
 #include <array>
 #include "IoDefine.h"
+#include "Config.h"
 #include "CircleBuffer.h"
 
 const int MAX_SOCKBUF = 1024;	
@@ -32,7 +33,8 @@ class RemoteSession
 {
 public:
 	RemoteSession();
-	
+	void Init();
+
 	bool			AcceptReady(SOCKET listenSock);
 	bool			AcceptFinish(HANDLE mIocp);
 
@@ -43,18 +45,22 @@ public:
 	bool			RecvMsg();
 	void			RecvFinish(unsigned short size);
 	
+	bool			CloseSocket();
+
 	void			SetUniqueId(int& id) { mUID = id; }
+
 	bool			IsLive()  { return mIsLive.load(); }
 	void			SetIsLive() { mIsLive.store(true); }
-
 	void			UnSetIsLive()  { mIsLive.store(false); }
-	bool			UnInit(bool IsForce, SOCKET mListenSock);
+
+	bool			DisconnectFinish(SOCKET mListenSock);
 
 	unsigned int	GetUniqueId() const { return mUID; }
 	SOCKET&			GetSock() { return mRemoteSock; }
 	CircleBuffer&	GetRecvBuffer() { return mRecvBuffer; }
 	CircleBuffer&	GetSendBuffer() { return mSendBuffer; }
 
+	IoReference&	GetIoRef() { return mIoRef; }
 private:
 	SOCKET						mRemoteSock;
 
@@ -64,8 +70,11 @@ private:
 
 	CircleBuffer				mSendBuffer;
 	CircleBuffer				mRecvBuffer;
-    std::atomic<bool>			mIsLive = false;
-	
+    
+	std::atomic<bool>			mIsLive = false;
+	std::atomic<bool>			mIsClose = false;
+	IoReference					mIoRef;
+	std::mutex					mLock;
 	unsigned int				mUID = -1;
 	char						mAcceptBuf[64];
 };

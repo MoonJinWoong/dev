@@ -1,5 +1,5 @@
 #pragma once
-
+#include "../NetLib/Config.h"
 #include "Client.h"
 #include <vector>
 #include <unordered_map>
@@ -11,7 +11,7 @@ public:
 	ClientManager() = default;
 	~ClientManager() = default;
 
-	void Init(unsigned int maxCnt);
+	void Init();
 
 	void Add(std::string nickName, int unique_id);
 	bool FindID(std::string nickName);

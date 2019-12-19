@@ -48,7 +48,7 @@ void ChatServer::ThrowLogicRecv(CustomOverEx* pOver, unsigned int ioSize)
 
 
 
-void ChatServer::Run(unsigned int maxClient)
+void ChatServer::Run()
 {
 	// logic에서 Send를 부르면 실행
 	auto SendFunc = [&](unsigned int index, int size, char* pPacket)
@@ -58,9 +58,9 @@ void ChatServer::Run(unsigned int maxClient)
 
 	mLogicProc = std::make_unique<LogicMain>();
 	mLogicProc->SendPacketFunc = SendFunc;
-	mLogicProc->Init(maxClient);
+	mLogicProc->Init();
 	mLogicProc->Start();
-	StartNetService(maxClient);
+	StartNetService();
 }
 
 void ChatServer::Stop()

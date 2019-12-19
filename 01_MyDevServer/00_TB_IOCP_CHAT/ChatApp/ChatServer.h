@@ -14,7 +14,7 @@ public:
 	virtual void ThrowLogicConnection(unsigned int unique_id, PACKET_TYPE type) override;
 	virtual void ThrowLogicRecv(CustomOverEx *pOver, unsigned int size_) override;
 
-	void Run(unsigned int maxClient);
+	void Run();
 	void Stop();
 private:
 	std::unique_ptr<LogicMain> mLogicProc;

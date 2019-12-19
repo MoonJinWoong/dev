@@ -2,7 +2,7 @@
 #include "LogicProcess.h"
 
 
-void LogicMain::Init(unsigned int maxClient)
+void LogicMain::Init()
 {
 	mRecvFuncDic = std::unordered_map<int, RECV_PKT_TYPE>();
 	mRecvFuncDic[(int)PACKET_TYPE::CONNECTION] = &LogicMain::ProcConnect;
@@ -12,15 +12,13 @@ void LogicMain::Init(unsigned int maxClient)
 	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_ENTER] = &LogicMain::ProcRoomEnter;
 	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_CHAT] = &LogicMain::ProcRoomChat;
 
-
-	//TODO 옵션값으로 빼줄 것
-	//TODO  굳이 힙에 할당 해줄 필요가 있을까 고민해보자
-	mMaxRoomCnt = 10;
 	mClMgr = std::make_unique<ClientManager>();
-	mClMgr->Init(maxClient);
+	mClMgr->Init();
 
+	mMaxRoomCnt = Config::LoadNetConfig(CATEGORY_LOGIC, MAX_ROOM_COUNT);
+	auto MaxClientCntInRoom = Config::LoadNetConfig(CATEGORY_LOGIC, MAX_ROOM_CLIENT_COUNT);
 	mRoomMgr = std::make_unique<RoomManager>();
-	mRoomMgr->Init(mMaxRoomCnt);
+	mRoomMgr->Init(mMaxRoomCnt, MaxClientCntInRoom);
 }
 
 bool LogicMain::Start()

@@ -4,6 +4,7 @@
 #include <mswsock.h>
 #include <iostream>
 #include "RemoteSession.h"
+#include "easylogging++.h"
 
 
 
@@ -14,7 +15,7 @@ public:
 	class IocpEvents
 	{
 	public:
-		OVERLAPPED_ENTRY m_IoArray[1000]; //TODO 상수 넣기
+		OVERLAPPED_ENTRY m_IoArray[IOCP_EVENT_COUNT]; //TODO 상수 넣기
 		int m_eventCount;
 	};
 	 
@@ -28,7 +29,7 @@ public:
 		mIocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, threadCnt);
 		if (!mIocp)
 		{
-			std::cout << "fail CreateNewIocp " << std::endl;
+			LOG(ERROR) << "Iocp::CreateNewIocp";
 			return false;
 		}
 		return true;
@@ -45,9 +46,7 @@ public:
 
 		if (ret != mIocp)
 		{
-			//TODO 로그 라이브러리 사용하기
-			//SPD DOG
-			std::cout << "fail AddDeviceListenSocket " << std::endl;
+			LOG(ERROR) << "Iocp::AddDeviceListenSocket";
 			return false;
 		}
 		return true;
@@ -63,7 +62,7 @@ public:
 
 		if (ret != mIocp)
 		{
-			std::cout << "fail AddDeviceRemoteSocket " << std::endl;
+			LOG(ERROR) << "Iocp::AddDeviceRemoteSocket";
 			return false;
 		}
 		return true;
@@ -81,7 +80,7 @@ public:
 		bool ret = GetQueuedCompletionStatusEx(
 			mIocp,
 			IoEvent.m_IoArray,
-			1000,	//한번에 가져올 이벤트 양
+			IOCP_EVENT_COUNT,	//한번에 가져올 이벤트 양
 			(ULONG*)&IoEvent.m_eventCount,
 			timeOut,
 			FALSE

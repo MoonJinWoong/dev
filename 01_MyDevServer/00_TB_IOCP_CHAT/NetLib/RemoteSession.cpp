@@ -1,8 +1,10 @@
 #include "RemoteSession.h"
 #include "Packet.h"
+#include "easylogging++.h"
 #pragma comment(lib,"mswsock.lib")
 
-RemoteSession::RemoteSession() : mRecvBuffer(1024),mSendBuffer(1024) // 옵션으로 받을 것
+
+RemoteSession::RemoteSession() : mRecvBuffer(RECV_BUFFER_MAX_SIZE),mSendBuffer(SEND_BUFFER_MAX_SIZE)
 {
 	ZeroMemory(&mRecvOverEx, sizeof(CustomOverEx));
 	ZeroMemory(&mSendOverEx, sizeof(CustomOverEx));
@@ -10,14 +12,28 @@ RemoteSession::RemoteSession() : mRecvBuffer(1024),mSendBuffer(1024) // 옵션으로
 	mRemoteSock = INVALID_SOCKET;
 }
 
+void RemoteSession::Init()
+{
+	ZeroMemory(&mRecvOverEx, sizeof(CustomOverEx));
+	ZeroMemory(&mSendOverEx, sizeof(CustomOverEx));
+	ZeroMemory(&mAcceptOverEx, sizeof(CustomOverEx));
+
+	mRecvBuffer.Init();
+	mSendBuffer.Init();
+
+	mIsLive.store(false);
+	mIsClose.store(false);
+
+	mIoRef.Init();
+}
 bool RemoteSession::AcceptReady(SOCKET listenSock)
 {
 	mRemoteSock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_IP,
 		NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (mRemoteSock == INVALID_SOCKET)
 	{
-		std::cout << "[ERR] AccpetAsync WSASocket fail" << std::endl;
-	}
+		LOG(ERROR) << "RemoteSession::WSASocket";
+ 	}
 
 	ZeroMemory(&mAcceptOverEx, sizeof(CustomOverEx));
 
@@ -27,6 +43,8 @@ bool RemoteSession::AcceptReady(SOCKET listenSock)
 	mAcceptOverEx.mWSABuf.buf = nullptr;
 	mAcceptOverEx.mIoType = IO_TYPE::ACCEPT;
 	mAcceptOverEx.mUid = mUID;
+
+	mIoRef.IncAcptCount();
 
 	auto ret = AcceptEx(
 		listenSock,
@@ -43,14 +61,16 @@ bool RemoteSession::AcceptReady(SOCKET listenSock)
 	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
+			mIoRef.DecAcptCount();
+			LOG(ERROR) << "RemoteSession::WSASocket : " << GetLastError();
 			return false;
-			printf_s("AcceptEx Error : %d\n", GetLastError());
 		}
 	}
 	return true;
 }
 bool RemoteSession::AcceptFinish(HANDLE mIocp)
 {
+
 	SetIsLive();
 
 	SOCKADDR_IN		RemoteAddr;
@@ -58,7 +78,8 @@ bool RemoteSession::AcceptFinish(HANDLE mIocp)
 	char clientIP[32] = { 0, };
 	inet_ntop(AF_INET, &(RemoteAddr.sin_addr), clientIP, 32 - 1);
 
-	std::cout << "[접속] index :"<<mUID<<"   socket num:"<<mRemoteSock << std::endl;
+	LOG(INFO) << "[SUCCESS] Connect :  " << mUID;
+	mIoRef.DecAcptCount();
 
 	RecvMsg();
 	return true;
@@ -78,9 +99,12 @@ bool RemoteSession::SendPacket()
 		return false;
 	}
 
+	//TODO 수정 해야함
 	mSendOverEx.mWSABuf.len = mSendBuffer.GetReadAbleSize();
 	mSendOverEx.mWSABuf.buf = mSendBuffer.GetReadBufferPtr();
 	mSendOverEx.mIoType = IO_TYPE::SEND;
+
+	mIoRef.IncSendCount();
 
 	DWORD dwRecvNumBytes = 0;
 	int nRet = WSASend(mRemoteSock,
@@ -93,7 +117,8 @@ bool RemoteSession::SendPacket()
 
 	if (nRet == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		std::cout << "[에러] WSASend() fail :" << WSAGetLastError() << std::endl;
+		LOG(ERROR) << "RemoteSession::WSASend : " << WSAGetLastError();
+		mIoRef.DecSendCount();
 		return false;
 	}
 	return true;
@@ -102,8 +127,10 @@ bool RemoteSession::SendPacket()
 void RemoteSession::SendFinish(unsigned long len)
 {
 	//TODO 내가 send 요청한 사이즈랑 완료된 사이즈랑 다를때 처리해야함
-	std::cout << "Send Complete byte:" << len << std::endl;	
 	mSendBuffer.MoveReadPos(len);
+	mIoRef.DecSendCount();
+	std::cout << "Send Complete : " << len << std::endl;
+	std::cout << "Send Pos:" << mSendBuffer.GetWritePos() << std::endl;
 }
 
 bool RemoteSession::RecvMsg()
@@ -126,6 +153,7 @@ bool RemoteSession::RecvMsg()
 	mRecvOverEx.mIoType = IO_TYPE::RECV;
 	mRecvOverEx.mUid = mUID;
 
+	mIoRef.IncRecvCount();
 	auto ret = WSARecv(
 		mRemoteSock,
 		wBuf,
@@ -138,8 +166,8 @@ bool RemoteSession::RecvMsg()
 
 	if (ret == SOCKET_ERROR && (WSAGetLastError() != ERROR_IO_PENDING))
 	{
-		std::cout << "[에러] WSARecv fail.. :" << WSAGetLastError()
-			<< "   socket num:" << mRemoteSock << std::endl;
+		LOG(ERROR) << "RemoteSession::WSARecv : " << WSAGetLastError();
+		mIoRef.DecRecvCount();
 		return false;
 	}
 	return true;
@@ -148,35 +176,32 @@ bool RemoteSession::RecvMsg()
 void RemoteSession::RecvFinish(unsigned short size)
 {
 	mRecvBuffer.MoveReadPos(size);
+	mIoRef.DecRecvCount();
 }
 
-bool RemoteSession::UnInit(bool IsForce, SOCKET mListenSock)
+bool RemoteSession::DisconnectFinish(SOCKET mListenSock)
 {
-	//TODO IO가 남아있는 경우도 있을거고 
-	// 유니크하게 실행될 수 있게 구현하자
-	struct linger stLinger = { 0, 0 };	// SO_DONTLINGER로 설정
-
-	// 강제 종료
-	if (IsForce)
+	if (mIoRef.GetRecvIoCount() != 0 || mIoRef.GetSendIoCount() != 0 || mIoRef.GetAcptIoCount() != 0)
 	{
-		stLinger.l_onoff = 1;
+		CloseSocket();
+		return false;
 	}
-	std::cout << "[Session] out -> " << mUID <<"   SOCKET:"<<mRemoteSock<< std::endl;
+	
+	if (mIsLive.load())
+	{
+		return true;
+	}
+	return false;
+}
 
+bool RemoteSession::CloseSocket()
+{
+	mIsLive.store(false);
 
+	//std::lock_guard<std::mutex> guard(mLock);
 	shutdown(mRemoteSock, SD_BOTH);
-	setsockopt(mRemoteSock, SOL_SOCKET, SO_LINGER, (char*)&stLinger, sizeof(stLinger));
 	closesocket(mRemoteSock);
-
 	mRemoteSock = INVALID_SOCKET;
-	mIsLive = false;
-
-	mRecvBuffer.Init();
-	mSendBuffer.Init();
-
-
-	// accept 다시 걸어주자
-	AcceptReady(mListenSock);
 	return true;
 }
 

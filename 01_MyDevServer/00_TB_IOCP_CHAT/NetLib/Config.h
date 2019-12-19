@@ -1,48 +1,47 @@
 #pragma once
-#include <string>
-#include <fstream>
-#include <iostream>
+#include <Windows.h>
+#include <atlstr.h>
+#include <direct.h>
 
-struct Config
+#include <string>  //TODO delete
+#include <cstring> //TODO delete
+#include <fstream>//TODO delete
+#include <iostream>//TODO delete
+
+
+namespace Config
 {
-	void ReadConfig()
+	static int LoadNetConfig(const wchar_t* category , const wchar_t* optName)
 	{
-		std::ifstream in("../NetLib/config.txt");
-	
-		std::string buf2;
-		while (getline(in, buf2)) 
-		{
-			ParsingOpt(buf2);
-		}
+		wchar_t buf[100] = { 0, };
+		auto result = GetPrivateProfileString(category, optName, L"-1", buf, 100, L"..\\config.ini");
+		std::wstring ResultString(buf, result);
+
+		return std::stoi(ResultString);
 	}
+}
 
-	void ParsingOpt(std::string& str)
-	{
-		auto token = str.find('=');
-		auto optName = str.substr(0, token);
-		auto optValue = std::stoi(str.substr(token + 1));
 
-		
-		if (optName == "ServerPort")
-		{
-			mServerPort = optValue;
-		}
-		else if(optName == "MaxClient")
-		{
-			mMaxUserCount = optValue;
-		}
-		else if (optName == "MaxWorkThread")
-		{
-			mMaxWorkThreadCnt = optValue;
-		}
-		else if (optName == "ListenWaitQueue")
-		{
-			mBackLog = optValue;
-		}
-	}
+// config category
+const wchar_t CATEGORY_NET[] = L"NETWORK";
+const wchar_t CATEGORY_LOGIC[] = L"LOGIC";
 
-	int mServerPort = 0;
-	int mMaxUserCount = 0;
-	unsigned short mMaxWorkThreadCnt = 0;
-	unsigned short mBackLog = 0;
-};
+
+// config option name 
+const wchar_t PORT[] = L"port";
+const wchar_t BACKLOG[] = L"backlog";
+const wchar_t MAX_WORK_THEAD_CNT[] = L"workerCount";
+const wchar_t MAX_SESSION_COUNT[] = L"maxSessionCount";
+const wchar_t MAX_IOCP_EVENT_COUNT[] = L"maxIocpEventCount";
+
+
+// logic config
+const wchar_t MAX_CLIENT_COUNT[] = L"maxClientCount";
+const wchar_t MAX_ROOM_COUNT[] = L"maxRoomCount";
+const wchar_t MAX_ROOM_CLIENT_COUNT[] = L"maxClientCountInRoom";
+
+
+
+const int RECV_BUFFER_MAX_SIZE = 4096;
+const int SEND_BUFFER_MAX_SIZE = 4096;
+const int IOCP_EVENT_COUNT = 100;

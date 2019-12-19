@@ -16,6 +16,7 @@ void LogicMain::ProcDisConnect(unsigned int uniqueId, int size, char* pData)
 
 void LogicMain::ProcLogin(unsigned int uniqueId, int size, char* pData)
 {
+
 	auto packet = reinterpret_cast<CS_LOGIN_PKT*>(pData);
 	auto inputId = packet->szID;
 
@@ -42,13 +43,13 @@ void LogicMain::ProcLogin(unsigned int uniqueId, int size, char* pData)
 	// success
 	else
 	{
+
 		// 로그인 세팅 
 		mClMgr->IncreaseCurClientCnt();
 		mClMgr->Add(inputId, uniqueId);
 
 		// 성공 메세지
 		strcpy_s(packet2.msg, "login sussess....!");
-
 		SendPacketFunc(uniqueId, sizeof(SC_LOGIN_PKT), (char*)&packet2);
 	}
 }
@@ -61,7 +62,6 @@ void LogicMain::ProcRoomList(unsigned int uniqueId, int size, char* pData)
 	
 	auto client = mClMgr->GetClient(uniqueId);
 
-
 	if (client->GetUserState() != USER_STATE::LOGIN)
 	{
 		packet.mRoomCount = -1;
@@ -73,7 +73,6 @@ void LogicMain::ProcRoomList(unsigned int uniqueId, int size, char* pData)
 		packet.mRoomCount = mMaxRoomCnt;
 		strcpy_s(packet.mMsg, "success room list...!");
 		SendPacketFunc(uniqueId, sizeof(SC_ROOM_LIST_PKT), (char*)&packet);
-
 	}
 }
 void LogicMain::ProcRoomEnter(unsigned int uniqueId, int size, char* pData)

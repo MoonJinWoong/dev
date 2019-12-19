@@ -15,7 +15,7 @@ public:
 	LogicMain() = default;
 	~LogicMain() = default;
 
-	void Init(unsigned int maxClient);
+	void Init();
 	bool Start();
 	void Stop();
 

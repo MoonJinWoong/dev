@@ -12,6 +12,7 @@ enum class IO_TYPE
 //한 클래스에 몰아넣기 싫어서 분리 시킴
 class IoReference
 {
+public:
 	void IncRecvCount() { mRecvIoCount.fetch_add(1); }
 	void IncSendCount() { mSendIoCount.fetch_add(1); }
 	void IncAcptCount() { mAcptIoCount.fetch_add(1); }
@@ -20,9 +21,16 @@ class IoReference
 	void DecSendCount() { mSendIoCount.fetch_sub(1); }
 	void DecAcptCount() { mAcptIoCount.fetch_sub(1); }
 
-	int GetRecvIoCount() const { return mRecvIoCount.load(); }
-	int GetSendIoCount() const { return mSendIoCount.load(); }
-	int GetAcptIoCount() const { return mAcptIoCount.load(); }
+	int GetRecvIoCount()  { return mRecvIoCount.load(); }
+	int GetSendIoCount()  { return mSendIoCount.load(); }
+	int GetAcptIoCount()  { return mAcptIoCount.load(); }
+
+	void Init()
+	{
+		mRecvIoCount.store(0);
+		mSendIoCount.store(0);
+		mAcptIoCount.store(0);
+	}
 
 private:
 	//NOTE std::atomic -> 8바이트 이하의 객체여야 빠름. 넘어가면 락을 건다. 
