@@ -8,8 +8,7 @@ enum class IO_TYPE
 	ACCEPT
 };
 
-//EXPLAIN  세션이 종료될 때 남은 Io 처리를 위해 만듦
-//한 클래스에 몰아넣기 싫어서 분리 시킴
+// 세션이 종료될 때 남은 Io 처리를 위해 만듦
 class IoReference
 {
 public:

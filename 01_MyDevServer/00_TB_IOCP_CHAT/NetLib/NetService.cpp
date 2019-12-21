@@ -1,6 +1,4 @@
 #include "NetService.h"
-
-
 #include "easylogging++.h"
 INITIALIZE_EASYLOGGINGPP
 
@@ -156,27 +154,63 @@ RemoteSession* NetService::GetEmptySession()
 	return nullptr;
 }
 
-void NetService::DoAcceptFinish(unsigned int uid)
+void NetService::OnAccept(unsigned int uid)
 {
 	auto pSession = GetSessionByIdx(uid);
 
 	if (mIocpService.AddDeviceRemoteSocket(pSession))
 	{
 		pSession->AcceptFinish(mIocpService.GetIocp());
-		ThrowLogicConnection(pSession->GetUniqueId(),PACKET_TYPE::CONNECTION);
+		PostLogicConnection(pSession->GetUniqueId(),PACKET_TYPE::CONNECTION);
 	}
 	else
 	{
-		KickSession(pSession,IO_TYPE::ACCEPT);
+		OnCloseSession(pSession,IO_TYPE::ACCEPT);
 	}
 }
-void NetService::DoRecvFinish(CustomOverEx* pOver,unsigned long ioSize)
+
+// WSARecv가 완료되면 루프를 돌면서 패킷을 추출해서 로직으로 던져야 한다.
+// 뭉쳐서 혹은 짤려서 오는 것도 고려해야한다 정확하게
+void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 {
 	auto session = GetSessionByIdx(pOver->mUid);	
-	ThrowLogicRecv(pOver, ioSize);
+	if (session == nullptr)
+	{
+		LOG(INFO) << "not exist session";
+		return;
+	}
+
+	if (ioSize != session->GetRecvBuffer().MoveWritePos(ioSize))
+	{
+		LOG(ERROR) << "ThrowLogicRecv::MoveWritePos";
+		return;
+	}
+
+	PKT_HEADER header;
+	while (session->GetRecvBuffer().GetReadAbleSize() > 0)
+	{
+		if (session->GetRecvBuffer().GetReadAbleSize() <= sizeof(header))
+		{
+			break;
+		}
+
+		session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
+
+		if (session->GetRecvBuffer().GetReadAbleSize() < header.packet_len)
+		{
+			break;
+		}
+		else
+		{
+			PostLogicRecv(session->GetUniqueId(),session->GetRecvBuffer().GetReadBufferPtr(), header.packet_len);
+			session->RecvFinish(header.packet_len);
+		}
+	}
+
+	session->RecvMsg();
 }
 
-void NetService::DoSend(RemoteSession* pSession,unsigned long size)
+void NetService::OnSend(RemoteSession* pSession,unsigned long size)
 {
 	pSession->SendFinish(size);
 }
@@ -201,23 +235,23 @@ void NetService::WokerThread()
 
 			if (0 >= ioSize && IO_TYPE::ACCEPT != Over->mIoType)
 			{
-				KickSession(pSession, Over->mIoType);
+				OnCloseSession(pSession, Over->mIoType);
 				continue;
 			}
 
 			switch (Over->mIoType)
 			{
 			case IO_TYPE::ACCEPT:
-				DoAcceptFinish(Over->mUid);
+				OnAccept(Over->mUid);
 				break;
 			case IO_TYPE::RECV:
-				DoRecvFinish(Over, ioSize);
+				OnRecv(Over, ioSize);
 				break;
 			case IO_TYPE::SEND:
-				DoSend(pSession, ioSize);
+				OnSend(pSession, ioSize);
 				break;
 			default:
-				LOG(ERROR) << "Bad Operation : " << (int)pSession->GetSock();
+				LOG(ERROR) << "Bad IO TYPE : " << (int)pSession->GetSock();
 				break;
 			}
 		}
@@ -237,6 +271,8 @@ void NetService::SendThread()
 				continue;
 			}
 
+			// 아래와 IOthread에서 동시 실행해야 되는데 
+			//TODO On -> 수동     Kick 능동이니까 쓰지말자 
 			if (!client->SendPacket())
 			{
 				continue;
@@ -246,7 +282,7 @@ void NetService::SendThread()
 	}
 }
 
-void NetService::KickSession(RemoteSession* pSession, IO_TYPE ioType)
+void NetService::OnCloseSession(RemoteSession* pSession, IO_TYPE ioType)
 {
 	if (ioType == IO_TYPE::RECV)
 		pSession->GetIoRef().DecRecvCount();
@@ -258,20 +294,17 @@ void NetService::KickSession(RemoteSession* pSession, IO_TYPE ioType)
 
 	if (pSession->DisconnectFinish(mListenSocket))
 	{
-		std::lock_guard<std::mutex> guard(mLock);
-
-		ThrowDisConnectProcess(pSession);
+		PostDisConnectProcess(pSession);
 		pSession->Init();
 		pSession->AcceptReady(mListenSocket);
 	}
-
 }
 
-void NetService::ThrowDisConnectProcess(RemoteSession* pSession)
+void NetService::PostDisConnectProcess(RemoteSession* pSession)
 {
 	pSession->CloseSocket();
 	auto uniqueId = pSession->GetUniqueId();
-	ThrowLogicConnection(uniqueId, PACKET_TYPE::DISCONNECTION);
+	PostLogicConnection(uniqueId, PACKET_TYPE::DISCONNECTION);
 }
 
 bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
@@ -280,8 +313,6 @@ bool NetService::SendMsg(unsigned int uniqueId, unsigned int size, char* pData)
 	{
 		return false;
 	}
-
-
 	auto session = GetSessionByIdx(uniqueId);
 	session->SendReady(size, pData);
 }

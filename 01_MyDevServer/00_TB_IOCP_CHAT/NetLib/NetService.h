@@ -20,8 +20,8 @@ public:
 
 	~NetService() { WSACleanup(); }
 
-	virtual void ThrowLogicConnection(unsigned int index,PACKET_TYPE type) = 0;
-	virtual void ThrowLogicRecv(CustomOverEx* pOver, unsigned int size) = 0;
+	virtual void PostLogicConnection(unsigned int unique_id,PACKET_TYPE type) = 0;
+	virtual void PostLogicRecv(unsigned int unique_id, char* pData, unsigned int packetLen) = 0;
 
 	bool InitSocket();
 	bool BindandListen();
@@ -35,15 +35,15 @@ public:
 	RemoteSession* GetEmptySession();
 	RemoteSession* GetSessionByIdx(int index) {return mSessionPool[index];}
 	
-	void DoRecvFinish(CustomOverEx* pOver,unsigned long size);
-	void DoSend(RemoteSession* pSessoin,unsigned long size);
-	void DoAcceptFinish( unsigned int uid);
+	void OnRecv(CustomOverEx* pOver,unsigned long size);
+	void OnSend(RemoteSession* pSessoin,unsigned long size);
+	void OnAccept( unsigned int uid);
 
 	void WokerThread();
 	void SendThread();
 
-	void KickSession(RemoteSession* pSession, IO_TYPE ioType);
-	void ThrowDisConnectProcess(RemoteSession* pSession);
+	void OnCloseSession(RemoteSession* pSession, IO_TYPE ioType);
+	void PostDisConnectProcess(RemoteSession* pSession);
 
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);
 private:

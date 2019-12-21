@@ -11,8 +11,8 @@ public:
 	ChatServer() = default;
 	virtual ~ChatServer() = default;
 
-	virtual void ThrowLogicConnection(unsigned int unique_id, PACKET_TYPE type) override;
-	virtual void ThrowLogicRecv(CustomOverEx *pOver, unsigned int size_) override;
+	virtual void PostLogicConnection(unsigned int unique_id, PACKET_TYPE type) override;
+	virtual void PostLogicRecv(unsigned int unique_id, char* pData, unsigned int packetLen) override;
 
 	void Run();
 	void Stop();

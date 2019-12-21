@@ -41,7 +41,8 @@ const wchar_t MAX_ROOM_COUNT[] = L"maxRoomCount";
 const wchar_t MAX_ROOM_CLIENT_COUNT[] = L"maxClientCountInRoom";
 
 
+// 1024 2048 4096 8172
+const int RECV_BUFFER_MAX_SIZE = 1024;
+const int SEND_BUFFER_MAX_SIZE = 1024;
 
-const int RECV_BUFFER_MAX_SIZE = 4096;
-const int SEND_BUFFER_MAX_SIZE = 4096;
 const int IOCP_EVENT_COUNT = 100;

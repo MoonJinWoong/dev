@@ -15,7 +15,7 @@ public:
 	class IocpEvents
 	{
 	public:
-		OVERLAPPED_ENTRY m_IoArray[IOCP_EVENT_COUNT]; //TODO 상수 넣기
+		OVERLAPPED_ENTRY m_IoArray[IOCP_EVENT_COUNT];
 		int m_eventCount;
 	};
 	 
@@ -51,6 +51,7 @@ public:
 		}
 		return true;
 	}
+
 	bool AddDeviceRemoteSocket(RemoteSession* RemoteSession)
 	{
 		auto ret = CreateIoCompletionPort(
@@ -65,13 +66,6 @@ public:
 			LOG(ERROR) << "Iocp::AddDeviceRemoteSocket";
 			return false;
 		}
-		return true;
-	}
-
-
-	//TODO: 필요할때 구현해주자
-	bool PQCS()
-	{
 		return true;
 	}
 

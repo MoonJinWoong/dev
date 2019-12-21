@@ -17,7 +17,7 @@ struct CustomOverEx
 {
 	WSAOVERLAPPED	mWSAOverlapped;		// Overlapped I/O구조체
 	WSABUF			mWSABuf;			// Overlapped I/O작업 버퍼
-	unsigned int	mUid;				// unique id
+	int				mUid;				// unique id
 	IO_TYPE			mIoType;			// 작업 동작 종류
 
 	CustomOverEx()
@@ -42,18 +42,18 @@ public:
 	bool			SendPacket();
 	void			SendFinish(unsigned long len);
 
-	bool			RecvMsg();
+	bool			RecvMsg(); //TODO 이름 바꾸기 
 	void			RecvFinish(unsigned short size);
 	
 	bool			CloseSocket();
+	bool			DisconnectFinish(SOCKET mListenSock); //TODO 이름 바꾸기
 
-	void			SetUniqueId(int& id) { mUID = id; }
 
+
+	void			SetUniqueId(int id) { mUID = id; }
 	bool			IsLive()  { return mIsLive.load(); }
 	void			SetIsLive() { mIsLive.store(true); }
 	void			UnSetIsLive()  { mIsLive.store(false); }
-
-	bool			DisconnectFinish(SOCKET mListenSock);
 
 	unsigned int	GetUniqueId() const { return mUID; }
 	SOCKET&			GetSock() { return mRemoteSock; }
@@ -68,11 +68,11 @@ private:
 	CustomOverEx				mSendOverEx;
 	CustomOverEx                mAcceptOverEx;
 
+	//TODO 밑에 두개용 락을 여기에다가 만들자.링버퍼 안의 락들은 제거
 	CircleBuffer				mSendBuffer;
 	CircleBuffer				mRecvBuffer;
     
 	std::atomic<bool>			mIsLive = false;
-	std::atomic<bool>			mIsClose = false;
 	IoReference					mIoRef;
 	std::mutex					mLock;
 	unsigned int				mUID = -1;

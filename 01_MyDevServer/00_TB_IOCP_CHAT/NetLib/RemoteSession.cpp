@@ -22,7 +22,6 @@ void RemoteSession::Init()
 	mSendBuffer.Init();
 
 	mIsLive.store(false);
-	mIsClose.store(false);
 
 	mIoRef.Init();
 }
@@ -104,8 +103,8 @@ bool RemoteSession::SendPacket()
 	mSendOverEx.mWSABuf.buf = mSendBuffer.GetReadBufferPtr();
 	mSendOverEx.mIoType = IO_TYPE::SEND;
 
-	mIoRef.IncSendCount();
 
+	mIoRef.IncSendCount();
 	DWORD dwRecvNumBytes = 0;
 	int nRet = WSASend(mRemoteSock,
 		&(mSendOverEx.mWSABuf),
@@ -183,12 +182,12 @@ bool RemoteSession::DisconnectFinish(SOCKET mListenSock)
 {
 	if (mIoRef.GetRecvIoCount() != 0 || mIoRef.GetSendIoCount() != 0 || mIoRef.GetAcptIoCount() != 0)
 	{
-		CloseSocket();
 		return false;
 	}
 	
 	if (mIsLive.load())
 	{
+		CloseSocket();
 		return true;
 	}
 	return false;
