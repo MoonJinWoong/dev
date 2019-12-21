@@ -15,7 +15,6 @@ public:
 		for (auto i = 0; i < mMaxRoomCount; i++)
 		{
 			mRoomList[i] = new Room();
-			//TODO 두번째 param 은 맥스 유저 카운트이나 일단 같게 한다. 추후 수정
 			mRoomList[i]->Init(i, maxClientInRoom);
 		}
 	}
@@ -40,7 +39,7 @@ public:
 		}
 	}
 
-	bool LeaveRoom(INT32 roomNum, Client* client)
+	bool LeaveRoom(signed int roomNum, Client* client)
 	{
 		//TODO 방 떠나기 구현
 	}

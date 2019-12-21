@@ -1,8 +1,4 @@
 #pragma once
-#include <winsock2.h>
-#include <windows.h>
-#include <mswsock.h>
-#include <iostream>
 #include "RemoteSession.h"
 #include "easylogging++.h"
 

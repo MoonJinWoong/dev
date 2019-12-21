@@ -20,33 +20,29 @@ public:
 
 	void Init()
 	{
-		// 소멸자가 불린게 아님 memset만 해주자
+		// 소멸자가 불린게 아님 그냥 깔끔하게 memset만 해주자
 		std::lock_guard<std::mutex> guard(mLock);
 		memset(mBuffer, 0, mTotalSize);
 		mReadPos = 0;
 		mWritePos = 0;
 	}
 
-	char* GetWriteBuffer()
-	{
-		return &mBuffer[mWritePos];
-	}
-
-	int	SetWriteBuffer(char* pData, int size)
+	int SetWriteBuffer(char* pData, int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
-
-		if (size > GetRemainSize())
+		
+		// 넘으면 그냥 처음부터 쓰자
+		if (size > GetWriteAbleSize())
 		{
-			size = GetRemainSize();
+			memcpy_s(&mBuffer[0], size, pData, size);
+			mReadPos = 0;
+			mWritePos = size;
 		}
-
-		for (int index = 0; index < size; ++index)
+		else
 		{
-			mBuffer[mWritePos] = pData[index];
-			mWritePos = (mWritePos + 1) % mTotalSize;
+			memcpy_s(&mBuffer[mWritePos],size, pData, size);
+			mWritePos += size;
 		}
-
 		return size;
 	}
 
@@ -75,45 +71,53 @@ public:
 			return (mTotalSize - mReadPos) + mWritePos;
 	}
 
+
+	// WSASend 전에 세팅해줄 함수
+	int	GetReadAbleSize2(int size)
+	{
+		std::lock_guard<std::mutex> guard(mLock);
+
+		// 읽어야될 사이즈가 넘치면 처음부터 다시 읽게 만든다.
+		if (size > (mTotalSize - mReadPos))
+		{
+			mReadPos = 0;
+			return mTotalSize;
+		}
+		else
+		{
+			return (mTotalSize - mReadPos) + mWritePos;
+		}
+	}
+
+	// 패킷 토탈 길이 뽑아옴
 	int	GetHeaderSize(char* pData, int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
-
-		if (size > GetReadAbleSize())
+		
+		// 이건 잘못된 거다
+		if (mTotalSize - mReadPos < size)
 		{
-			size = GetReadAbleSize();
+			return -1;
 		}
 
-		for (int index = 0; index < size; ++index)
-		{
-			pData[index] = mBuffer[(mReadPos + index) % mTotalSize];
-		}
+		memcpy_s(pData, size, &mBuffer[mReadPos], size);
 		return size;
 	}
 
-	
+
+
+	// Send finish 할때 
 	void MoveReadPos(int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
-
-		if (GetRemainSize() < size)
-		{
-			size = GetRemainSize();
-		}
-
 		mReadPos = (mReadPos + size) % mTotalSize;
 	}
 
-	int	MoveWritePos(int size)
+	// OnRecv에서 패킷 분해하기 전에 호출
+	void MoveWritePos(int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
-
-		if (GetRemainSize() < size)
-		{
-			size = GetRemainSize();
-		}
 		mWritePos = (mWritePos + size) % mTotalSize;
-		return size;
 	}
 
 	int	GetRemainSize()
@@ -125,15 +129,13 @@ public:
 	}
 
 
-	int GetWritePos() { return mWritePos; }
+	char* GetWriteBufferPtr(){return &mBuffer[mWritePos];}
+	int   GetWritePos() { return mWritePos; }
 	char* GetBufferPtr(void) { return mBuffer; }
 	char* GetReadBufferPtr(void) { return &mBuffer[mReadPos]; }
-	char* GetWriteBufferPtr(void) { return &mBuffer[mWritePos]; }
-
 private:
 	char* mBuffer;
 	int mTotalSize = 0;
-
 	int mReadPos = 0;
 	int mWritePos = 0;
 	std::mutex	mLock;

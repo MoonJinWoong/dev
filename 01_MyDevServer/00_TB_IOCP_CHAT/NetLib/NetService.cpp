@@ -180,11 +180,7 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		return;
 	}
 
-	if (ioSize != session->GetRecvBuffer().MoveWritePos(ioSize))
-	{
-		LOG(ERROR) << "ThrowLogicRecv::MoveWritePos";
-		return;
-	}
+	session->GetRecvBuffer().MoveWritePos(ioSize);
 
 	PKT_HEADER header;
 	while (session->GetRecvBuffer().GetReadAbleSize() > 0)
@@ -194,7 +190,11 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 			break;
 		}
 
-		session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
+		auto ret = session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
+		if (ret == -1)
+		{
+			LOG(ERROR) << "GetHeaderSize Err";
+		}
 
 		if (session->GetRecvBuffer().GetReadAbleSize() < header.packet_len)
 		{
@@ -272,7 +272,6 @@ void NetService::SendThread()
 			}
 
 			// 아래와 IOthread에서 동시 실행해야 되는데 
-			//TODO On -> 수동     Kick 능동이니까 쓰지말자 
 			if (!client->SendPacket())
 			{
 				continue;

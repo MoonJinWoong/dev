@@ -3,7 +3,6 @@
 #include "Client.h"
 #include <vector>
 #include <unordered_map>
-#include <iostream>
 
 class ClientManager
 {
@@ -16,7 +15,6 @@ public:
 	void Add(std::string nickName, int unique_id);
 	bool FindID(std::string nickName);
 	void Delete(Client* client);
-
 
 	void IncreaseCurClientCnt() { ++mCurrCnt; }
 	void DecreaseCurClientCnt() { --mCurrCnt; if (mCurrCnt < 0)  mCurrCnt = 0; }

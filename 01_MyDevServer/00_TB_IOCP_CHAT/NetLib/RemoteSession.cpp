@@ -98,7 +98,6 @@ bool RemoteSession::SendPacket()
 		return false;
 	}
 
-	//TODO 수정 해야함
 	mSendOverEx.mWSABuf.len = mSendBuffer.GetReadAbleSize();
 	mSendOverEx.mWSABuf.buf = mSendBuffer.GetReadBufferPtr();
 	mSendOverEx.mIoType = IO_TYPE::SEND;
@@ -128,6 +127,10 @@ void RemoteSession::SendFinish(unsigned long len)
 	//TODO 내가 send 요청한 사이즈랑 완료된 사이즈랑 다를때 처리해야함
 	mSendBuffer.MoveReadPos(len);
 	mIoRef.DecSendCount();
+	
+
+
+	//TODO LOG로 바꿀것. 지금은 테스트용
 	std::cout << "Send Complete : " << len << std::endl;
 	std::cout << "Send Pos:" << mSendBuffer.GetWritePos() << std::endl;
 }
@@ -139,7 +142,7 @@ bool RemoteSession::RecvMsg()
 	short count = 1;
 	WSABUF wBuf[2];
 
-	wBuf[0].buf = mRecvBuffer.GetWriteBuffer();
+	wBuf[0].buf = mRecvBuffer.GetWriteBufferPtr();
 	wBuf[0].len = mRecvBuffer.GetWriteAbleSize();
 
 	if (mRecvBuffer.GetRemainSize() > mRecvBuffer.GetWriteAbleSize())
@@ -197,7 +200,6 @@ bool RemoteSession::CloseSocket()
 {
 	mIsLive.store(false);
 
-	//std::lock_guard<std::mutex> guard(mLock);
 	shutdown(mRemoteSock, SD_BOTH);
 	closesocket(mRemoteSock);
 	mRemoteSock = INVALID_SOCKET;

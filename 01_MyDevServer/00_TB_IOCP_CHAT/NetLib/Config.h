@@ -1,12 +1,8 @@
 #pragma once
 #include <Windows.h>
 #include <atlstr.h>
-#include <direct.h>
+#include <string>
 
-#include <string>  //TODO delete
-#include <cstring> //TODO delete
-#include <fstream>//TODO delete
-#include <iostream>//TODO delete
 
 
 namespace Config
@@ -42,7 +38,7 @@ const wchar_t MAX_ROOM_CLIENT_COUNT[] = L"maxClientCountInRoom";
 
 
 // 1024 2048 4096 8172
-const int RECV_BUFFER_MAX_SIZE = 1024;
-const int SEND_BUFFER_MAX_SIZE = 1024;
+const int RECV_BUFFER_MAX_SIZE = 4096;
+const int SEND_BUFFER_MAX_SIZE = 4096;
 
 const int IOCP_EVENT_COUNT = 100;

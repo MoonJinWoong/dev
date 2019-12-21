@@ -59,8 +59,8 @@ public:
 	SOCKET&			GetSock() { return mRemoteSock; }
 	CircleBuffer&	GetRecvBuffer() { return mRecvBuffer; }
 	CircleBuffer&	GetSendBuffer() { return mSendBuffer; }
-
 	IoReference&	GetIoRef() { return mIoRef; }
+
 private:
 	SOCKET						mRemoteSock;
 
