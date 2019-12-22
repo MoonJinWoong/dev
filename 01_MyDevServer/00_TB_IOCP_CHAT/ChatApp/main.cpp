@@ -15,10 +15,11 @@ int main()
 	// start 
 	server.Run();
 
-	printf("show me the money...\n");
+	LOG(INFO) << "****** SERVER START ******* " << std::endl;
 	getchar();
 
 	server.Stop();
+	LOG(INFO) << "****** SERVER STOP ******* " << std::endl;
 	return 0;
 }
 

@@ -39,21 +39,17 @@ public:
 	bool			AcceptFinish(HANDLE mIocp);
 
 	bool			SendReady(const unsigned int size, char* msg);
-	bool			SendPacket();
+	bool			SendIo();
 	void			SendFinish(unsigned long len);
 
-	bool			RecvMsg(); //TODO 이름 바꾸기 
+	bool			RecvIo(); 
 	void			RecvFinish(unsigned short size);
 	
 	bool			CloseSocket();
 	bool			DisconnectFinish(SOCKET mListenSock); //TODO 이름 바꾸기
 
-
-
 	void			SetUniqueId(int id) { mUID = id; }
 	bool			IsLive()  { return mIsLive.load(); }
-	void			SetIsLive() { mIsLive.store(true); }
-	void			UnSetIsLive()  { mIsLive.store(false); }
 
 	unsigned int	GetUniqueId() const { return mUID; }
 	SOCKET&			GetSock() { return mRemoteSock; }
@@ -68,7 +64,6 @@ private:
 	CustomOverEx				mSendOverEx;
 	CustomOverEx                mAcceptOverEx;
 
-	//TODO 밑에 두개용 락을 여기에다가 만들자.링버퍼 안의 락들은 제거
 	CircleBuffer				mSendBuffer;
 	CircleBuffer				mRecvBuffer;
     

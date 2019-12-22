@@ -71,24 +71,6 @@ public:
 			return (mTotalSize - mReadPos) + mWritePos;
 	}
 
-
-	// WSASend 전에 세팅해줄 함수
-	int	GetReadAbleSize2(int size)
-	{
-		std::lock_guard<std::mutex> guard(mLock);
-
-		// 읽어야될 사이즈가 넘치면 처음부터 다시 읽게 만든다.
-		if (size > (mTotalSize - mReadPos))
-		{
-			mReadPos = 0;
-			return mTotalSize;
-		}
-		else
-		{
-			return (mTotalSize - mReadPos) + mWritePos;
-		}
-	}
-
 	// 패킷 토탈 길이 뽑아옴
 	int	GetHeaderSize(char* pData, int size)
 	{
@@ -106,7 +88,7 @@ public:
 
 
 
-	// Send finish 할때 
+	// Send finish 할때 , Recv finish 할때 
 	void MoveReadPos(int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
@@ -114,10 +96,18 @@ public:
 	}
 
 	// OnRecv에서 패킷 분해하기 전에 호출
-	void MoveWritePos(int size)
+	bool MoveWritePos(int size)
 	{
 		std::lock_guard<std::mutex> guard(mLock);
+		
+		// 무조건 잘못 된거 
+		if (size > mTotalSize)
+		{
+			return false;
+		}
+
 		mWritePos = (mWritePos + size) % mTotalSize;
+		return true;
 	}
 
 	int	GetRemainSize()
@@ -133,6 +123,7 @@ public:
 	int   GetWritePos() { return mWritePos; }
 	char* GetBufferPtr(void) { return mBuffer; }
 	char* GetReadBufferPtr(void) { return &mBuffer[mReadPos]; }
+
 private:
 	char* mBuffer;
 	int mTotalSize = 0;

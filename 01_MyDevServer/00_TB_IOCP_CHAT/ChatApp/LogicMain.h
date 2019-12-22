@@ -30,12 +30,12 @@ public:
 	std::function<void(unsigned int, unsigned int, char*)> SendPacketFunc;
 
 	// 로직처리 모음
-	void ProcConnect(unsigned int uniqueId, int size, char* pData);
-	void ProcDisConnect(unsigned int uniqueId, int size, char* pData);
-	void ProcLogin(unsigned int uniqueId, int size, char* pData);
-	void ProcRoomList(unsigned int uniqueId, int size, char* pData);
-	void ProcRoomEnter(unsigned int uniqueId, int size, char* pData);
-	void ProcRoomChat(unsigned int uniqueId, int size, char* pData);
+	void ProcConnect(unsigned int uniqueId, unsigned int size, char* pData);
+	void ProcDisConnect(unsigned int uniqueId, unsigned int size, char* pData);
+	void ProcLogin(unsigned int uniqueId, unsigned int size, char* pData);
+	void ProcRoomList(unsigned int uniqueId, unsigned int size, char* pData);
+	void ProcRoomEnter(unsigned int uniqueId, unsigned int size, char* pData);
+	void ProcRoomChat(unsigned int uniqueId, unsigned int size, char* pData);
 
 private:
 	bool mIsRun = false;
@@ -48,7 +48,7 @@ private:
 	std::shared_ptr<RoomManager>   mRoomMgr;
 	unsigned int mMaxRoomCnt = 0;
 
-	using RECV_PKT_TYPE = void (LogicMain::*)(unsigned int, int, char*);
+	using RECV_PKT_TYPE = void (LogicMain::*)(unsigned int,unsigned int, char*);
 	std::unordered_map<int, RECV_PKT_TYPE> mRecvFuncDic;
 };
 

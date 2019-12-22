@@ -4,17 +4,17 @@
 
 
 
-void LogicMain::ProcConnect(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcConnect(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	std::cout << "[Connect]" << std::endl;
 }
 
-void LogicMain::ProcDisConnect(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcDisConnect(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	std::cout << "[DisConnect]" << std::endl;
 }
 
-void LogicMain::ProcLogin(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcLogin(unsigned int uniqueId, unsigned int size, char* pData)
 {
 
 	auto packet = reinterpret_cast<CS_LOGIN_PKT*>(pData);
@@ -54,7 +54,7 @@ void LogicMain::ProcLogin(unsigned int uniqueId, int size, char* pData)
 	}
 }
 
-void LogicMain::ProcRoomList(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcRoomList(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	SC_ROOM_LIST_PKT packet;
 	packet.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_LIST;
@@ -75,7 +75,7 @@ void LogicMain::ProcRoomList(unsigned int uniqueId, int size, char* pData)
 		SendPacketFunc(uniqueId, sizeof(SC_ROOM_LIST_PKT), (char*)&packet);
 	}
 }
-void LogicMain::ProcRoomEnter(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcRoomEnter(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	std::cout << "RoomEnter" << std::endl;
 
@@ -95,17 +95,16 @@ void LogicMain::ProcRoomEnter(unsigned int uniqueId, int size, char* pData)
 	}
 	else if (!mRoomMgr->EnterRoom(packet->RoomId,client))
 	{
-
 		strcpy_s(packet2.mMsg, "room enter fail...!");
 		SendPacketFunc(uniqueId, sizeof(SC_ROOM_ENTER), (char*)&packet2);
 	}
 	else
 	{
-		strcpy_s(packet2.mMsg, "room enter sucess...!");
+		strcpy_s(packet2.mMsg, "room enter success...!");
 		SendPacketFunc(uniqueId, sizeof(SC_ROOM_ENTER), (char*)&packet2);
 	}
 }
-void LogicMain::ProcRoomChat(unsigned int uniqueId, int size, char* pData)
+void LogicMain::ProcRoomChat(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	auto recvPkt = reinterpret_cast<CS_ROOM_CHAT*>(pData);
 

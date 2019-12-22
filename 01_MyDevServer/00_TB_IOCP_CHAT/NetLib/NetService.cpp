@@ -165,7 +165,7 @@ void NetService::OnAccept(unsigned int uid)
 	}
 	else
 	{
-		OnCloseSession(pSession,IO_TYPE::ACCEPT);
+		OnClose(pSession,IO_TYPE::ACCEPT);
 	}
 }
 
@@ -180,7 +180,10 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		return;
 	}
 
-	session->GetRecvBuffer().MoveWritePos(ioSize);
+	if (!session->GetRecvBuffer().MoveWritePos(ioSize))
+	{
+		LOG(ERROR) << "CircleBuffer Write Buffer Over Flow" << std::endl;
+	}
 
 	PKT_HEADER header;
 	while (session->GetRecvBuffer().GetReadAbleSize() > 0)
@@ -190,8 +193,8 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 			break;
 		}
 
-		auto ret = session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
-		if (ret == -1)
+		auto pktSize = session->GetRecvBuffer().GetHeaderSize((char*)&header, sizeof(header));
+		if (pktSize == -1)
 		{
 			LOG(ERROR) << "GetHeaderSize Err";
 		}
@@ -200,6 +203,7 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		{
 			break;
 		}
+
 		else
 		{
 			PostLogicRecv(session->GetUniqueId(),session->GetRecvBuffer().GetReadBufferPtr(), header.packet_len);
@@ -207,7 +211,7 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		}
 	}
 
-	session->RecvMsg();
+	session->RecvIo();
 }
 
 void NetService::OnSend(RemoteSession* pSession,unsigned long size)
@@ -235,7 +239,7 @@ void NetService::WokerThread()
 
 			if (0 >= ioSize && IO_TYPE::ACCEPT != Over->mIoType)
 			{
-				OnCloseSession(pSession, Over->mIoType);
+				OnClose(pSession, Over->mIoType);
 				continue;
 			}
 
@@ -271,8 +275,7 @@ void NetService::SendThread()
 				continue;
 			}
 
-			// 아래와 IOthread에서 동시 실행해야 되는데 
-			if (!client->SendPacket())
+			if (!client->SendIo())
 			{
 				continue;
 			}
@@ -281,7 +284,7 @@ void NetService::SendThread()
 	}
 }
 
-void NetService::OnCloseSession(RemoteSession* pSession, IO_TYPE ioType)
+void NetService::OnClose(RemoteSession* pSession, IO_TYPE ioType)
 {
 	if (ioType == IO_TYPE::RECV)
 		pSession->GetIoRef().DecRecvCount();
@@ -289,7 +292,6 @@ void NetService::OnCloseSession(RemoteSession* pSession, IO_TYPE ioType)
 		pSession->GetIoRef().DecSendCount();
 	else
 		pSession->GetIoRef().DecAcptCount();
-
 
 	if (pSession->DisconnectFinish(mListenSocket))
 	{

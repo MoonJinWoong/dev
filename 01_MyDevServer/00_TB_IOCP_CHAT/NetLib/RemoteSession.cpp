@@ -70,7 +70,7 @@ bool RemoteSession::AcceptReady(SOCKET listenSock)
 bool RemoteSession::AcceptFinish(HANDLE mIocp)
 {
 
-	SetIsLive();
+	mIsLive.store(true);
 
 	SOCKADDR_IN		RemoteAddr;
 	int nAddrLen = sizeof(SOCKADDR_IN);
@@ -80,7 +80,7 @@ bool RemoteSession::AcceptFinish(HANDLE mIocp)
 	LOG(INFO) << "[SUCCESS] Connect :  " << mUID;
 	mIoRef.DecAcptCount();
 
-	RecvMsg();
+	RecvIo();
 	return true;
 }
 
@@ -91,7 +91,7 @@ bool RemoteSession::SendReady(const unsigned int size, char* pData)
 }
 
 
-bool RemoteSession::SendPacket()
+bool RemoteSession::SendIo()
 {
 	if (mSendBuffer.GetReadAbleSize() == 0)
 	{
@@ -124,18 +124,12 @@ bool RemoteSession::SendPacket()
 
 void RemoteSession::SendFinish(unsigned long len)
 {
-	//TODO 내가 send 요청한 사이즈랑 완료된 사이즈랑 다를때 처리해야함
+	//TODO 내가 send 요청한 사이즈랑 완료된 사이즈랑 다를 때 처리해야함
 	mSendBuffer.MoveReadPos(len);
 	mIoRef.DecSendCount();
-	
-
-
-	//TODO LOG로 바꿀것. 지금은 테스트용
-	std::cout << "Send Complete : " << len << std::endl;
-	std::cout << "Send Pos:" << mSendBuffer.GetWritePos() << std::endl;
 }
 
-bool RemoteSession::RecvMsg()
+bool RemoteSession::RecvIo()
 {
 	DWORD dwFlag = 0;
 	DWORD dwRecvNumBytes = 0;

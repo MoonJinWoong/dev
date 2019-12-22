@@ -44,7 +44,7 @@ public:
 	void WokerThread();
 	void SendThread();
 
-	void OnCloseSession(RemoteSession* pSession, IO_TYPE ioType);
+	void OnClose(RemoteSession* pSession, IO_TYPE ioType);
 	void PostDisConnectProcess(RemoteSession* pSession);
 
 	bool SendMsg(unsigned int unique_id, unsigned int size, char* pData);

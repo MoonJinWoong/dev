@@ -17,6 +17,7 @@ void LogicMain::Init()
 
 	mMaxRoomCnt = Config::LoadNetConfig(CATEGORY_LOGIC, MAX_ROOM_COUNT);
 	auto MaxClientCntInRoom = Config::LoadNetConfig(CATEGORY_LOGIC, MAX_ROOM_CLIENT_COUNT);
+	
 	mRoomMgr = std::make_unique<RoomManager>();
 	mRoomMgr->Init(mMaxRoomCnt, MaxClientCntInRoom);
 }
@@ -82,7 +83,6 @@ void LogicMain::LogicThread()
 			std::lock_guard<std::mutex> guard(mLock);
 			auto packet = mRecvPktQ.front();
 			
-			//delete [] mRecvPktQ.front().pData;
 			mRecvPktQ.pop();
 			
 			if (packet.packet_type >= (int)PACKET_TYPE::CONNECTION)

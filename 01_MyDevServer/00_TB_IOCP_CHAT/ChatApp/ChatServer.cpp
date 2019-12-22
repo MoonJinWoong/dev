@@ -15,7 +15,7 @@ void ChatServer::PostLogicRecv(unsigned int unique_id , char* pData, unsigned in
 void ChatServer::Run()
 {
 	// logic에서 Send를 부르면 실행
-	auto SendFunc = [&](unsigned int index, int size, char* pPacket)
+	auto SendFunc = [&](unsigned int index, unsigned int size, char* pPacket)
 	{
 		NetService::SendMsg(index, size, pPacket);
 	};

@@ -7,7 +7,6 @@
 class Iocp
 {
 public:
-
 	class IocpEvents
 	{
 	public:
