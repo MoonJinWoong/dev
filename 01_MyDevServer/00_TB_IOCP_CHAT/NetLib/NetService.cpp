@@ -186,6 +186,7 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 	}
 
 	PKT_HEADER header;
+	int remainSize = 0;
 	while (session->GetRecvBuffer().GetReadAbleSize() > 0)
 	{
 		if (session->GetRecvBuffer().GetReadAbleSize() <= sizeof(header))
@@ -208,10 +209,13 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		{
 			PostLogicRecv(session->GetUniqueId(),session->GetRecvBuffer().GetReadBufferPtr(), header.packet_len);
 			session->RecvFinish(header.packet_len);
+			remainSize += (ioSize - header.packet_len);
 		}
 	}
 
-	session->RecvIo();
+
+	//
+	session->RecvIo(remainSize);
 }
 
 void NetService::OnSend(RemoteSession* pSession,unsigned long size)
@@ -229,7 +233,7 @@ void NetService::WokerThread()
 	while (mWorkerRun)
 	{
 		Iocp::IocpEvents events;
-		mIocpService.GQCSEx(events, 100);
+		mIocpService.GQCSEx(events, 0);
 
 		for (int i = 0; i < events.m_eventCount; ++i)
 		{
@@ -268,14 +272,14 @@ void NetService::SendThread()
 {
 	while (mSendRun)
 	{
-		for (auto client : mSessionPool)
+		for (auto session : mSessionPool)
 		{
-			if (!client->IsLive())
+			if (!session->IsLive())
 			{
 				continue;
 			}
 
-			if (!client->SendIo())
+			if (!session->SendIo())
 			{
 				continue;
 			}

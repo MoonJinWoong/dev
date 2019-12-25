@@ -42,7 +42,7 @@ public:
 	bool			SendIo();
 	void			SendFinish(unsigned long len);
 
-	bool			RecvIo(); 
+	bool			RecvIo(int remainSize);
 	void			RecvFinish(unsigned short size);
 	
 	bool			CloseSocket();

@@ -80,7 +80,7 @@ bool RemoteSession::AcceptFinish(HANDLE mIocp)
 	LOG(INFO) << "[SUCCESS] Connect :  " << mUID;
 	mIoRef.DecAcptCount();
 
-	RecvIo();
+	RecvIo(0);
 	return true;
 }
 
@@ -124,36 +124,33 @@ bool RemoteSession::SendIo()
 
 void RemoteSession::SendFinish(unsigned long len)
 {
-	//TODO 내가 send 요청한 사이즈랑 완료된 사이즈랑 다를 때 처리해야함
 	mSendBuffer.MoveReadPos(len);
 	mIoRef.DecSendCount();
 }
 
-bool RemoteSession::RecvIo()
+bool RemoteSession::RecvIo(int remainSize)
 {
 	DWORD dwFlag = 0;
 	DWORD dwRecvNumBytes = 0;
-	short count = 1;
-	WSABUF wBuf[2];
+	WSABUF wBuf;
 
-	wBuf[0].buf = mRecvBuffer.GetWriteBufferPtr();
-	wBuf[0].len = mRecvBuffer.GetWriteAbleSize();
-
-	if (mRecvBuffer.GetRemainSize() > mRecvBuffer.GetWriteAbleSize())
+	if (remainSize > 0)
 	{
-		wBuf[1].buf = mRecvBuffer.GetBufferPtr();
-		wBuf[1].len = mRecvBuffer.GetRemainSize() - mRecvBuffer.GetWriteAbleSize();
-		count++;
+		mRecvBuffer.CheckWrite(remainSize);
 	}
+
+	wBuf.buf = mRecvBuffer.GetWriteBufferPtr();
+	wBuf.len = RECV_BUFFER_MAX_SIZE;
 
 	mRecvOverEx.mIoType = IO_TYPE::RECV;
 	mRecvOverEx.mUid = mUID;
 
 	mIoRef.IncRecvCount();
+
 	auto ret = WSARecv(
 		mRemoteSock,
-		wBuf,
-		count,
+		&wBuf,
+		1,
 		&dwRecvNumBytes,
 		&dwFlag,
 		(LPWSAOVERLAPPED) & (mRecvOverEx),

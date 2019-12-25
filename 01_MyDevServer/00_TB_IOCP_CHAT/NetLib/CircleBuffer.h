@@ -12,6 +12,7 @@ public:
 		mReadPos = 0;
 		mWritePos = 0;
 	}
+
 	~CircleBuffer()
 	{
 		delete[] mBuffer;
@@ -86,8 +87,6 @@ public:
 		return size;
 	}
 
-
-
 	// Send finish 할때 , Recv finish 할때 
 	void MoveReadPos(int size)
 	{
@@ -118,11 +117,25 @@ public:
 			return (mTotalSize - mWritePos) + mReadPos;
 	}
 
-
 	char* GetWriteBufferPtr(){return &mBuffer[mWritePos];}
 	int   GetWritePos() { return mWritePos; }
 	char* GetBufferPtr(void) { return mBuffer; }
 	char* GetReadBufferPtr(void) { return &mBuffer[mReadPos]; }
+	void  CheckWrite(int remainSize)
+	{
+		std::lock_guard<std::mutex> guard(mLock);
+		
+		// 순환
+		if (mWritePos + remainSize > mTotalSize)
+		{
+			memcpy_s(mBuffer, mWritePos - mReadPos, 
+						&mBuffer[mReadPos], mWritePos - mReadPos);
+
+			mReadPos = 0;
+			mWritePos = mWritePos - mReadPos;
+			std::cout << "Because Packet split and buffer over ..." << std::endl;
+		}
+	}
 
 private:
 	char* mBuffer;
@@ -130,5 +143,4 @@ private:
 	int mReadPos = 0;
 	int mWritePos = 0;
 	std::mutex	mLock;
-
 };
