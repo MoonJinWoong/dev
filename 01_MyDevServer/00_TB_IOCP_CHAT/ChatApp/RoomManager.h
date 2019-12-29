@@ -52,5 +52,5 @@ public:
 
 private:
 	std::vector<Room*> mRoomList;
-	INT32 mMaxRoomCount = 0;
+	signed int mMaxRoomCount = 0;
 };

@@ -213,8 +213,6 @@ void NetService::OnRecv(CustomOverEx* pOver,unsigned long ioSize)
 		}
 	}
 
-
-	//
 	session->RecvIo(remainSize);
 }
 
@@ -226,7 +224,6 @@ void NetService::OnSend(RemoteSession* pSession,unsigned long size)
 void NetService::WokerThread()
 {
 	RemoteSession* pSession = nullptr;
-	bool bSuccess = true;
 	unsigned long dwIoSize = 0;
 	LPOVERLAPPED lpOverlapped = nullptr;
 

@@ -128,7 +128,7 @@ public:
 		// ¼øÈ¯
 		if (mWritePos + remainSize > mTotalSize)
 		{
-			memcpy_s(mBuffer, mWritePos - mReadPos, 
+			memcpy_s(&mBuffer[0],mWritePos - mReadPos,
 						&mBuffer[mReadPos], mWritePos - mReadPos);
 
 			mReadPos = 0;
