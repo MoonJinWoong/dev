@@ -49,6 +49,6 @@ private:
 	unsigned int mMaxRoomCnt = 0;
 
 	using RECV_PKT_TYPE = void (LogicMain::*)(unsigned int,unsigned int, char*);
-	std::unordered_map<int, RECV_PKT_TYPE> mRecvFuncDic;
+	std::unordered_map<unsigned short, RECV_PKT_TYPE> mRecvFuncDic;
 };
 

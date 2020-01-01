@@ -4,13 +4,25 @@
 
 void LogicMain::Init()
 {
-	mRecvFuncDic = std::unordered_map<int, RECV_PKT_TYPE>();
-	mRecvFuncDic[(int)PACKET_TYPE::CONNECTION] = &LogicMain::ProcConnect;
-	mRecvFuncDic[(int)PACKET_TYPE::DISCONNECTION] = &LogicMain::ProcDisConnect;
-	mRecvFuncDic[(int)PACKET_TYPE::CS_LOGIN] = &LogicMain::ProcLogin;
-	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_LIST] = &LogicMain::ProcRoomList;
-	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_ENTER] = &LogicMain::ProcRoomEnter;
-	mRecvFuncDic[(int)PACKET_TYPE::CS_ROOM_CHAT] = &LogicMain::ProcRoomChat;
+	mRecvFuncDic = std::unordered_map<unsigned short, RECV_PKT_TYPE>();
+	
+	auto reqConn = static_cast<unsigned short>(PACKET_TYPE::CONNECTION);
+	mRecvFuncDic[reqConn] = &LogicMain::ProcConnect;
+
+	auto reqDisConn = static_cast<unsigned short>(PACKET_TYPE::DISCONNECTION);
+	mRecvFuncDic[reqDisConn] = &LogicMain::ProcDisConnect;
+	
+	auto reqLogin = static_cast<unsigned short>(PACKET_TYPE::CS_LOGIN);
+	mRecvFuncDic[reqLogin] = &LogicMain::ProcLogin;
+	
+	auto reqRoomList = static_cast<unsigned short>(PACKET_TYPE::CS_ROOM_LIST);
+	mRecvFuncDic[reqRoomList] = &LogicMain::ProcRoomList;
+	
+	auto reqRoomEnter = static_cast<unsigned short>(PACKET_TYPE::CS_ROOM_ENTER);
+	mRecvFuncDic[reqRoomEnter] = &LogicMain::ProcRoomEnter;
+	
+	auto reqRoomChat = static_cast<unsigned short>(PACKET_TYPE::CS_ROOM_CHAT);
+	mRecvFuncDic[reqRoomChat] = &LogicMain::ProcRoomChat;
 
 	mClMgr = std::make_unique<ClientManager>();
 	mClMgr->Init();

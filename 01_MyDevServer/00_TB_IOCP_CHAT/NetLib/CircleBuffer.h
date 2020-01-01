@@ -32,6 +32,7 @@ public:
 	{
 		std::lock_guard<std::mutex> guard(mLock);
 		
+		//read가 0일때 고려 or 명세를 하자
 		// 넘으면 그냥 처음부터 쓰자
 		if (size > GetWriteAbleSize())
 		{

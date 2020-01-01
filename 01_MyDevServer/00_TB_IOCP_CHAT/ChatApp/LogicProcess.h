@@ -21,7 +21,7 @@ void LogicMain::ProcLogin(unsigned int uniqueId, unsigned int size, char* pData)
 	auto inputId = packet->szID;
 
 	SC_LOGIN_PKT packet2;
-	packet2.packet_type = (unsigned short)PACKET_TYPE::SC_LOGIN;
+	packet2.packet_type = static_cast<unsigned short>(PACKET_TYPE::SC_LOGIN);
 	packet2.packet_len = sizeof(SC_LOGIN_PKT);
 
 	// overflow
@@ -57,7 +57,7 @@ void LogicMain::ProcLogin(unsigned int uniqueId, unsigned int size, char* pData)
 void LogicMain::ProcRoomList(unsigned int uniqueId, unsigned int size, char* pData)
 {
 	SC_ROOM_LIST_PKT packet;
-	packet.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_LIST;
+	packet.packet_type = static_cast<unsigned short>(PACKET_TYPE::SC_ROOM_LIST);
 	packet.packet_len = sizeof(SC_ROOM_LIST_PKT);
 	
 	auto client = mClMgr->GetClient(uniqueId);
@@ -82,7 +82,7 @@ void LogicMain::ProcRoomEnter(unsigned int uniqueId, unsigned int size, char* pD
 	auto packet = reinterpret_cast<CS_ROOM_ENTER*>(pData);
 
 	SC_ROOM_ENTER packet2;
-	packet2.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_ENTER;
+	packet2.packet_type = static_cast<unsigned short>(PACKET_TYPE::SC_ROOM_ENTER);
 	packet2.packet_len = sizeof(SC_ROOM_ENTER);
 
 
@@ -109,7 +109,7 @@ void LogicMain::ProcRoomChat(unsigned int uniqueId, unsigned int size, char* pDa
 	auto recvPkt = reinterpret_cast<CS_ROOM_CHAT*>(pData);
 
 	SC_ROOM_CHAT packet2;
-	packet2.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_CHAT;
+	packet2.packet_type = static_cast<unsigned short>(PACKET_TYPE::SC_ROOM_CHAT);
 	packet2.packet_len = sizeof(SC_ROOM_CHAT);
 
 	auto client = mClMgr->GetClient(uniqueId);

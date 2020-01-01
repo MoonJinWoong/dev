@@ -3,7 +3,7 @@
 
 /* SC -> server to client */
 /* CS -> client to server */
-enum class  PACKET_TYPE : int
+enum class  PACKET_TYPE : unsigned short   // 0~65535
 {
 	NONE = 0,
 	CONNECTION = 1,
@@ -36,6 +36,8 @@ struct PacketFrame
 	char* pData = nullptr;
 };
 
+//TODO 이거 다음에 구현할 때는 
+// 유연하게 크기별로 대응할 수 있는 클래스를 구현해보자.
 struct PKT_HEADER
 {
 	unsigned short packet_len;
