@@ -43,7 +43,6 @@ void LogicMain::ProcLogin(unsigned int uniqueId, unsigned int size, char* pData)
 	// success
 	else
 	{
-
 		// 로그인 세팅 
 		mClMgr->IncreaseCurClientCnt();
 		mClMgr->Add(inputId, uniqueId);
@@ -120,7 +119,7 @@ void LogicMain::ProcRoomChat(unsigned int uniqueId, unsigned int size, char* pDa
 	auto roomNum = client->GetRoomIdx();
 	if (roomNum != -1)
 	{
-
+		//TODO
 	}
 
 	auto room = mRoomMgr->GetRoomByNum(roomNum);

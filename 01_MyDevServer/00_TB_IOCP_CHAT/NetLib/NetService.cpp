@@ -256,7 +256,7 @@ void NetService::WokerThread()
 				OnSend(pSession, ioSize);
 				break;
 			default:
-				LOG(ERROR) << "Bad IO TYPE : " << (int)pSession->GetSock();
+				LOG(ERROR) << "Bad IO TYPE : " << pSession->GetSock();
 				break;
 			}
 		}

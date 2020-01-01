@@ -53,7 +53,7 @@ private:
 	std::vector<RemoteSession*> mSessionPool;
 	SOCKET		mListenSocket = INVALID_SOCKET;
 	
-	unsigned int mMaxSessionCnt;
+	int mMaxSessionCnt;
 	
 	std::vector<std::thread> mIOWorkerThreads;
 	std::thread	mAccepterThread;

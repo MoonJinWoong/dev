@@ -30,7 +30,7 @@ enum class  PACKET_TYPE : unsigned short   // 0~65535
 // recv ->  parsing 
 struct PacketFrame
 {
-	short packet_type = -1; // NONE
+	unsigned short packet_type = 0; // NONE
 	short size = 0;
 	int unique_id = 0;
 	char* pData = nullptr;

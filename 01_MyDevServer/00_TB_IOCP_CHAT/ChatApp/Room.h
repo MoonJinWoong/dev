@@ -46,7 +46,7 @@ public:
 	void BroadCastInRoom(int clientIdx, const char* ID, const char* msg)
 	{
 		SC_NOTICE_IN_ROOM packet;
-		packet.packet_type = (unsigned short)PACKET_TYPE::SC_ROOM_CHAT_NOTICE;
+		packet.packet_type = static_cast<unsigned short>(PACKET_TYPE::SC_ROOM_CHAT_NOTICE);
 		packet.packet_len = sizeof(SC_NOTICE_IN_ROOM);
 
 		CopyMemory(packet.Id, ID, sizeof(packet.Id));

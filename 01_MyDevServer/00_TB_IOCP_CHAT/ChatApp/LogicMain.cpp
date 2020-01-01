@@ -57,7 +57,7 @@ void LogicMain::RecvPktData(unsigned int unique_id, char* pBuf , int size)
 	char *recvBuf = new char[size];
 	memcpy(recvBuf, pBuf, size);
 
-	auto pHeader = (PKT_HEADER*)pBuf;
+	auto pHeader = reinterpret_cast<PKT_HEADER*>(pBuf);
 	if (pHeader->packet_len < sizeof(PKT_HEADER))
 	{
 		return;
@@ -77,7 +77,7 @@ void LogicMain::RecvPktData(unsigned int unique_id, char* pBuf , int size)
 void LogicMain::ConnectionPktData(unsigned int unique_id, PACKET_TYPE type)
 {
 	PacketFrame packet;
-	packet.packet_type = (unsigned short)type;
+	packet.packet_type = static_cast<unsigned short>(type);
 	packet.unique_id = unique_id;
 	packet.size = 0;
 	packet.pData = nullptr;
@@ -97,7 +97,7 @@ void LogicMain::LogicThread()
 			
 			mRecvPktQ.pop();
 			
-			if (packet.packet_type >= (int)PACKET_TYPE::CONNECTION)
+			if (packet.packet_type >= static_cast<unsigned short>(PACKET_TYPE::CONNECTION))
 			{
 				ProcRecv(packet.unique_id, packet.packet_type, packet.size, packet.pData);
 			}
