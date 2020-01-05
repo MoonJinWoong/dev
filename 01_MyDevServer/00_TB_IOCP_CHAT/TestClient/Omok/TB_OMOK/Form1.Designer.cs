@@ -69,14 +69,14 @@
             // 
             this.ChList.FormattingEnabled = true;
             this.ChList.ItemHeight = 15;
-            this.ChList.Location = new System.Drawing.Point(379, 34);
+            this.ChList.Location = new System.Drawing.Point(441, 34);
             this.ChList.Name = "ChList";
             this.ChList.Size = new System.Drawing.Size(75, 124);
             this.ChList.TabIndex = 2;
             // 
             // Join
             // 
-            this.Join.Location = new System.Drawing.Point(378, 165);
+            this.Join.Location = new System.Drawing.Point(444, 165);
             this.Join.Name = "Join";
             this.Join.Size = new System.Drawing.Size(75, 23);
             this.Join.TabIndex = 3;
@@ -87,7 +87,7 @@
             // Chat
             // 
             this.Chat.AutoSize = true;
-            this.Chat.Location = new System.Drawing.Point(376, 218);
+            this.Chat.Location = new System.Drawing.Point(444, 218);
             this.Chat.Name = "Chat";
             this.Chat.Size = new System.Drawing.Size(37, 15);
             this.Chat.TabIndex = 4;
@@ -96,7 +96,7 @@
             // 
             // SendMsg
             // 
-            this.SendMsg.Location = new System.Drawing.Point(594, 413);
+            this.SendMsg.Location = new System.Drawing.Point(662, 413);
             this.SendMsg.Name = "SendMsg";
             this.SendMsg.Size = new System.Drawing.Size(81, 23);
             this.SendMsg.TabIndex = 5;
@@ -105,7 +105,7 @@
             // 
             // ChatInput
             // 
-            this.ChatInput.Location = new System.Drawing.Point(379, 413);
+            this.ChatInput.Location = new System.Drawing.Point(447, 413);
             this.ChatInput.Multiline = true;
             this.ChatInput.Name = "ChatInput";
             this.ChatInput.Size = new System.Drawing.Size(209, 23);
@@ -132,7 +132,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(376, 12);
+            this.label1.Location = new System.Drawing.Point(435, 12);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(83, 15);
             this.label1.TabIndex = 9;
@@ -141,7 +141,7 @@
             // 
             // ChatInfo
             // 
-            this.ChatInfo.Location = new System.Drawing.Point(379, 236);
+            this.ChatInfo.Location = new System.Drawing.Point(447, 236);
             this.ChatInfo.Multiline = true;
             this.ChatInfo.Name = "ChatInfo";
             this.ChatInfo.Size = new System.Drawing.Size(296, 171);
@@ -149,7 +149,7 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(469, 30);
+            this.textBox1.Location = new System.Drawing.Point(532, 30);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(206, 178);
@@ -158,7 +158,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(468, 12);
+            this.label2.Location = new System.Drawing.Point(530, 12);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(51, 15);
             this.label2.TabIndex = 12;
@@ -166,16 +166,17 @@
             // 
             // CheckBoard
             // 
-            this.CheckBoard.Location = new System.Drawing.Point(12, 58);
+            this.CheckBoard.Location = new System.Drawing.Point(15, 88);
+            this.CheckBoard.Margin = new System.Windows.Forms.Padding(0);
             this.CheckBoard.Name = "CheckBoard";
-            this.CheckBoard.Size = new System.Drawing.Size(346, 378);
+            this.CheckBoard.Size = new System.Drawing.Size(400, 428);
             this.CheckBoard.TabIndex = 13;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(706, 450);
+            this.ClientSize = new System.Drawing.Size(782, 533);
             this.Controls.Add(this.CheckBoard);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);

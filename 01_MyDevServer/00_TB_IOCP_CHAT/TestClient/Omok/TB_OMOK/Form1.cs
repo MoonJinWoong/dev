@@ -12,25 +12,28 @@ namespace TB_OMOK
 {
     public partial class Form1 : Form
     {
-        int margin = 10;
-        int 눈Size = 20; // gridSize
-        int 돌Size = 18; // stoneSize
-
-
         Graphics myGraphic;
         Pen   myPen;
         Brush whiteBrush,blackBrush;
+
+        enum STATE { NONE = 0, WHITE = 1, BLACK = 2 };
+
+        // 내 차례인가 ? 
+        bool IsMyTurn = false;
+
 
         public Form1()
         {
             InitializeComponent();
             this.Text = "Test Omok"; // app 제목 
-            this.CheckBoard.BackColor = Color.Orange;   // 패널 색
+            this.CheckBoard.BackColor = Color.Goldenrod;   // 패널 색
 
             myPen = new Pen(Color.Black);
             blackBrush = new SolidBrush(Color.Black);
             whiteBrush = new SolidBrush(Color.White);
 
+           // 패널 사이즈 세팅
+           this.CheckBoard.Size = new Size(340, 340);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -42,26 +45,26 @@ namespace TB_OMOK
         {
             // panel1에 Graphics 객체 생성
             myGraphic = CheckBoard.CreateGraphics();
-
-            // 세로선
-            for (int i = 0; i < 15; i++)
+            
+            // 15 칸만 만들자..
+            // 가로 좌표 20  ~ 320 
+            // 세로 좌표 20 ~ 320
+            for(int i = 1; i <= 16; ++i)
             {
-                myGraphic.DrawLine(myPen, 
-                  new Point(margin + i * 눈Size, margin),
-                  new Point(margin + i * 눈Size, margin + 15 * 눈Size));
+                myGraphic.DrawLine(myPen, 20, i*20 , 320, i * 20);  // 가로
+                myGraphic.DrawLine(myPen, i*20, 20, i*20, 320);  // 세로
+
             }
 
-            // 가로선 15개
-            for (int i = 0; i < 15; i++)
-            {
-                myGraphic.DrawLine(myPen, 
-                  new Point(margin, margin + i * 눈Size),
-                  new Point(margin + 15 * 눈Size, margin + i * 눈Size));
-            }
 
         }
 
-            private void Form1_Load(object sender, EventArgs e)
+        private void panel1_MouseDown(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            this.textBox1.Text = "asdf";
+
+        }
+        private void Form1_Load(object sender, EventArgs e)
         {
 
         }
